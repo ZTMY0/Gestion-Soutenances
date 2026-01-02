@@ -1,0 +1,4 @@
+plantuml==1.2023.6
+graphviz==0.21.1
+pygraphviz==1.11
+requests==2.31.0

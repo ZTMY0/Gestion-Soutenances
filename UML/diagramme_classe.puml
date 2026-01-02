@@ -1,0 +1,148 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+'========================
+' CLASSES UTILISATEURS
+'========================
+class Utilisateur {
+  - id : int
+  - nom : String
+  - prenom : String
+  - email : String
+  - motDePasse : String
+}
+
+class Etudiant {
+  - matricule : String
+  - niveau : String
+}
+
+class Professeur {
+  - specialite : String
+  - chargeMax : int
+}
+
+class Coordinateur {
+  - filiere : String
+}
+
+class Directeur {
+}
+
+class AssistanteAdministrative {
+}
+
+Utilisateur <|-- Etudiant
+Utilisateur <|-- Professeur
+Utilisateur <|-- Coordinateur
+Utilisateur <|-- Directeur
+Utilisateur <|-- AssistanteAdministrative
+
+'========================
+' PROJET PFE
+'========================
+class ProjetPFE {
+  - id : int
+  - titre : String
+  - description : String
+  - motsCles : String
+  - statut : String
+}
+
+Etudiant "1..2" -- "1" ProjetPFE : realise >
+Professeur "1" -- "0..*" ProjetPFE : encadre >
+
+'========================
+' RAPPORT
+'========================
+class Rapport {
+  - id : int
+  - fichierPDF : String
+  - dateDepot : Date
+  - valide : boolean
+}
+
+ProjetPFE "1" *-- "1" Rapport
+
+'========================
+' DISPONIBILITES
+'========================
+class Disponibilite {
+  - id : int
+  - date : Date
+  - heureDebut : Time
+  - heureFin : Time
+}
+
+Professeur "1" -- "0..*" Disponibilite
+
+'========================
+' SOUTENANCE
+'========================
+class Soutenance {
+  - id : int
+  - date : Date
+  - heure : Time
+  - duree : int
+}
+
+ProjetPFE "1" -- "0..1" Soutenance
+
+'========================
+' SALLE
+'========================
+class Salle {
+  - id : int
+  - nom : String
+  - capacite : int
+  - equipements : String
+}
+
+Salle "1" -- "0..*" Soutenance
+
+'========================
+' JURY
+'========================
+class Jury {
+  - id : int
+  - role : String
+}
+
+Soutenance "1" *-- "2..*" Jury
+Professeur "1" -- "0..*" Jury
+
+'========================
+' EVALUATION
+'========================
+class Evaluation {
+  - id : int
+  - note : float
+  - commentaire : String
+}
+
+Jury "1" -- "0..*" Evaluation
+
+'========================
+' CONVOCATION
+'========================
+class Convocation {
+  - id : int
+  - dateEnvoi : Date
+  - type : String
+}
+
+Soutenance "1" -- "0..*" Convocation
+
+'========================
+' PROCES VERBAL
+'========================
+class ProcesVerbal {
+  - id : int
+  - dateSignature : Date
+  - signe : boolean
+}
+
+Soutenance "1" -- "1" ProcesVerbal
+Directeur "1" -- "0..*" ProcesVerbal
+
+@enduml

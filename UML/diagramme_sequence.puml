@@ -1,0 +1,50 @@
+@startuml
+skinparam classAttributeIconSize 0
+title Workflow complet PFE - Dépôt, Soutenance, Évaluation, Procès-verbal
+
+actor Etudiant
+actor Professeur
+actor Coordinateur
+actor Directeur
+actor Jury
+
+participant "ProjetPFE" as P
+participant "Rapport" as R
+participant "Soutenance" as S
+participant "Salle" as Sa
+participant "Evaluation" as E
+participant "Convocation" as C
+participant "ProcesVerbal" as PV
+
+== Dépôt du rapport ==
+Etudiant -> P : sélectionne son projet
+Etudiant -> R : crée et dépose rapport
+R -> P : associe le rapport au projet
+R -> Etudiant : confirmation dépôt
+
+== Planification de la soutenance ==
+Professeur -> P : sélectionne projet à soutenir
+Professeur -> S : crée soutenance
+S -> Sa : réserve salle
+S -> Jury : ajoute membres du jury
+S -> Professeur : confirmation planification
+
+== Envoi des convocations ==
+Coordinateur -> S : sélectionne soutenance
+S -> C : crée convocation
+C -> Etudiant : envoie convocation
+C -> Professeur : envoie convocation
+C -> Coordinateur : confirmation envoi
+
+== Évaluation de la soutenance ==
+Jury -> S : consulte projet
+Jury -> E : crée évaluation (note + commentaire)
+E -> S : associe évaluation à la soutenance
+E -> Jury : confirmation enregistrement
+
+== Signature du procès-verbal ==
+S -> PV : crée procès-verbal
+Directeur -> PV : signe le procès-verbal
+PV -> S : confirmation signature
+
+@enduml

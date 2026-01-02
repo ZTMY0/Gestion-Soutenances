@@ -1,0 +1,101 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor Etudiant
+actor "Professeur Encadrant" as Prof
+actor "Coordinateur Filiere" as Coord
+actor Directeur
+actor "Assistante Administrative" as Assist
+
+rectangle "Systeme Gestion Soutenances PFE" {
+
+package "Gestion Projets PFE" {
+  Etudiant -- (Inscription PFE)
+  Etudiant -- (Consulter statut projet)
+
+  (Inscription PFE) ..> (Remplir fiche projet) : <<include>>
+  (Inscription PFE) ..> (Choisir binome) : <<include>>
+  (Inscription PFE) ..> (Definir preferences encadrant) : <<include>>
+
+  Prof -- (Suivre projet)
+  (Suivre projet) ..> (Consulter documents) : <<include>>
+  (Suivre projet) ..> (Valider etapes intermediaires) : <<include>>
+
+  Coord -- (Affecter encadrant)
+  (Affecter encadrant) ..> (Analyser charges professeurs) : <<include>>
+  (Affecter encadrant) ..> (Affectation automatique) : <<include>>
+}
+
+package "Communication" {
+  Etudiant -- (Communiquer avec encadrant)
+  Prof -- (Communiquer avec etudiants)
+
+  (Communiquer avec encadrant) ..> (Envoyer message) : <<include>>
+  (Communiquer avec encadrant) ..> (Recevoir message) : <<include>>
+}
+
+package "Rapport Final" {
+  Etudiant -- (Soumettre rapport final)
+  (Soumettre rapport final) ..> (Uploader PDF) : <<include>>
+  (Soumettre rapport final) ..> (Declaration originalite) : <<include>>
+
+  Prof -- (Valider rapport final)
+}
+
+package "Disponibilites" {
+  Prof -- (Saisir disponibilites)
+  (Saisir disponibilites) ..> (Definir creneaux) : <<include>>
+  (Saisir disponibilites) ..> (Modifier disponibilites) : <<include>>
+
+  Coord -- (Collecter disponibilites)
+  (Collecter disponibilites) ..> (Relancer professeurs) : <<include>>
+  (Collecter disponibilites) ..> (Cloturer periode) : <<include>>
+}
+
+package "Planification Soutenances" {
+  Coord -- (Planifier soutenance)
+  (Planifier soutenance) ..> (Planification manuelle) : <<include>>
+  (Planifier soutenance) ..> (Planification automatique) : <<include>>
+  (Planifier soutenance) ..> (Detecter conflits) : <<include>>
+
+  Assist -- (Reserver salles)
+  (Reserver salles) ..> (Verifier disponibilite salle) : <<include>>
+}
+
+package "Jurys" {
+  Coord -- (Constituer jury)
+  (Constituer jury) ..> (Proposition automatique jury) : <<include>>
+  (Constituer jury) ..> (Modifier jury) : <<include>>
+  (Constituer jury) ..> (Valider jury) : <<include>>
+
+  Prof -- (Participer jury)
+  Prof -- (Evaluer soutenance)
+  (Evaluer soutenance) ..> (Saisir note) : <<include>>
+  (Evaluer soutenance) ..> (Saisir commentaires) : <<include>>
+}
+
+package "Communication Officielle" {
+  Coord -- (Generer convocations)
+  (Generer convocations) ..> (Generer PDF) : <<include>>
+
+  Assist -- (Envoyer convocations)
+  (Envoyer convocations) ..> (Envoyer email) : <<include>>
+}
+
+package "Validation et Archivage" {
+  Directeur -- (Valider planning)
+  Directeur -- (Demander modifications)
+
+  Prof -- (Completer PV)
+  Directeur -- (Signer PV)
+  (Signer PV) ..> (Signature electronique) : <<include>>
+
+  Assist -- (Archiver documents)
+  Assist -- (Generer attestations)
+}
+
+}
+
+@enduml
