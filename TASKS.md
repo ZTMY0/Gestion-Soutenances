@@ -1,43 +1,48 @@
-# GESTION SOUTENANCES - ÉTAT D'AVANCEMENT
+#  GESTION SOUTENANCES - ÉTAT D'AVANCEMENT (V2)
 
-**STATUS :** Backend terminé. Données chargées. Phase de développement Frontend & Algo.
-
----
-
-##  INFOS TECHNIQUES (À lire avant de coder)
-- **Login :** Format `prenom.nom` (ex: `ihab.admin`, `amine.berrada`).
-- **Admin :** Réinitialisable via `http://localhost/Gestion-Soutenances/scripts/reset_admin.php`.
-- **Dossiers :** Code dans `src/`. Données brutes (CSV/Python) dans `_data_generators/`.
+**STATUS ACTUEL :**
+ **Module Étudiant :** 100% Terminé.
+ **Base de Données :** 100% Conforme (Tables officielles).
+ **Module Professeur :** 0% (Démarrage immédiat).
 
 ---
 
-## 1. IHAB (Backend & Architecture) -  TERMINÉ
-- [x] Structure MVC et Nettoyage du projet (`organize.py`).
-- [x] Base de données peuplée (+200 étudiants, +25 profs, Clés étrangères OK).
-- [x] Auth sécurisée via Login (Coordinateur, Prof, Étudiant).
-- [x] Backend "Soumission Sujet" opérationnel.
+##  ACTION REQUISE POUR TOUS
+1. Faites un **`git pull`**.
+2. **IMPÉRATIF :** Importez le fichier `soutenances_db.sql` (à la racine) dans votre phpMyAdmin.
+ La structure de la BDD a changé (ajout tables `jurys`, `rapports`, `disponibilites`).
+---
 
-## 2. ABDELMOUGHIT (Algo & Profs) -  À FAIRE
-*Objectif : Matcher les sujets validés avec les disponibilités des profs.*
-- [ ] **Vue Disponibilités :** Formulaire où le prof coche ses plages horaires libres.
-- [ ] **Algorithme :** Script PHP qui assigne automatiquement 2 profs (Encadrant + Rapporteur) + 1 Salle + 1 Date à un projet.
-- [ ] **Conflits :** Gérer les cas impossibles (pas de salle/prof dispo).
+## 1. IHAB (Tech Lead & Admin/Support) -  FAIT
+- [x] **Architecture BDD :** Mise à niveau complète (gestion des versions rapports, rôles jurys, périodes).
+- [x] **Module Étudiant :**
+    - Inscription complète (Titre + Mots-clés + Binôme + 3 Vœux).
+    - Dashboard (Affichage dynamique de l'encadrant).
+    - Dépôt Rapport (PDF <50Mo + Déclaration d'originalité).
+- [x] **Rôles Support :** Création des vues pour **Directeur** (KPIs) et **Assistante** (Gestion Salles).
 
-## 3. NIZAR (Frontend & Salles) -  À FAIRE
-*Objectif : Rendre le site utilisable et gérer la logistique.*
-- [ ] **Design :** Appliquer Bootstrap sur `views/etudiant/index.php` et `soumettre.php`.
-- [ ] **CRUD Salles :** Page Coordinateur pour Ajouter/Modifier/Supprimer des salles (Numéro, Capacité).
-- [ ] **Binômes :** Permettre à l'étudiant d'ajouter un camarade lors de la soumission.
+## 2. ABDELMOUGHIT (Professeurs & Algo) -  À FAIRE (Prioritaire)
+*Tes vues sont prêtes mais vides dans `src/views/prof/`.*
+- [ ] **Disponibilités (`disponibilites.php`) :** Créer le formulaire pour remplir la table `disponibilites_profs`. (Input indispensable pour ton algo).
+- [ ] **Encadrement (`encadrement.php`) :** Liste des étudiants affectés + Bouton pour télécharger le PDF et **Valider le rapport** (débloque la soutenance).
+- [ ] **Dashboard Prof :** Remplacer la page d'accueil temporaire par de vrais widgets.
 
-## 4. NOURDDINE (Reporting) -  À FAIRE
-*Objectif : Sortir les documents officiels.*
-- [ ] **PDF :** Installer DomPDF/FPDF.
-- [ ] **Exports :** Générer "Planning des soutenances.pdf" et "Fiches d'évaluation.pdf".
+## 3. NIZAR (Frontend & Tests) -  EN COURS
+*Le module étudiant étant codé, focus sur l'UX et la communication.*
+- [ ] **Tests Utilisateur :** Vérifier que le parcours étudiant (Inscription -> Dépôt) fonctionne sans bug.
+- [ ] **Messagerie Interne :** La table `messages` est créée. Créer une interface simple pour que l'étudiant puisse écrire à son encadrant.
+- [ ] **Design Global :** Harmoniser les boutons et les alertes (Succès/Erreur) sur toutes les pages.
+
+## 4. NOURDDINE (Reporting & Archivage) -  EN ATTENTE
+*Les données commencent à arriver, tu vas bientôt pouvoir générer les docs.*
+- [ ] **PDF Convocations :** Maquetter la convocation (Logo UEMF, Date, Salle, Jury).
+- [ ] **PV de Soutenance :** Préparer le modèle PDF qui sera rempli après la saisie des notes.
 
 ---
 
-## DÉMARRAGE RAPIDE
-1. **Nettoyage :** Supprimez votre ancien dossier local.
-2. **Copie :** Récupérez la nouvelle version fournie par Ihab.
-3. **Admin :** Lancez le script `scripts/reset_admin.php` pour créer votre accès coordinateur.
-4. **Test :** Connectez-vous avec `ihab.admin` / `123456`.
+##  RAPPEL DES ACCÈS (Locaux)
+* **Étudiant (Test) :** Créez un compte via `register.php`.
+* **Prof (Test) :** `prof.test` / `123456` (à créer si besoin).
+* **Coordinateur :** `ihab.admin` / `123456`.
+* **Directeur :** `directeur.general` / `123456`.
+* **Assistante :** `assistante.admin` / `123456`.
