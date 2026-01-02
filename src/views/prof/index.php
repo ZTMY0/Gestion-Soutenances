@@ -22,6 +22,23 @@ $nbEncadres = $stmt->fetchColumn();
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM projets WHERE encadrant_id = ? AND statut = 'encadrant_affecte'");
 $stmt->execute([$prof_id]);
 $nbEnAttente = $stmt->fetchColumn();
+
+// Compter les jurys
+$nbJurys = 0;
+$nbJurysAVenir = 0;
+try {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM jury_soutenance WHERE prof_id = ?");
+    $stmt->execute([$prof_id]);
+    $nbJurys = $stmt->fetchColumn();
+    
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM jury_soutenance js 
+                           JOIN soutenances s ON js.soutenance_id = s.id 
+                           WHERE js.prof_id = ? AND s.date_soutenance >= CURDATE()");
+    $stmt->execute([$prof_id]);
+    $nbJurysAVenir = $stmt->fetchColumn();
+} catch (PDOException $e) {
+    // Tables n'existent peut-être pas encore
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -89,7 +106,7 @@ $nbEnAttente = $stmt->fetchColumn();
 
         <!-- STATS -->
         <div class="row g-4 mb-5">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card stat-card shadow-sm h-100">
                     <div class="card-body d-flex align-items-center">
                         <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
@@ -102,7 +119,7 @@ $nbEnAttente = $stmt->fetchColumn();
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card stat-card shadow-sm h-100">
                     <div class="card-body d-flex align-items-center">
                         <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
@@ -110,12 +127,12 @@ $nbEnAttente = $stmt->fetchColumn();
                         </div>
                         <div>
                             <h3 class="mb-0 fw-bold"><?php echo $nbDispos; ?></h3>
-                            <small class="text-muted">Créneaux disponibles</small>
+                            <small class="text-muted">Créneaux dispo</small>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card stat-card shadow-sm h-100">
                     <div class="card-body d-flex align-items-center">
                         <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
@@ -128,19 +145,32 @@ $nbEnAttente = $stmt->fetchColumn();
                     </div>
                 </div>
             </div>
+            <div class="col-md-3">
+                <div class="card stat-card shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3">
+                            <i class="fas fa-gavel"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0 fw-bold"><?php echo $nbJurys; ?></h3>
+                            <small class="text-muted">Participations jury</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- MENU -->
         <h4 class="mb-4"><i class="fas fa-th-large text-primary me-2"></i>Accès rapide</h4>
         <div class="row g-4">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <a href="disponibilites.php" class="card menu-card shadow-sm h-100 text-decoration-none">
-                    <div class="card-body text-center py-5">
+                    <div class="card-body text-center py-4">
                         <div class="mb-3">
                             <i class="fas fa-calendar-alt fa-3x text-success"></i>
                         </div>
                         <h5 class="fw-bold text-dark">Mes Disponibilités</h5>
-                        <p class="text-muted mb-0">Indiquer vos créneaux pour les jurys</p>
+                        <p class="text-muted mb-0 small">Indiquer vos créneaux pour les jurys</p>
                         <?php if ($nbDispos == 0): ?>
                             <span class="badge bg-danger mt-2">À remplir</span>
                         <?php else: ?>
@@ -149,19 +179,50 @@ $nbEnAttente = $stmt->fetchColumn();
                     </div>
                 </a>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <a href="encadrement.php" class="card menu-card shadow-sm h-100 text-decoration-none">
-                    <div class="card-body text-center py-5">
+                    <div class="card-body text-center py-4">
                         <div class="mb-3">
                             <i class="fas fa-user-graduate fa-3x text-primary"></i>
                         </div>
                         <h5 class="fw-bold text-dark">Mes Encadrements</h5>
-                        <p class="text-muted mb-0">Suivre vos étudiants et valider les rapports</p>
+                        <p class="text-muted mb-0 small">Suivre vos étudiants et valider les rapports</p>
                         <?php if ($nbEnAttente > 0): ?>
                             <span class="badge bg-warning mt-2"><?php echo $nbEnAttente; ?> en attente</span>
                         <?php else: ?>
                             <span class="badge bg-secondary mt-2"><?php echo $nbEncadres; ?> projets</span>
                         <?php endif; ?>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="jurys.php" class="card menu-card shadow-sm h-100 text-decoration-none">
+                    <div class="card-body text-center py-4">
+                        <div class="mb-3">
+                            <i class="fas fa-gavel fa-3x text-danger"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark">Mes Jurys</h5>
+                        <p class="text-muted mb-0 small">Convocations et saisie des notes</p>
+                        <?php if ($nbJurysAVenir > 0): ?>
+                            <span class="badge bg-warning mt-2"><?php echo $nbJurysAVenir; ?> à venir</span>
+                        <?php else: ?>
+                            <span class="badge bg-secondary mt-2"><?php echo $nbJurys; ?> participations</span>
+                        <?php endif; ?>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Deuxième ligne de menu -->
+        <div class="row g-4 mt-2">
+            <div class="col-md-4">
+                <a href="statistiques.php" class="card menu-card shadow-sm h-100 text-decoration-none">
+                    <div class="card-body text-center py-4">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-bar fa-3x text-info"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark">Mes Statistiques</h5>
+                        <p class="text-muted mb-0 small">Historique et graphiques d'activité</p>
                     </div>
                 </a>
             </div>
