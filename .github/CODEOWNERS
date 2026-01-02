@@ -1,0 +1,13 @@
+# Tout le monde peut toucher au reste, mais...
+
+# --- ZONES PROTÉGÉES PAR IHAB ---
+# La configuration et la BDD sont critiques
+/config/           @ZTMY0
+/sql/              @ZTMY0
+
+# Le système d'authentification et les modèles de base
+/src/controllers/AuthController.php    @ZTMY0
+/src/models/User.php                   @ZTMY0
+
+# Le dossier des générateurs de données (Python)
+/_data_generators/ @ZTMY0
