@@ -1,63 +1,172 @@
--- STRUCTURE DE LA BASE DE DONNEES (NE PAS MODIFIER)
+-- GESTION SOUTENANCES - SCHEMA COMPLET (ULTIMATE VERSION)
+-- Basé sur le Cahier des Charges Détaillé
+SET FOREIGN_KEY_CHECKS = 0; -- Désactiver vérif pour pouvoir tout recréer
 
--- 1. Table Utilisateurs (Tous les rôles)
+-- 1. TABLE FILIERES (Le point de départ)
+DROP TABLE IF EXISTS filieres;
+CREATE TABLE filieres (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(20) UNIQUE NOT NULL, -- Ex: "G-INFO", "G-INDUS"
+    nom VARCHAR(150) NOT NULL,
+    description TEXT,
+    coordinateur_id INT, -- Sera lié plus tard
+    duree_soutenance INT DEFAULT 60, -- En minutes
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. TABLE UTILISATEURS (Tous les acteurs : Directeur, Assistante, etc.)
+DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    role ENUM('etudiant', 'prof', 'coordinateur', 'admin') NOT NULL,
-    specialite VARCHAR(100) NULL, -- Pour les profs
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    role ENUM('etudiant', 'prof', 'coordinateur', 'directeur', 'assistante') NOT NULL,
+    filiere_id INT NULL, -- L'étudiant appartient à une filière
+    specialite VARCHAR(255) NULL, -- Pour les profs (JSON possible ou texte)
+    telephone VARCHAR(20) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (filiere_id) REFERENCES filieres(id) ON DELETE SET NULL
 );
 
--- 2. Salles
+-- (Mise à jour de la clé étrangère coordinateur dans filieres)
+ALTER TABLE filieres ADD CONSTRAINT fk_filieres_coord FOREIGN KEY (coordinateur_id) REFERENCES users(id) ON DELETE SET NULL;
+
+-- 3. TABLE PROJETS (Avec Binôme et Mots-clés)
+DROP TABLE IF EXISTS projets;
+CREATE TABLE projets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titre VARCHAR(255) NOT NULL,
+    description TEXT,
+    mots_cles TEXT, -- Stocké en JSON ex: ["IA", "Web"]
+    etudiant_id INT NOT NULL,
+    binome_id INT NULL, -- Gestion du binôme incluse
+    encadrant_id INT NULL,
+    filiere_id INT NOT NULL,
+    annee_universitaire VARCHAR(9) NOT NULL, -- Ex: "2025-2026"
+    statut ENUM('inscrit', 'encadrant_affecte', 'valide_encadrant', 'planifie', 'soutenu') DEFAULT 'inscrit',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (etudiant_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (binome_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (encadrant_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (filiere_id) REFERENCES filieres(id)
+);
+
+-- 4. TABLE RAPPORTS (Versioning des fichiers)
+DROP TABLE IF EXISTS rapports;
+CREATE TABLE rapports (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    projet_id INT NOT NULL,
+    version INT DEFAULT 1,
+    chemin_fichier VARCHAR(255) NOT NULL,
+    commentaire TEXT,
+    date_upload TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (projet_id) REFERENCES projets(id) ON DELETE CASCADE
+);
+
+-- 5. TABLE SALLES
+DROP TABLE IF EXISTS salles;
 CREATE TABLE salles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(50) NOT NULL,
-    capacite INT NOT NULL
+    capacite INT NOT NULL,
+    equipements TEXT -- Ex: "Projecteur, Tableau"
 );
 
--- 3. Projets
-CREATE TABLE projets (
+-- 6. TABLE PERIODES DISPONIBILITE (Gestion des campagnes de saisie)
+DROP TABLE IF EXISTS periodes;
+CREATE TABLE periodes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    titre VARCHAR(200) NOT NULL,
-    description TEXT,
-    etudiant_id INT NOT NULL,
-    encadrant_id INT NULL,
-    rapport_path VARCHAR(255) NULL,
-    statut ENUM('inscrit', 'valide', 'planifie', 'soutenu') DEFAULT 'inscrit',
-    FOREIGN KEY (etudiant_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (encadrant_id) REFERENCES users(id) ON DELETE SET NULL
+    filiere_id INT NOT NULL,
+    date_debut DATE NOT NULL,
+    date_fin DATE NOT NULL,
+    titre VARCHAR(100), -- Ex: "Soutenance Session Hiver"
+    FOREIGN KEY (filiere_id) REFERENCES filieres(id)
 );
 
--- 4. Disponibilités Profs
+-- 7. TABLE DISPONIBILITES (Liées aux périodes)
+DROP TABLE IF EXISTS disponibilites;
 CREATE TABLE disponibilites (
     id INT AUTO_INCREMENT PRIMARY KEY,
     prof_id INT NOT NULL,
+    periode_id INT NOT NULL,
     jour DATE NOT NULL,
     heure_debut TIME NOT NULL,
     heure_fin TIME NOT NULL,
-    FOREIGN KEY (prof_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (prof_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (periode_id) REFERENCES periodes(id) ON DELETE CASCADE
 );
 
--- 5. Soutenances
+-- 8. TABLE SOUTENANCES (Planification)
+DROP TABLE IF EXISTS soutenances;
 CREATE TABLE soutenances (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    projet_id INT NOT NULL,
+    projet_id INT UNIQUE NOT NULL,
     salle_id INT NOT NULL,
     date_soutenance DATETIME NOT NULL,
-    jury_president_id INT,
-    jury_examinateur_id INT,
     note_finale DECIMAL(4,2) NULL,
+    mention VARCHAR(50) NULL,
+    pv_signe BOOLEAN DEFAULT FALSE, -- Signature Directeur
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (projet_id) REFERENCES projets(id),
     FOREIGN KEY (salle_id) REFERENCES salles(id)
 );
 
--- DONNEES DE TEST (SEEDER)
-INSERT INTO users (nom, email, password, role) VALUES 
-('Admin Ihab', 'ihab@admin.com', '123456', 'coordinateur'),
-('Prof Abdel', 'abdel@prof.com', '123456', 'prof'),
-('Etudiant Nizar', 'nizar@etud.com', '123456', 'etudiant');
+-- 9. TABLE JURYS (Composition complexe : Président, Examinateur...)
+DROP TABLE IF EXISTS jurys;
+CREATE TABLE jurys (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    soutenance_id INT NOT NULL,
+    prof_id INT NOT NULL,
+    role_jury ENUM('president', 'examinateur', 'rapporteur', 'encadrant', 'invite') NOT NULL,
+    present BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (soutenance_id) REFERENCES soutenances(id) ON DELETE CASCADE,
+    FOREIGN KEY (prof_id) REFERENCES users(id)
+);
 
-INSERT INTO salles (nom, capacite) VALUES ('Salle A', 20), ('Amphi 1', 100);
+-- 10. TABLE MESSAGES (Communication interne)
+DROP TABLE IF EXISTS messages;
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    projet_id INT NOT NULL,
+    expediteur_id INT NOT NULL,
+    contenu TEXT NOT NULL,
+    lu BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (projet_id) REFERENCES projets(id),
+    FOREIGN KEY (expediteur_id) REFERENCES users(id)
+);
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- =============================================
+-- JEU DE DONNÉES COMPLET (SEEDER)
+-- =============================================
+
+-- 1. Filière
+INSERT INTO filieres (code, nom, duree_soutenance) VALUES ('GINF', 'Génie Informatique', 60);
+
+-- 2. Utilisateurs (Tous les rôles)
+INSERT INTO users (nom, email, password, role, filiere_id, specialite) VALUES 
+('Directeur Rachid', 'directeur@ecole.com', '123456', 'directeur', 1, NULL),
+('Assistante Sarah', 'assistante@ecole.com', '123456', 'assistante', 1, NULL),
+('Coordinateur Ihab', 'ihab@admin.com', '123456', 'coordinateur', 1, NULL),
+('Prof Abdel', 'abdel@prof.com', '123456', 'prof', 1, 'Algorithmique'),
+('Prof Bennani', 'bennani@prof.com', '123456', 'prof', 1, 'Reseaux'),
+('Prof Chami', 'chami@prof.com', '123456', 'prof', 1, 'Gestion'),
+('Nizar Etudiant', 'nizar@etud.com', '123456', 'etudiant', 1, NULL),
+('Binome Amine', 'amine@etud.com', '123456', 'etudiant', 1, NULL);
+
+-- Lier le coordinateur à la filière
+UPDATE filieres SET coordinateur_id = 3 WHERE code = 'GINF';
+
+-- 3. Salle
+INSERT INTO salles (nom, capacite) VALUES ('Salle B12', 30), ('Amphi OCP', 200);
+
+-- 4. Projet
+INSERT INTO projets (titre, description, etudiant_id, binome_id, encadrant_id, filiere_id, annee_universitaire, statut) VALUES 
+('Gestion Soutenances', 'Application Web complète', 7, 8, 4, 1, '2025-2026', 'valide_encadrant');
+
+-- 5. Message
+INSERT INTO messages (projet_id, expediteur_id, contenu) VALUES 
+(1, 4, 'Bonjour, n oubliez pas de déposer le rapport V1 avant lundi.');
