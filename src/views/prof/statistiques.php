@@ -87,14 +87,18 @@ for ($i = 1; $i <= 12; $i++) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-light">
-    <nav class="navbar navbar-dark bg-dark px-4 shadow-sm">
-        <a href="index.php" class="navbar-brand">
-            <i class="fas fa-chalkboard-teacher me-2"></i>Espace Professeur
-        </a>
+    <nav class="navbar navbar-dark bg-dark px-4 shadow-sm mb-4">
         <div class="d-flex align-items-center">
-            <span class="text-white me-3"><?php echo htmlspecialchars($_SESSION['user_nom']); ?></span>
+            <span class="navbar-brand mb-0 h1">
+                <i class="fas fa-chalkboard-teacher me-2"></i>Espace Professeur
+            </span>
+        </div>
+        <div class="d-flex align-items-center">
+            <span class="text-white me-3 d-none d-md-block">
+                <i class="fas fa-user me-1"></i><?php echo htmlspecialchars($_SESSION['user_nom']); ?>
+            </span>
             <a href="../auth/logout.php" class="btn btn-outline-light btn-sm">
-                <i class="fas fa-sign-out-alt"></i>
+                <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
             </a>
         </div>
     </nav>

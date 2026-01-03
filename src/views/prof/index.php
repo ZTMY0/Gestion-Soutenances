@@ -81,7 +81,7 @@ try {
     </style>
 </head>
 <body class="bg-light">
-    <nav class="navbar navbar-dark bg-dark px-4 shadow-sm">
+    <nav class="navbar navbar-dark bg-dark px-4 shadow-sm mb-4">
         <div class="d-flex align-items-center">
             <span class="navbar-brand mb-0 h1">
                 <i class="fas fa-chalkboard-teacher me-2"></i>Espace Professeur
