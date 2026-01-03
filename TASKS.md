@@ -22,12 +22,25 @@
 - [x] **Rôles Support :** Création des vues pour **Directeur** (KPIs) et **Assistante** (Gestion Salles).
 
 ## 2. ABDELMOUGHIT (Professeurs & Algo) - ✅ FAIT
-*Module Professeur complet dans `src/views/prof/`.*
+*Module Professeur complet dans `src/views/prof/` + Algorithmes dans `src/services/`.*
 - [x] **Disponibilités (`disponibilites.php`) :** Formulaire complet pour saisir les créneaux disponibles (Lundi-Samedi, horaires). Compatible avec l'algo de planification.
 - [x] **Encadrement (`encadrement.php`) :** Liste des étudiants encadrés + Téléchargement PDF + **Validation du rapport** (change statut en `valide_encadrant`).
 - [x] **Dashboard Prof (`index.php`) :** 4 widgets stats + 4 cartes d'accès rapide.
 - [x] **Jurys (`jurys.php`) :** Convocations à venir + Historique des participations.
 - [x] **Statistiques (`statistiques.php`) :** Graphiques Chart.js (par filière, rôles jury, activité mensuelle).
+
+### 🤖 ALGORITHMES (src/services/)
+- [x] **AffectationService.php :** Algorithme d'affectation automatique des encadrants
+  - Matching mots-clés/spécialités (40 pts)
+  - Respect des préférences étudiants (30 pts)
+  - Équilibrage des charges (30 pts)
+- [x] **PlanificationService.php :** Algorithme de planification automatique des soutenances
+  - Respect des disponibilités des encadrants
+  - Gestion des salles et créneaux
+  - Détection des conflits
+- [x] **JuryService.php :** Algorithme de constitution des jurys
+  - Règle: Président ≠ Encadrant
+  - Équilibrage des participations entre profs
 
 ## 3. NIZAR (Frontend & Tests) -  EN COURS
 *Le module étudiant étant codé, focus sur l'UX et la communication.*
