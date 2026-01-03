@@ -13,9 +13,14 @@ $message = "";
 $error = "";
 
 // 2. RÉCUPÉRER LE PROJET
-$stmt = $pdo->prepare("SELECT * FROM projets WHERE etudiant_id = ?");
-$stmt->execute([$etudiant_id]);
-$projet = $stmt->fetch();
+$stmtR = $pdo->prepare("SELECT COUNT(*) FROM rapports WHERE projet_id = ?");
+$stmtR->execute([$projet['id']]);
+$already = (int)$stmtR->fetchColumn();
+
+if ($already > 0) {
+    $error = "Vous avez déjà déposé un rapport. Contactez votre encadrant si vous devez remplacer la version.";
+}
+
 
 // Vérification : Peut-on déposer ?
 if (!$projet || !$projet['encadrant_id']) {
@@ -41,6 +46,12 @@ if (isset($_POST['upload_btn'])) {
         $maxSize = 50 * 1024 * 1024; // 50 Mo
         $allowedExt = ['pdf'];
         $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+$mime  = $finfo->file($file['tmp_name']);
+if ($mime !== 'application/pdf') {
+    $error = "Le fichier n'est pas un PDF valide.";
+}
+
 
         if ($file['size'] > $maxSize) {
             $error = "Le fichier est trop volumineux (Max 50 Mo).";
@@ -142,3 +153,4 @@ if (isset($_POST['upload_btn'])) {
     </div>
 </body>
 </html>
+UPDATE projets SET statut = 'rapport_soumis'
