@@ -2,7 +2,7 @@
 session_start();
 require_once '../../../config/database.php';
 
-// SECURITE
+// SÉCURITÉ
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'coordinateur') {
     header("Location: ../auth/login.php");
     exit();
@@ -13,7 +13,7 @@ if (isset($_POST['valider_projet_id'])) {
     $id = $_POST['valider_projet_id'];
     $stmt = $pdo->prepare("UPDATE projets SET statut = 'valide_encadrant' WHERE id = ?");
     $stmt->execute([$id]);
-    $message = " Projet #$id validé avec succès !";
+    $message = "Projet #$id validé avec succès !";
     $msg_type = "success";
 }
 
@@ -22,7 +22,7 @@ if (isset($_POST['supprimer_projet_id'])) {
     $id = $_POST['supprimer_projet_id'];
     $stmt = $pdo->prepare("DELETE FROM projets WHERE id = ?");
     $stmt->execute([$id]);
-    $message = " Projet #$id supprimé définitivement.";
+    $message = "Projet #$id supprimé définitivement.";
     $msg_type = "danger";
 }
 
@@ -48,7 +48,7 @@ $projets = $stmt->fetchAll();
 
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3> Liste des Projets Soumis</h3>
+            <h3><i class="fas fa-list-ul me-2"></i>Liste des Projets Soumis</h3>
             <a href="index.php" class="btn btn-secondary">← Retour Dashboard</a>
         </div>
 
@@ -87,6 +87,10 @@ $projets = $stmt->fetchAll();
                                 <?php endif; ?>
                             </td>
                             <td class="text-end">
+                                
+                                <a href="details_projet.php?id=<?php echo $p['id']; ?>" class="btn btn-info btn-sm text-white me-1" title="Voir les détails complets">
+                                    <i class="fas fa-eye"></i>
+                                </a>
                                 <?php if($p['statut'] == 'inscrit'): ?>
                                 <form method="POST" style="display:inline;">
                                     <input type="hidden" name="valider_projet_id" value="<?php echo $p['id']; ?>">

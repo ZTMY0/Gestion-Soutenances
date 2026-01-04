@@ -1,63 +1,62 @@
-#  GESTION SOUTENANCES - ÉTAT D'AVANCEMENT (V2)
+# 🎓 GESTION SOUTENANCES - ÉTAT D'AVANCEMENT (V4)
 
-**STATUS ACTUEL :**
- **Module Étudiant :** 100% Terminé.
- **Base de Données :** 100% Conforme (Tables officielles).
- **Module Professeur :** 100% Terminé ✅
-
----
-
-##  ACTION REQUISE POUR TOUS
-1. Faites un **`git pull`**.
-2. **IMPÉRATIF :** Importez le fichier `soutenances_db.sql` (à la racine) dans votre phpMyAdmin.
- La structure de la BDD a changé (ajout tables `jurys`, `rapports`, `disponibilites`).
----
-
-## 1. IHAB (Tech Lead & Admin/Support) - ✅ FAIT
-- [x] **Architecture BDD :** Mise à niveau complète (gestion des versions rapports, rôles jurys, périodes).
-- [x] **Module Étudiant :**
-    - Inscription complète (Titre + Mots-clés + Binôme + 3 Vœux).
-    - Dashboard (Affichage dynamique de l'encadrant).
-    - Dépôt Rapport (PDF <50Mo + Déclaration d'originalité).
-- [x] **Rôles Support :** Création des vues pour **Directeur** (KPIs) et **Assistante** (Gestion Salles).
-
-## 2. ABDELMOUGHIT (Professeurs & Algo) - ✅ FAIT
-*Module Professeur complet dans `src/views/prof/` + Algorithmes dans `src/services/`.*
-- [x] **Disponibilités (`disponibilites.php`) :** Formulaire complet pour saisir les créneaux disponibles (Lundi-Samedi, horaires). Compatible avec l'algo de planification.
-- [x] **Encadrement (`encadrement.php`) :** Liste des étudiants encadrés + Téléchargement PDF + **Validation du rapport** (change statut en `valide_encadrant`).
-- [x] **Dashboard Prof (`index.php`) :** 4 widgets stats + 4 cartes d'accès rapide.
-- [x] **Jurys (`jurys.php`) :** Convocations à venir + Historique des participations.
-- [x] **Statistiques (`statistiques.php`) :** Graphiques Chart.js (par filière, rôles jury, activité mensuelle).
-
-### 🤖 ALGORITHMES (src/services/)
-- [x] **AffectationService.php :** Algorithme d'affectation automatique des encadrants
-  - Matching mots-clés/spécialités (40 pts)
-  - Respect des préférences étudiants (30 pts)
-  - Équilibrage des charges (30 pts)
-- [x] **PlanificationService.php :** Algorithme de planification automatique des soutenances
-  - Respect des disponibilités des encadrants
-  - Gestion des salles et créneaux
-  - Détection des conflits
-- [x] **JuryService.php :** Algorithme de constitution des jurys
-  - Règle: Président ≠ Encadrant
-  - Équilibrage des participations entre profs
-
-## 3. NIZAR (Frontend & Tests) -  EN COURS
-*Le module étudiant étant codé, focus sur l'UX et la communication.*
-- [ ] **Tests Utilisateur :** Vérifier que le parcours étudiant (Inscription -> Dépôt) fonctionne sans bug.
-- [ ] **Messagerie Interne :** La table `messages` est créée. Créer une interface simple pour que l'étudiant puisse écrire à son encadrant.
-- [ ] **Design Global :** Harmoniser les boutons et les alertes (Succès/Erreur) sur toutes les pages.
-
-## 4. NOURDDINE (Reporting & Archivage) -  EN ATTENTE
-*Les données commencent à arriver, tu vas bientôt pouvoir générer les docs.*
-- [ ] **PDF Convocations :** Maquetter la convocation (Logo UEMF, Date, Salle, Jury).
-- [ ] **PV de Soutenance :** Préparer le modèle PDF qui sera rempli après la saisie des notes.
+**PROJET :** Plateforme de Gestion des Soutenances de Fin d'Études (PFE)  
+**STATUS :** Opérationnel / En phase de finalisation  
+**URL RÉFÉRENCE :** [Cahier des charges EIDIA](https://cs-eidia-projects-2025.netlify.app/projet_3_projet3)
 
 ---
 
-##  RAPPEL DES ACCÈS (Locaux)
-* **Étudiant (Test) :** Créez un compte via `register.php`.
-* **Prof (Test) :** `prof.test` / `123456` (à créer si besoin).
-* **Coordinateur :** `ihab.admin` / `123456`.
-* **Directeur :** `directeur.general` / `123456`.
-* **Assistante :** `assistante.admin` / `123456`.
+## 👥 RÉPARTITION DES RÔLES ET MISSIONS
+
+| Membre | Module Responsable | Tâches Principales |
+| :--- | :--- | :--- |
+| **IHAB** | **Étudiants & Coordinateur** | Inscription, Dépôts, Affectations encadrants, Supervision. |
+| **ABDELMOUGHIT** | **Professeurs & Algorithmes** | Disponibilités, Validation rapports, Planning Auto, Constitution Jurys. |
+| **NIZAR** | **Directeur** | Validation planning, KPIs, Signature électronique des PV. |
+| **NOURDDINE** | **Secrétaire Générale** | Logistique salles, Génération PDF (Convocations/PV), Archivage. |
+| **TOUTE L'ÉQUIPE** | **UI/UX & SÉCURITÉ** | Harmonisation design, RBAC, Audit de sécurité et Intégrité des notes. |
+
+---
+
+## 🛠️ DÉTAIL DES RÉALISATIONS PAR MODULE
+
+### 1. IHAB (Responsable Étudiant & Coordinateur) - ✅ FAIT
+* **Module Étudiant :** Formulaire d'inscription (Titre, Mots-clés), gestion des binômes et upload du rapport PDF (< 50 Mo).
+* **Module Coordinateur :** Interface de matching intelligent entre projets (mots-clés) et spécialités des professeurs.
+* **Architecture BDD :** Implémentation des tables `filières`, `utilisateurs` et `projets` avec gestion des statuts (Inscrit → Soutenu).
+
+### 2. ABDELMOUGHIT (Responsable Professeurs & Algo) - ✅ FAIT
+* **Module Professeur :** Saisie des disponibilités sur calendrier et interface de validation finale des rapports.
+* **Algorithmes (Services PHP) :**
+    * `AffectationService.php` : Répartition équitable des charges d'encadrement.
+    * `PlanificationService.php` : Génération de planning sans conflits (salle/prof/étudiant).
+    * `JuryService.php` : Constitution automatique respectant la règle (Président ≠ Encadrant).
+
+### 3. NIZAR (Responsable Directeur) - 🔄 EN COURS
+* **Validation Stratégique :** Interface de revue globale du planning avant publication officielle.
+* **Signature Électronique :** Système de validation des Procès-verbaux (PV) avec horodatage certifié.
+* **Dashboard :** Vue d'ensemble des statistiques de réussite par filière et alertes anomalies.
+
+### 4. NOURDDINE (Responsable Secrétaire Générale & Reporting) - 🔄 EN COURS
+* **Logistique :** Référentiel des salles (Capacité, équipements type vidéoprojecteur/visio).
+* **Reporting PDF :** Automatisation des Convocations, Grilles d'évaluation et Attestations de réussite.
+* **Archivage :** Numérisation et classement des PV signés par année universitaire.
+
+---
+
+## 🔐 AXES TRANSVERSAUX (TRAVAIL COLLECTIF)
+
+### **Sécurité & Intégrité**
+* **RBAC (Contrôle d'accès) :** Vérification stricte des permissions à chaque requête (un étudiant ne voit que son projet).
+* **Protection des Documents :** Rapports stockés hors du répertoire web public avec noms aléatoires pour éviter les fuites.
+* **Audit Trail :** Journalisation (Logs) de toutes les modifications de notes et d'affectations.
+
+### **UI/UX & Design**
+* **Harmonisation :** Utilisation de composants communs (Alertes Succès/Erreur, Boutons, Modals).
+* **Workflow :** Validation du parcours utilisateur de l'étape 1 (Inscription) à l'étape 9 (Notes & PV).
+
+---
+
+## 🚀 RAPPEL DES ACCÈS
+* **BDD :** Réimporter `soutenances_db.sql` (Tables `jurys`, `rapports`, `disponibilites` mises à jour).
+* **Git :** `git pull origin main` avant toute modification sur l'UI ou la Sécurité.

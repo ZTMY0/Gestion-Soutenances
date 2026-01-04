@@ -2,333 +2,168 @@
 session_start();
 require_once '../../../config/database.php';
 
-// SÉCURITÉ : Vérifier que c'est bien un prof connecté
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'prof') {
-    header("Location: ../auth/login.php");
-    exit();
+    header("Location: ../auth/login.php"); exit();
 }
 
 $prof_id = $_SESSION['user_id'];
-$message = '';
-$messageType = '';
+$message = ''; $messageType = '';
 
-// TRAITEMENT : Validation du rapport
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['valider_rapport'])) {
-    $projet_id = intval($_POST['projet_id']);
-    
-    // Vérifier que ce projet appartient bien à ce prof
-    $stmt = $pdo->prepare("SELECT id FROM projets WHERE id = ? AND encadrant_id = ?");
-    $stmt->execute([$projet_id, $prof_id]);
-    
-    if ($stmt->fetch()) {
-        // Mettre à jour le statut du projet
-        $stmt = $pdo->prepare("UPDATE projets SET statut = 'valide_encadrant' WHERE id = ?");
-        $stmt->execute([$projet_id]);
-        
-        $message = "Le rapport a été validé avec succès. L'étudiant peut maintenant passer en soutenance.";
-        $messageType = "success";
-    } else {
-        $message = "Erreur : Ce projet ne vous est pas assigné.";
-        $messageType = "danger";
+// 1. Envoi Message (Chat interne)
+if (isset($_POST['send_msg']) && !empty($_POST['msg_text'])) {
+    $pid = intval($_POST['projet_id']);
+    $msg = trim($_POST['msg_text']);
+    $check = $pdo->prepare("SELECT id FROM projets WHERE id = ? AND encadrant_id = ?");
+    $check->execute([$pid, $prof_id]);
+    if($check->fetch()) {
+        $pdo->prepare("INSERT INTO messages (projet_id, sender_id, message) VALUES (?, ?, ?)")->execute([$pid, $prof_id, $msg]);
     }
 }
 
-// RÉCUPÉRER LES PROJETS ENCADRÉS
-$sql = "SELECT p.*, 
-               u.nom AS etudiant_nom, 
-               u.email AS etudiant_email,
-               b.nom AS binome_nom,
-               f.nom AS filiere_nom,
-               r.chemin_fichier AS rapport_path,
-               r.date_upload AS rapport_date,
-               r.id AS rapport_id
+// 2. Validation Rapport
+if (isset($_POST['valider_rapport'])) {
+    $projet_id = intval($_POST['projet_id']);
+    $stmt = $pdo->prepare("UPDATE projets SET statut = 'valide_encadrant' WHERE id = ? AND encadrant_id = ?");
+    if ($stmt->execute([$projet_id, $prof_id])) {
+        $message = "Rapport validé !"; $messageType = "success";
+    }
+}
+
+// 3. Récupération Projets
+$sql = "SELECT p.*, u.nom AS etudiant_nom, u.email AS etudiant_email, 
+               b.nom AS binome_nom, f.nom AS filiere_nom, 
+               r.chemin_fichier AS rapport_path 
         FROM projets p
         JOIN users u ON p.etudiant_id = u.id
-        LEFT JOIN users b ON p.binome_id = b.id
+        LEFT JOIN users b ON p.binome_email = b.email
         LEFT JOIN filieres f ON p.filiere_id = f.id
         LEFT JOIN rapports r ON r.projet_id = p.id
-        WHERE p.encadrant_id = ?
-        ORDER BY p.created_at DESC";
+        WHERE p.encadrant_id = ? ORDER BY p.created_at DESC";
+$projets = $pdo->prepare($sql);
+$projets->execute([$prof_id]);
+$projets = $projets->fetchAll();
 
-$stmt = $pdo->prepare($sql);
-$stmt->execute([$prof_id]);
-$projets = $stmt->fetchAll();
-
-// Statistiques
+// Stats
 $nbTotal = count($projets);
-$nbEnAttente = 0;
-$nbValides = 0;
-foreach ($projets as $p) {
-    if ($p['statut'] === 'valide_encadrant' || $p['statut'] === 'planifie' || $p['statut'] === 'soutenu') {
-        $nbValides++;
-    } elseif ($p['rapport_path']) {
-        $nbEnAttente++;
-    }
+$nbEnAttente = 0; $nbValides = 0;
+foreach($projets as $p) {
+    if($p['statut'] == 'valide_encadrant') $nbValides++;
+    elseif($p['rapport_path']) $nbEnAttente++;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mes Encadrements - Espace Professeur</title>
+    <title>Encadrement Professeur</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .project-card {
-            transition: all 0.3s ease;
-            border: none;
-            border-radius: 15px;
-            overflow: hidden;
-        }
-        .project-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .status-badge {
-            font-size: 0.75rem;
-            padding: 5px 12px;
-            border-radius: 20px;
-        }
-        .student-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-        .stat-card {
-            border-radius: 12px;
-            border: none;
-        }
-        .btn-validate {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            border: none;
-            color: white;
-        }
-        .btn-validate:hover {
-            background: linear-gradient(135deg, #0f8a7e 0%, #32d970 100%);
-            color: white;
-        }
+        .project-card { border:none; border-radius:15px; transition:0.3s; }
+        .project-card:hover { transform:translateY(-3px); box-shadow:0 10px 30px rgba(0,0,0,0.1); }
+        .student-avatar { width:50px; height:50px; border-radius:50%; background:#6c5ce7; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; }
+        .chat-box { height:250px; overflow-y:auto; background:white; border:1px solid #dee2e6; border-radius:10px; padding:15px; }
+        .msg { padding:8px 12px; border-radius:15px; margin-bottom:8px; max-width:85%; font-size:0.9rem; }
+        .msg-me { background:#d1e7dd; margin-left:auto; text-align:right; }
+        .msg-other { background:#f1f2f6; margin-right:auto; }
     </style>
 </head>
 <body class="bg-light">
-    <!-- NAVBAR -->
     <nav class="navbar navbar-dark bg-dark px-4 shadow-sm">
-        <div class="d-flex align-items-center">
-            <a href="index.php" class="navbar-brand mb-0 h1">
-                <i class="fas fa-chalkboard-teacher me-2"></i>Espace Professeur
-            </a>
-        </div>
-        <div class="d-flex align-items-center">
-            <span class="text-white me-3 d-none d-md-block">
-                <i class="fas fa-user me-1"></i><?php echo htmlspecialchars($_SESSION['user_nom']); ?>
-            </span>
-            <a href="../auth/logout.php" class="btn btn-outline-light btn-sm">
-                <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
-            </a>
-        </div>
+        <span class="navbar-brand"><i class="fas fa-chalkboard-teacher me-2"></i>Espace Professeur</span>
+        <div class="text-white"><?= htmlspecialchars($_SESSION['user_nom']) ?> <a href="../auth/logout.php" class="btn btn-sm btn-outline-light ms-3">Déconnexion</a></div>
     </nav>
 
     <div class="container py-4">
-        <!-- HEADER -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="mb-1"><i class="fas fa-user-graduate text-primary me-2"></i>Mes Encadrements</h2>
-                <p class="text-muted mb-0">Suivez vos étudiants et validez leurs rapports</p>
-            </div>
-            <a href="index.php" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i>Retour
-            </a>
+        <div class="d-flex justify-content-between mb-4">
+            <h3><i class="fas fa-tasks text-primary me-2"></i>Suivi des Projets</h3>
+            <a href="index.php" class="btn btn-outline-secondary">Retour</a>
         </div>
 
-        <!-- MESSAGE -->
-        <?php if ($message): ?>
-            <div class="alert alert-<?php echo $messageType; ?> alert-dismissible fade show" role="alert">
-                <i class="fas fa-<?php echo $messageType === 'success' ? 'check-circle' : 'exclamation-triangle'; ?> me-2"></i>
-                <?php echo $message; ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
+        <?php if($message): ?><div class="alert alert-<?= $messageType ?>"><?= $message ?></div><?php endif; ?>
 
-        <!-- STATISTIQUES -->
         <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <div class="card stat-card shadow-sm h-100">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
-                            <i class="fas fa-users fa-lg text-primary"></i>
-                        </div>
-                        <div>
-                            <h3 class="mb-0 fw-bold"><?php echo $nbTotal; ?></h3>
-                            <small class="text-muted">Projets encadrés</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card stat-card shadow-sm h-100">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
-                            <i class="fas fa-hourglass-half fa-lg text-warning"></i>
-                        </div>
-                        <div>
-                            <h3 class="mb-0 fw-bold"><?php echo $nbEnAttente; ?></h3>
-                            <small class="text-muted">Rapports à valider</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card stat-card shadow-sm h-100">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
-                            <i class="fas fa-check-circle fa-lg text-success"></i>
-                        </div>
-                        <div>
-                            <h3 class="mb-0 fw-bold"><?php echo $nbValides; ?></h3>
-                            <small class="text-muted">Projets validés</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="col-md-4"><div class="card p-3 border-0 shadow-sm"><h3 class="fw-bold text-primary"><?= $nbTotal ?></h3><small>Total Projets</small></div></div>
+            <div class="col-md-4"><div class="card p-3 border-0 shadow-sm"><h3 class="fw-bold text-warning"><?= $nbEnAttente ?></h3><small>En attente validation</small></div></div>
+            <div class="col-md-4"><div class="card p-3 border-0 shadow-sm"><h3 class="fw-bold text-success"><?= $nbValides ?></h3><small>Validés</small></div></div>
         </div>
 
-        <!-- LISTE DES PROJETS -->
-        <?php if (count($projets) === 0): ?>
-            <div class="text-center py-5 bg-white rounded shadow-sm">
-                <i class="fas fa-folder-open fa-4x text-muted mb-3 opacity-50"></i>
-                <h4 class="text-muted">Aucun projet encadré</h4>
-                <p class="text-muted">Vous n'avez pas encore d'étudiants assignés.</p>
-            </div>
+        <?php if(empty($projets)): ?>
+            <div class="text-center py-5 text-muted">Aucun projet assigné.</div>
         <?php else: ?>
             <div class="row g-4">
-                <?php foreach ($projets as $projet): ?>
-                    <?php
-                    // Définir le badge de statut
-                    $statusConfig = [
-                        'inscrit' => ['bg-secondary', 'En attente', 'fa-clock'],
-                        'encadrant_affecte' => ['bg-info', 'Affecté', 'fa-user-check'],
-                        'rapport_soumis' => ['bg-warning', 'Rapport soumis', 'fa-file-pdf'],
-                        'valide_encadrant' => ['bg-success', 'Validé', 'fa-check'],
-                        'planifie' => ['bg-primary', 'Planifié', 'fa-calendar'],
-                        'soutenu' => ['bg-dark', 'Soutenu', 'fa-graduation-cap']
-                    ];
-                    $status = $statusConfig[$projet['statut']] ?? ['bg-secondary', $projet['statut'], 'fa-question'];
-                    $initiales = strtoupper(substr($projet['etudiant_nom'], 0, 2));
-                    ?>
-                    <div class="col-lg-6">
-                        <div class="card project-card shadow-sm h-100">
-                            <div class="card-header bg-white py-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div class="d-flex align-items-center">
-                                        <div class="student-avatar me-3"><?php echo $initiales; ?></div>
-                                        <div>
-                                            <h6 class="mb-0 fw-bold"><?php echo htmlspecialchars($projet['etudiant_nom']); ?></h6>
-                                            <?php if ($projet['binome_nom']): ?>
-                                                <small class="text-muted">
-                                                    <i class="fas fa-users me-1"></i>Binôme: <?php echo htmlspecialchars($projet['binome_nom']); ?>
-                                                </small>
-                                            <?php else: ?>
-                                                <small class="text-muted">
-                                                    <i class="fas fa-user me-1"></i>Monôme
-                                                </small>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                    <span class="badge <?php echo $status[0]; ?> status-badge">
-                                        <i class="fas <?php echo $status[2]; ?> me-1"></i><?php echo $status[1]; ?>
-                                    </span>
-                                </div>
+                <?php foreach($projets as $p): 
+                    // Chat Count
+                    $stmtMsg = $pdo->prepare("SELECT m.*, u.nom FROM messages m JOIN users u ON m.sender_id = u.id WHERE m.projet_id = ? ORDER BY m.created_at ASC");
+                    $stmtMsg->execute([$p['id']]);
+                    $msgs = $stmtMsg->fetchAll();
+                ?>
+                <div class="col-lg-6">
+                    <div class="card project-card shadow-sm h-100">
+                        <div class="card-header bg-white py-3 d-flex align-items-center">
+                            <div class="student-avatar me-3"><?= strtoupper(substr($p['etudiant_nom'],0,2)) ?></div>
+                            <div>
+                                <h6 class="mb-0 fw-bold"><?= htmlspecialchars($p['etudiant_nom']) ?></h6>
+                                <small class="text-muted"><?= $p['binome_nom'] ? 'Binôme: '.$p['binome_nom'] : 'Monôme' ?></small>
                             </div>
-                            <div class="card-body">
-                                <h5 class="card-title"><?php echo htmlspecialchars($projet['titre']); ?></h5>
+                            <span class="badge bg-secondary ms-auto"><?= $p['statut'] ?></span>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-primary"><?= htmlspecialchars($p['titre']) ?></h5>
+                            <?php if($p['rapport_path']): ?>
+                                <div class="alert alert-light border p-2 mt-3"><i class="fas fa-file-pdf text-danger me-2"></i>Rapport reçu <a href="../../../public/<?= $p['rapport_path'] ?>" target="_blank" class="float-end"><i class="fas fa-download"></i></a></div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="card-footer bg-white border-0 pb-3">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-primary btn-sm flex-fill" data-bs-toggle="collapse" data-bs-target="#chat<?= $p['id'] ?>">
+                                    <i class="fas fa-comments"></i> Chat <span class="badge bg-primary rounded-pill"><?= count($msgs) ?></span>
+                                </button>
                                 
-                                <?php if ($projet['description']): ?>
-                                    <p class="card-text text-muted small">
-                                        <?php echo htmlspecialchars(substr($projet['description'], 0, 150)); ?>...
-                                    </p>
-                                <?php endif; ?>
+                                <a href="mailto:<?= htmlspecialchars($p['etudiant_email']) ?>" class="btn btn-outline-dark btn-sm flex-fill">
+                                    <i class="fas fa-envelope"></i> Email
+                                </a>
 
-                                <div class="d-flex flex-wrap gap-2 mb-3">
-                                    <span class="badge bg-light text-dark">
-                                        <i class="fas fa-graduation-cap me-1"></i><?php echo htmlspecialchars($projet['filiere_nom'] ?? 'N/A'); ?>
-                                    </span>
-                                    <span class="badge bg-light text-dark">
-                                        <i class="fas fa-calendar me-1"></i><?php echo htmlspecialchars($projet['annee_universitaire']); ?>
-                                    </span>
-                                </div>
-
-                                <!-- RAPPORT -->
-                                <?php if ($projet['rapport_path']): ?>
-                                    <div class="alert alert-light border mb-3">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <i class="fas fa-file-pdf text-danger me-2"></i>
-                                                <strong>Rapport déposé</strong>
-                                                <br>
-                                                <small class="text-muted">
-                                                    <?php echo date('d/m/Y H:i', strtotime($projet['rapport_date'])); ?>
-                                                </small>
-                                            </div>
-                                            <a href="../../../public/<?php echo htmlspecialchars($projet['rapport_path']); ?>" 
-                                               class="btn btn-sm btn-outline-primary" 
-                                               target="_blank"
-                                               download>
-                                                <i class="fas fa-download me-1"></i>Télécharger
-                                            </a>
-                                        </div>
-                                    </div>
-                                <?php else: ?>
-                                    <div class="alert alert-secondary mb-3">
-                                        <i class="fas fa-info-circle me-2"></i>
-                                        Aucun rapport déposé pour le moment.
-                                    </div>
+                                <?php if($p['statut'] == 'rapport_soumis'): ?>
+                                    <form method="POST" class="flex-fill">
+                                        <input type="hidden" name="projet_id" value="<?= $p['id'] ?>">
+                                        <button type="submit" name="valider_rapport" class="btn btn-success btn-sm w-100" onclick="return confirm('Valider ?')"><i class="fas fa-check"></i> Valider</button>
+                                    </form>
                                 <?php endif; ?>
                             </div>
 
-                            <!-- ACTIONS -->
-                            <div class="card-footer bg-white border-top-0 pb-3">
-                                <div class="d-flex gap-2">
-                                    <a href="mailto:<?php echo htmlspecialchars($projet['etudiant_email']); ?>" 
-                                       class="btn btn-outline-secondary btn-sm flex-fill">
-                                        <i class="fas fa-envelope me-1"></i>Contacter
-                                    </a>
-                                    
-                                    <?php if ($projet['rapport_path'] && $projet['statut'] !== 'valide_encadrant' && $projet['statut'] !== 'planifie' && $projet['statut'] !== 'soutenu'): ?>
-                                        <form method="POST" class="flex-fill" onsubmit="return confirm('Êtes-vous sûr de vouloir valider ce rapport ? Cette action autorisera l\'étudiant à passer en soutenance.');">
-                                            <input type="hidden" name="projet_id" value="<?php echo $projet['id']; ?>">
-                                            <button type="submit" name="valider_rapport" class="btn btn-validate btn-sm w-100">
-                                                <i class="fas fa-check-circle me-1"></i>Valider le rapport
-                                            </button>
-                                        </form>
-                                    <?php elseif ($projet['statut'] === 'valide_encadrant'): ?>
-                                        <button class="btn btn-success btn-sm flex-fill" disabled>
-                                            <i class="fas fa-check me-1"></i>Déjà validé
-                                        </button>
-                                    <?php elseif ($projet['statut'] === 'planifie' || $projet['statut'] === 'soutenu'): ?>
-                                        <button class="btn btn-dark btn-sm flex-fill" disabled>
-                                            <i class="fas fa-calendar-check me-1"></i><?php echo $projet['statut'] === 'soutenu' ? 'Soutenu' : 'Planifié'; ?>
-                                        </button>
-                                    <?php else: ?>
-                                        <button class="btn btn-secondary btn-sm flex-fill" disabled>
-                                            <i class="fas fa-hourglass me-1"></i>En attente du rapport
-                                        </button>
-                                    <?php endif; ?>
+                            <div class="collapse mt-3" id="chat<?= $p['id'] ?>">
+                                <div class="bg-light p-3 rounded">
+                                    <div class="chat-box" id="box<?= $p['id'] ?>">
+                                        <?php foreach($msgs as $m): $isMe = ($m['sender_id'] == $prof_id); ?>
+                                            <div class="msg <?= $isMe ? 'msg-me' : 'msg-other' ?>">
+                                                <strong><?= $isMe ? 'Moi' : htmlspecialchars($m['nom']) ?></strong><br>
+                                                <?= nl2br(htmlspecialchars($m['message'])) ?>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <form method="POST" class="mt-2 input-group input-group-sm">
+                                        <input type="hidden" name="projet_id" value="<?= $p['id'] ?>">
+                                        <input type="text" name="msg_text" class="form-control" placeholder="Répondre..." required>
+                                        <button type="submit" name="send_msg" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('.collapse').forEach(el => {
+            el.addEventListener('shown.bs.collapse', () => {
+                const box = el.querySelector('.chat-box');
+                if(box) box.scrollTop = box.scrollHeight;
+            })
+        });
+    </script>
 </body>
 </html>
