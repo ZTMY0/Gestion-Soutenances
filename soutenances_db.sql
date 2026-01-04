@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 02, 2026 at 09:39 PM
+-- Generation Time: Jan 04, 2026 at 03:42 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -50,6 +50,23 @@ CREATE TABLE `disponibilites_profs` (
   `heure_fin` time NOT NULL,
   `est_disponible` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `disponibilites_profs`
+--
+
+INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`) VALUES
+(1, 766, 'Mardi', '08:30:00', '09:00:00', 1),
+(2, 766, 'Mercredi', '09:30:00', '10:00:00', 1),
+(3, 766, 'Vendredi', '11:30:00', '12:00:00', 1),
+(4, 783, 'Mardi', '08:00:00', '08:30:00', 1),
+(5, 783, 'Mercredi', '09:30:00', '10:00:00', 1),
+(6, 783, 'Vendredi', '09:30:00', '10:00:00', 1),
+(7, 783, 'Lundi', '10:30:00', '11:00:00', 1),
+(8, 783, 'Mercredi', '10:30:00', '11:00:00', 1),
+(9, 783, 'Vendredi', '11:30:00', '12:00:00', 1),
+(10, 783, 'Mardi', '13:00:00', '13:30:00', 1),
+(11, 783, 'Vendredi', '14:30:00', '15:00:00', 1);
 
 -- --------------------------------------------------------
 
@@ -117,11 +134,40 @@ CREATE TABLE `jury_soutenance` (
 CREATE TABLE `messages` (
   `id` int(11) NOT NULL,
   `projet_id` int(11) NOT NULL,
-  `expediteur_id` int(11) NOT NULL,
-  `contenu` text NOT NULL,
-  `lu` tinyint(1) DEFAULT 0,
+  `sender_id` int(11) NOT NULL,
+  `message` text NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `messages`
+--
+
+INSERT INTO `messages` (`id`, `projet_id`, `sender_id`, `message`, `created_at`) VALUES
+(1, 1, 1157, 'test', '2026-01-04 13:59:50'),
+(2, 1, 1157, 'test', '2026-01-04 14:07:29'),
+(3, 1, 783, 'bien recu', '2026-01-04 14:07:39');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_resets`
+--
+
+CREATE TABLE `password_resets` (
+  `id` int(11) NOT NULL,
+  `email` varchar(191) NOT NULL,
+  `token` varchar(6) NOT NULL,
+  `expires_at` datetime NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `password_resets`
+--
+
+INSERT INTO `password_resets` (`id`, `email`, `token`, `expires_at`, `created_at`) VALUES
+(8, 'abdelmoughit.mossaid@eidia.ueuromed.org', '611829', '2026-01-03 14:30:20', '2026-01-03 13:15:20');
 
 -- --------------------------------------------------------
 
@@ -146,23 +192,27 @@ CREATE TABLE `periodes` (
 CREATE TABLE `projets` (
   `id` int(11) NOT NULL,
   `titre` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `mots_cles` text DEFAULT NULL,
+  `description` text NOT NULL,
+  `domaine` varchar(100) DEFAULT NULL,
+  `technologies` varchar(255) DEFAULT NULL,
+  `binome_email` varchar(150) DEFAULT NULL,
   `etudiant_id` int(11) NOT NULL,
-  `binome_id` int(11) DEFAULT NULL,
   `encadrant_id` int(11) DEFAULT NULL,
   `filiere_id` int(11) NOT NULL,
-  `annee_universitaire` varchar(9) NOT NULL,
-  `statut` enum('inscrit','encadrant_affecte','valide_encadrant','planifie','soutenu') DEFAULT 'inscrit',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `binome_email` varchar(100) DEFAULT NULL,
-  `rapport_path` varchar(255) DEFAULT NULL,
-  `est_original` tinyint(1) DEFAULT 0,
-  `technologies` varchar(255) DEFAULT NULL,
   `encadrant_pref1_id` int(11) DEFAULT NULL,
   `encadrant_pref2_id` int(11) DEFAULT NULL,
-  `encadrant_pref3_id` int(11) DEFAULT NULL
+  `encadrant_pref3_id` int(11) DEFAULT NULL,
+  `statut` varchar(50) DEFAULT 'inscrit',
+  `annee_universitaire` varchar(20) DEFAULT '2025-2026',
+  `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `projets`
+--
+
+INSERT INTO `projets` (`id`, `titre`, `description`, `domaine`, `technologies`, `binome_email`, `etudiant_id`, `encadrant_id`, `filiere_id`, `encadrant_pref1_id`, `encadrant_pref2_id`, `encadrant_pref3_id`, `statut`, `annee_universitaire`, `created_at`) VALUES
+(1, 'Système de détection d\'intrusions', 'Système de détection d\'intrusions', 'Cyber', 'Docker,PHP', '', 1157, 783, 1, 764, 765, 784, 'rapport_soumis', '2025-2026', '2026-01-04 13:58:41');
 
 -- --------------------------------------------------------
 
@@ -173,11 +223,22 @@ CREATE TABLE `projets` (
 CREATE TABLE `rapports` (
   `id` int(11) NOT NULL,
   `projet_id` int(11) NOT NULL,
-  `version` int(11) DEFAULT 1,
+  `nom_fichier` varchar(255) NOT NULL,
   `chemin_fichier` varchar(255) NOT NULL,
-  `commentaire` text DEFAULT NULL,
-  `date_upload` timestamp NOT NULL DEFAULT current_timestamp()
+  `taille_fichier` int(11) NOT NULL,
+  `resume` text DEFAULT NULL,
+  `mots_cles` varchar(255) DEFAULT NULL,
+  `remerciements` text DEFAULT NULL,
+  `est_original` tinyint(1) DEFAULT 0,
+  `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rapports`
+--
+
+INSERT INTO `rapports` (`id`, `projet_id`, `nom_fichier`, `chemin_fichier`, `taille_fichier`, `resume`, `mots_cles`, `remerciements`, `est_original`, `created_at`) VALUES
+(1, 1, 'rapport.pdf', 'uploads/rapport_1_1767532629.pdf', 856, 'resumé mock', NULL, NULL, 1, '2026-01-04 14:17:09');
 
 -- --------------------------------------------------------
 
@@ -209,12 +270,13 @@ INSERT INTO `salles` (`id`, `nom`, `capacite`, `equipements`) VALUES
 CREATE TABLE `soutenances` (
   `id` int(11) NOT NULL,
   `projet_id` int(11) NOT NULL,
-  `salle_id` int(11) NOT NULL,
-  `date_soutenance` datetime NOT NULL,
+  `date_soutenance` datetime DEFAULT NULL,
+  `salle` varchar(50) DEFAULT NULL,
+  `jury_infos` text DEFAULT NULL,
   `note_finale` decimal(4,2) DEFAULT NULL,
   `mention` varchar(50) DEFAULT NULL,
-  `pv_signe` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `commentaire_jury` text DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -226,275 +288,299 @@ CREATE TABLE `soutenances` (
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `nom` varchar(100) NOT NULL,
+  `prenom` varchar(100) DEFAULT NULL,
   `email` varchar(100) NOT NULL,
+  `username` varchar(50) DEFAULT NULL,
   `login` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('etudiant','prof','coordinateur','directeur','assistante') NOT NULL,
   `filiere_id` int(11) DEFAULT NULL,
   `specialite` varchar(255) DEFAULT NULL,
   `telephone` varchar(20) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `must_change_password` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `nom`, `email`, `login`, `password`, `role`, `filiere_id`, `specialite`, `telephone`, `created_at`) VALUES
-(1, 'Oussama Berrada', 'oussama.berrada@eidia.ueuromed.org', 'oussama.berrada', '$2y$10$wN1cnP4RlsWjmTKtlQAGSOXcO8ycuQXFLr6P1ueNlKHJRzT7OeBN2', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:38'),
-(2, 'Fatima Ouazzani', 'fatima.ouazzani@eidia.ueuromed.org', 'fatima.ouazzani', '$2y$10$SsAsqzn2M8g7Z8gNkQCgCeOlfNe8v3YDxyziH/VqKOWtLMQKr2bIS', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:38'),
-(3, 'Imane Chaoui', 'imane.chaoui@eidia.ueuromed.org', 'imane.chaoui', '$2y$10$pfvTT1mVMcBW5eblywjmh.N3sNKgxFjsLyX.DNUuEcmhO6IXBWrca', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:38'),
-(4, 'Sanae Kadiri', 'sanae.kadiri@eidia.ueuromed.org', 'sanae.kadiri', '$2y$10$x8uGJKhFUK/bufCqi87w2eqxxI6t1vNlvfnOXl8IrAWuVSWQP8lxO', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:38'),
-(5, 'Reda Filali', 'reda.filali@eidia.ueuromed.org', 'reda.filali', '$2y$10$wi2LMhuSI2i2uPR21NiBTexzm3Krj.g2HvmKn4zQvtZRoOtVTc2.2', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:39'),
-(6, 'Houda Benjelloun', 'houda.benjelloun2@eidia.ueuromed.org', 'houda.benjelloun2', '$2y$10$fOt6EXN2GsXdHy8i8kq0a.9VacQb4ou0QS.YtFpiOI6nGuf5O2Kom', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:39'),
-(7, 'Fatima Benjelloun', 'fatima.benjelloun@eidia.ueuromed.org', 'fatima.benjelloun', '$2y$10$wMgCnsGMWawLBv1/5IOIbe7J6dxyW9Wne8.1qG.4QnYidTrZiR8VW', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:39'),
-(8, 'Salma Tazi', 'salma.tazi@eidia.ueuromed.org', 'salma.tazi', '$2y$10$lgMrChyhByL9.XuFPVPFC..hTJzHNAAuAjbulm0fj0ixhMsmNVxGy', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:39'),
-(9, 'Asmaa Mansouri', 'asmaa.mansouri2@eidia.ueuromed.org', 'asmaa.mansouri2', '$2y$10$4ftb4m8xnzzIx4lLuZTxB.C35BbhbJhF/cCu.vmNerRv/Xo1XwrEC', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:39'),
-(10, 'Kenza Bennani', 'kenza.bennani@eidia.ueuromed.org', 'kenza.bennani', '$2y$10$7kBh6fsiiiVUUF/IpLxojuM54vlFyTBzAmGxY./e.0L2vjuQTi9ze', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:39'),
-(11, 'Ismail Benali', 'ismail.benali@eidia.ueuromed.org', 'ismail.benali', '$2y$10$xFGQs128QX9EQezEH40ZduPB6BmsAwGG6ldxR0GXkvywEBuncHQa.', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:39'),
-(12, 'Meryem Idrissi', 'meryem.idrissi2@eidia.ueuromed.org', 'meryem.idrissi2', '$2y$10$VWDkwx5O6cs3V0UnHXEO6e6dEhfMK9EikXFzHbFZDjV/7GOgTmyuS', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:39'),
-(13, 'Manal Talbi', 'manal.talbi@eidia.ueuromed.org', 'manal.talbi', '$2y$10$8rSVegdoKflaOrNnSY4mWuxNkVLojZmIEEahEI33CJpjxMvTP7FG2', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:39'),
-(14, 'Ismail Alami', 'ismail.alami@eidia.ueuromed.org', 'ismail.alami', '$2y$10$nlB5bxPbM9bqXnHWr5plS.1lP6BPNjXz34HhfUIlnfm3c4xxne3Ra', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:40'),
-(15, 'Rim Zerrad', 'rim.zerrad@eidia.ueuromed.org', 'rim.zerrad', '$2y$10$OGnFnzsIWBqa6JbeaFw1wOjXEOUvKAdj8YdTk653c55ONPOmn2xj2', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:40'),
-(16, 'Manal Raiss', 'manal.raiss@eidia.ueuromed.org', 'manal.raiss', '$2y$10$k9NE2BcIewXPIlpZ/hQDsuoUz6ZKbi7lJ/Z.hDnBrXE96TBQWq9Yu', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:40'),
-(17, 'Mehdi Fassi', 'mehdi.fassi2@eidia.ueuromed.org', 'mehdi.fassi2', '$2y$10$eKM9z5gFIV.LqFEqDMdonuQ5XIqcgdWDOmZQnAPHK7j7jX2MA77Yi', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:40'),
-(18, 'Youssef Mansouri', 'youssef.mansouri@eidia.ueuromed.org', 'youssef.mansouri', '$2y$10$dj5vnTLd.wd9EXT/HQV4pevRupvFlFWn69uQMpvQ.GADy/3v9ToUe', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:40'),
-(19, 'Lamia Mansouri', 'lamia.mansouri@eidia.ueuromed.org', 'lamia.mansouri', '$2y$10$LZbTpIcXe1mmNd0AO/uOFecfkn34Z9Ld1ohYDf9oV87mYPUsyAi7e', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:40'),
-(20, 'Ali Filali', 'ali.filali@eidia.ueuromed.org', 'ali.filali', '$2y$10$xZRfmEagZdpolyt.umI6AedIBweBlUSfN57OVRDCnjwOCthHaoRhK', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:40'),
-(21, 'Zineb Mernissi', 'zineb.mernissi@eidia.ueuromed.org', 'zineb.mernissi', '$2y$10$lo7BDyF0CiVl/dL4thy02.X5/pwDJtwK0Xexyc2CEQ2ns05gw3FWm', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:40'),
-(22, 'Ghita Chaoui', 'ghita.chaoui@eidia.ueuromed.org', 'ghita.chaoui', '$2y$10$c/zJLOOjs32Fv0OJHbNi1eqqZ1qd00ksIdKN5n9abgSQcZbNkwtA6', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:40'),
-(23, 'Walid Idrissi', 'walid.idrissi@eidia.ueuromed.org', 'walid.idrissi', '$2y$10$rYBt4qrqDNMOkYRMGlOQd.wEnBfG6PdH5WyQhcNLDGmlIgQkqx6zO', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:41'),
-(24, 'Sarah Mansouri', 'sarah.mansouri@eidia.ueuromed.org', 'sarah.mansouri', '$2y$10$SJmtOEcw8co5SCaqB8OUh.dW/McnbupIY/hdV9Y3Bf5ZQeV/eY1Dm', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:41'),
-(25, 'Mehdi Alami', 'mehdi.alami@eidia.ueuromed.org', 'mehdi.alami', '$2y$10$vRiaVbNk88iJv8yynF7WX.M7j0ihRjUP.kiwDInCQV0Ampsnmapky', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:41'),
-(26, 'Karim Benjelloun', 'karim.benjelloun@eidia.ueuromed.org', 'karim.benjelloun', '$2y$10$JJ.MtAbRvUxqIWeBivKmt.CbOVl76ZysnvTo.OXM2IP4l7AwI3Gha', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:41'),
-(27, 'Nizar Tahiri', 'nizar.tahiri@eidia.ueuromed.org', 'nizar.tahiri', '$2y$10$pLRTpiHP.9Nf6/eTwP5mpOTnrzRYDtz81HaGqIQiZiFDzBJyj7FTC', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:41'),
-(28, 'Saad Slaoui', 'saad.slaoui@eidia.ueuromed.org', 'saad.slaoui', '$2y$10$gkTXY8hTkTSFVZdTP6EOsuOWUGGayr7zU80gX.B3QlIGVphL9IKkm', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:41'),
-(29, 'Anas Bennani', 'anas.bennani@eidia.ueuromed.org', 'anas.bennani', '$2y$10$PZhFV0HtaWNZVFF0xuW.J.fLS7f9j6OieWtD9Rbzw33fkTTibY4TC', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:41'),
-(30, 'Kaoutar Chaoui', 'kaoutar.chaoui@eidia.ueuromed.org', 'kaoutar.chaoui', '$2y$10$noU0JW/59cdyhqvCMnMIGuMQpsZNRzi3vmeAM.xu6z/H2bJiVD2pm', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:41'),
-(31, 'Houda Ouazzani', 'houda.ouazzani@eidia.ueuromed.org', 'houda.ouazzani', '$2y$10$fzH4bOGMhOYALYAXv672EeNPPYU65mKShHXRfKcisOVN1A3Coyvi2', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:41'),
-(32, 'Sanae Kabbaj', 'sanae.kabbaj@eidia.ueuromed.org', 'sanae.kabbaj', '$2y$10$isyeqasr4FrXywtcWB9xzeNvv4l/kSxTX1dKf9WHO0szF.FTbyT62', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:42'),
-(33, 'Kenza Raiss', 'kenza.raiss@eidia.ueuromed.org', 'kenza.raiss', '$2y$10$cXKtJdNVAHPxuYPZKedjPubAFejYF/mW/qN0bvZwcamesQtqHsmEy', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:42'),
-(34, 'Rim Idrissi', 'rim.idrissi@eidia.ueuromed.org', 'rim.idrissi', '$2y$10$dlJLAWr5TzUxGkjQgvctzu4q6M7o2V5sutDA4WoNOiAjEgN2jE4xe', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:42'),
-(35, 'Oussama Kabbaj', 'oussama.kabbaj@eidia.ueuromed.org', 'oussama.kabbaj', '$2y$10$MztUdUDlDZUHO2dEWugYjOZLtyXTXGstxdY58E25W8HsjL79WiVKu', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:42'),
-(36, 'Bilal Mansouri', 'bilal.mansouri@eidia.ueuromed.org', 'bilal.mansouri', '$2y$10$nHKFTZ0oth5Mjz/DlYCOF.jiXQ8zuHH35yZeoKcbDJ1SREFkFdkJW', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:42'),
-(37, 'Omar Daoudi', 'omar.daoudi@eidia.ueuromed.org', 'omar.daoudi', '$2y$10$W5dnq37VM6MfVdoTuptIZukOexADZJs121f/HI/OjphtEL6dQXbQW', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:42'),
-(38, 'Salma Tazi', 'salma.tazi2@eidia.ueuromed.org', 'salma.tazi2', '$2y$10$rNSug0R9KUxcAEGjBAHdh.E2ldf2Mvws8Aiek74n1fMpgjuxf4BQu', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:42'),
-(39, 'Bilal Alami', 'bilal.alami@eidia.ueuromed.org', 'bilal.alami', '$2y$10$Qlky87aN5vqfGdxfCOwwbeScJLcNy5Gcr4VDaKw8cKrbWgj67g9xm', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:42'),
-(40, 'Asmaa Fassi', 'asmaa.fassi@eidia.ueuromed.org', 'asmaa.fassi', '$2y$10$B3jWUmcKxsGPBhxFWrDW8uCht/36L/sP91nqiF8ZAotlSWv23y8Je', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:42'),
-(41, 'Manal Mansouri', 'manal.mansouri@eidia.ueuromed.org', 'manal.mansouri', '$2y$10$StHMKJ0KDFNYeFaV5Q7unuqP6oMYpFR7JGYC1prB9IKQYoti5kKfG', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:43'),
-(42, 'Anas Naciri', 'anas.naciri@eidia.ueuromed.org', 'anas.naciri', '$2y$10$sHrB4sEAzFlGaHADq9ypwebhhgNdP1wRcEtrgp9js8Zh76X/26TJO', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:43'),
-(43, 'Nizar Slaoui', 'nizar.slaoui@eidia.ueuromed.org', 'nizar.slaoui', '$2y$10$WvSuOxezagUTuPoNfFTGKOe.pokfcPNdjHJCSD4.K5ZlTCNahEmuG', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:43'),
-(44, 'Reda Ouazzani', 'reda.ouazzani@eidia.ueuromed.org', 'reda.ouazzani', '$2y$10$csIsdwEhszpuv37jErHZGuvQWohros6t1A3G8jTelF3kPadiqrY/i', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:43'),
-(45, 'Walid Guedira', 'walid.guedira@eidia.ueuromed.org', 'walid.guedira', '$2y$10$GZlTALNAo3IE3Qnbi.B/UufVw.XuIWFupoYXq7LkuXpeCkM6kpi.q', 'etudiant', 3, NULL, NULL, '2026-01-02 19:30:43'),
-(46, 'Ihab Zaghdane', 'ihab.zaghdane@eidia.ueuromed.org', 'ihab.zaghdane', '$2y$10$flfyHJ..boa/aP/kD8Fk6eED2eJrfN68OFJROTIRJTH1xIGJa9U8m', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:48'),
-(47, 'Abdelmoughit Mossaid', 'abdelmoughit.mossaid@eidia.ueuromed.org', 'abdelmoughit.mossaid', '$2y$10$GI0/hblc3JZEFG48kDYfkeRVzTRAiLut2q5w7gxtnlZSLeY.plB3u', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:48'),
-(48, 'Nizar Zouizra', 'nizar.zouizra@eidia.ueuromed.org', 'nizar.zouizra', '$2y$10$U82PLmY99E3Xa0nmngwJEebtrSuU9tcqkQQYcDt1JWLkSlcmhL.v.', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:48'),
-(49, 'Nourddine Kissiri', 'nourddine.kissiri@eidia.ueuromed.org', 'nourddine.kissiri', '$2y$10$c3DvUm2geSt.0kwo1M1Fau399ItVKKGMJhoeeAy6Xnoqm/jd3UhUC', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:49'),
-(50, 'Hamza Raiss', 'hamza.raiss@eidia.ueuromed.org', 'hamza.raiss', '$2y$10$QW7m/RKJF8LjUC.3C4T4auSxNSnv8Bz3tG0FQkt52rwLgfn59/QG6', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:49'),
-(51, 'Mehdi Kabbaj', 'mehdi.kabbaj@eidia.ueuromed.org', 'mehdi.kabbaj', '$2y$10$bFhdCNcc2SZ.SzQMLlerjugJMtALq2Qzbiq63QRLCaAcH91IWLFfK', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:49'),
-(52, 'Salma Mernissi', 'salma.mernissi@eidia.ueuromed.org', 'salma.mernissi', '$2y$10$JkJNZrmrtZbPqz6dqLQb5u.XRNkdqrW5SPGzZldkx6xDSUhB5B.bK', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:49'),
-(53, 'Lamia Tahiri', 'lamia.tahiri@eidia.ueuromed.org', 'lamia.tahiri', '$2y$10$hHNr6tbJrRaYdjsMYwmIkuwhugQ.kfRJjj7eJUKFd3bMscjydhI8y', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:49'),
-(54, 'Sarah Fassi', 'sarah.fassi@eidia.ueuromed.org', 'sarah.fassi', '$2y$10$CG52mYS5v1VB2QghWPMCCeFXgvP/XTo9Cnz8YUVLHkiNyJWh.B1iG', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:49'),
-(55, 'Salma Chraibi', 'salma.chraibi@eidia.ueuromed.org', 'salma.chraibi', '$2y$10$DM.1xgQtoWPmGCOdpQUeW.sH06TRivHCT2J8fghh6OKvSFuY56xj6', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:49'),
-(56, 'Meryem Raiss', 'meryem.raiss@eidia.ueuromed.org', 'meryem.raiss', '$2y$10$/KGgdDc.j7re0z6Fx1Wy.OP8BqEN23WibVZm0AbHPsN0i6nLCk.lS', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:49'),
-(57, 'Reda Kabbaj', 'reda.kabbaj@eidia.ueuromed.org', 'reda.kabbaj', '$2y$10$.s71mYJn40TEJywB0mdH7u7iSV/g0a/JWnZrW9Wd.p0zs/XJ8VPya', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:49'),
-(58, 'Sarah El Amrani', 'sarah.el amrani@eidia.ueuromed.org', 'sarah.el amrani', '$2y$10$Nod65vHqGg.xcJFUNavYpOcxSHqbNRZcetSA2JyehRMhtgebXGeNq', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:50'),
-(59, 'Imane Benjelloun', 'imane.benjelloun@eidia.ueuromed.org', 'imane.benjelloun', '$2y$10$Hn9W/HYWwIUr6rgCzu6CL.cuiUlN3/UePKeJLHoWPMlhesuW7ktey', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:50'),
-(60, 'Taha El Amrani', 'taha.el amrani@eidia.ueuromed.org', 'taha.el amrani', '$2y$10$9Sbpf79lAxWf51Ed8TQhP.2cyVf.2N2w3jTcBw4a0yF1lXFJxhhue', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:50'),
-(61, 'Kenza Mernissi', 'kenza.mernissi@eidia.ueuromed.org', 'kenza.mernissi', '$2y$10$qmOM47cGHyLd5Z3r.TONA.v3OSNfESH3BpZhACTsd0fd2jI03Tx4e', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:50'),
-(62, 'Youssef Tazi', 'youssef.tazi@eidia.ueuromed.org', 'youssef.tazi', '$2y$10$dSy0x0mLiEMK/PYAcrSpHeqyRkUxTPTDqRqMn4BT/W9aj6J0IcadG', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:50'),
-(63, 'Yassine Kadiri', 'yassine.kadiri@eidia.ueuromed.org', 'yassine.kadiri', '$2y$10$ivYnXAapEl.5WcazmofgieePMQxVEGpCRbEAEJUu.BWcPj0JwuzNy', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:50'),
-(64, 'Sanae Naciri', 'sanae.naciri@eidia.ueuromed.org', 'sanae.naciri', '$2y$10$BOS6VkRv0CElb9JYiGM7ROQN3fRaZ.Dnh.GsuWJGjVwRHX8iLuiFC', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:50'),
-(65, 'Mohamed Ouazzani', 'mohamed.ouazzani@eidia.ueuromed.org', 'mohamed.ouazzani', '$2y$10$2xBPQqqGewRCsIIt5d2aaO6E.pUFleibhUR8ya778abk15klW2W9q', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:50'),
-(66, 'Omar Raiss', 'omar.raiss@eidia.ueuromed.org', 'omar.raiss', '$2y$10$1a.vRlNtKed2cikq1UZeE.2kAlE3xFgr7lzMzkzfzWtJH86qK0NqC', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:50'),
-(67, 'Noura Benali', 'noura.benali@eidia.ueuromed.org', 'noura.benali', '$2y$10$/1HnHaqFG.TBJXynOisl5uKRwcLvseHJ6.HYbM5gGodZr1lbAAQA.', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:51'),
-(68, 'Rania Daoudi', 'rania.daoudi@eidia.ueuromed.org', 'rania.daoudi', '$2y$10$FLDWgx2P/cjFCa.qgO8sMObnw1Mf0eDKcJmsuKBhmku8XdVYQPAlS', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:51'),
-(69, 'Saad El Amrani', 'saad.el amrani@eidia.ueuromed.org', 'saad.el amrani', '$2y$10$XRbI8HBbeZjpxAsx3e5YPeMuLn/gdEl449kzqJFzNw8aZXWKsl4KK', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:51'),
-(70, 'Youssef Berrada', 'youssef.berrada@eidia.ueuromed.org', 'youssef.berrada', '$2y$10$v/ZIbFfI3mQ/rrFRWTVgcuawIJRuI0qOQL1tzhARvDhYq32BxwBHC', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:51'),
-(71, 'Noura Berrada', 'noura.berrada@eidia.ueuromed.org', 'noura.berrada', '$2y$10$8HKpH7qtQ0CNl64j3YfrQ.DGXb6fDRnax7feakHyMvxBJ68nxcM9.', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:51'),
-(72, 'Kaoutar Berrada', 'kaoutar.berrada@eidia.ueuromed.org', 'kaoutar.berrada', '$2y$10$y6PSFWrDZNyUp4wjw6YcH.GaJQd5H9H4LoRlrhM11WAtHVZJLKuzi', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:51'),
-(73, 'Driss Kabbaj', 'driss.kabbaj@eidia.ueuromed.org', 'driss.kabbaj', '$2y$10$U3x3Tgd4F6BvmARiVuYQDemNseC7pMZEzEigk3x9RtN22Xtob7ukK', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:51'),
-(74, 'Taha El Amrani', 'taha.el amrani2@eidia.ueuromed.org', 'taha.el amrani2', '$2y$10$FKf0oFWMpzGWCzI6YkxS9enQ9bPTmGiy.trXiBYtd9x1RYYaLcyQi', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:51'),
-(75, 'Rim Tazi', 'rim.tazi@eidia.ueuromed.org', 'rim.tazi', '$2y$10$Cb84AlxVo1LpYPS5pnCr7u.OPHzNdvPpyQ.zYwxNbgxZkb5H3tmRS', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:51'),
-(76, 'Imane Mansouri', 'imane.mansouri@eidia.ueuromed.org', 'imane.mansouri', '$2y$10$.CWOTjYJ4caXoSOsxfnL6ONMjg9C4PmIuK7/fMgUoz1CcaDqLXQMK', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:52'),
-(77, 'Hamza Tahiri', 'hamza.tahiri@eidia.ueuromed.org', 'hamza.tahiri', '$2y$10$wPyAG/f50qDLAnLLDE.o5eCJv7PxWbwLbfH7FiVeYGQJwcbmc2iai', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:52'),
-(78, 'Noura Slaoui', 'noura.slaoui@eidia.ueuromed.org', 'noura.slaoui', '$2y$10$oRFpVTMal67lsoML.5qHdOy8QlIL6UNOFu.YlVfrE.UHl4e2GxiWi', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:52'),
-(79, 'Asmaa Ouazzani', 'asmaa.ouazzani@eidia.ueuromed.org', 'asmaa.ouazzani', '$2y$10$akx9G2chqEiZYW62Xa.z1.rUu4jS.VyXyIm/QaLL2chciDR/YKIRC', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:52'),
-(80, 'Saad Benali', 'saad.benali@eidia.ueuromed.org', 'saad.benali', '$2y$10$fvtu9a315MxXvMASec1jBuJXEA13Jvn43UOPuNqFoV0yQm0vgrSyO', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:52'),
-(81, 'Sanae Filali', 'sanae.filali@eidia.ueuromed.org', 'sanae.filali', '$2y$10$myaOgdiFtuChyyU0DyVXa.RO/lJ4L.SFoekXDAGNDJl0CtEaZV006', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:52'),
-(82, 'Taha Zerrad', 'taha.zerrad@eidia.ueuromed.org', 'taha.zerrad', '$2y$10$J0sqGAaa0afDoP1ebpvBdOBsuAovaMs4e9s5xYKWYnCgePOeK3wBe', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:52'),
-(83, 'Anas Alami', 'anas.alami@eidia.ueuromed.org', 'anas.alami', '$2y$10$BwERPwBLjmurvN2c3V7Hy.sTwf0SMZlF26gQ5Y0TJ92oWE48CRsE.', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:52'),
-(84, 'Meryem Kabbaj', 'meryem.kabbaj@eidia.ueuromed.org', 'meryem.kabbaj', '$2y$10$W.lwphmv.lKf02sXrceO5eHyIg1J/WtVixNpSlLSvOs1Bn/JKQ5Qq', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:52'),
-(85, 'Meryem Fassi', 'meryem.fassi@eidia.ueuromed.org', 'meryem.fassi', '$2y$10$npIxqPsKvZtcPDDUbZE7o.Vy6ERTiwwmsWjidmrP2csJ1/94hSIY2', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:53'),
-(86, 'Rim Mansouri', 'rim.mansouri@eidia.ueuromed.org', 'rim.mansouri', '$2y$10$VIMa1/wlWj6UUW..uCiyfeYV682e.XUxAXT0jB40u4HPYo2QSKqhK', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:53'),
-(87, 'Hassan Talbi', 'hassan.talbi@eidia.ueuromed.org', 'hassan.talbi', '$2y$10$T30IcwKHmzy4ySwZ92B4bO.WA2odOJvoahHWyWL/4BJkbYZy2RKtu', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:53'),
-(88, 'Ali Mernissi', 'ali.mernissi@eidia.ueuromed.org', 'ali.mernissi', '$2y$10$1mT/t4wtIviqLqAJCL7GdOcpMGN/u3G4rRn3naY9PIyGSR3owW9JK', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:53'),
-(89, 'Youssef Slaoui', 'youssef.slaoui@eidia.ueuromed.org', 'youssef.slaoui', '$2y$10$c8VlSmvhaZotpUskqPvd8u0Or8ep4SPldHTshmlSglKklEpisDge2', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:53'),
-(90, 'Houda Benjelloun', 'houda.benjelloun@eidia.ueuromed.org', 'houda.benjelloun', '$2y$10$bqO9rBJZNxhQQB4u.PTkV.59/C5xbhpmES0cQy0rrQROZOAfZ61FC', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:53'),
-(91, 'Fatima Idrissi', 'fatima.idrissi@eidia.ueuromed.org', 'fatima.idrissi', '$2y$10$nH8FEO5twI9kn4dlIvFgJuCIYZ6UyKrhnIRMStQUpLfqDlk86jRo2', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:53'),
-(92, 'Driss El Amrani', 'driss.el amrani@eidia.ueuromed.org', 'driss.el amrani', '$2y$10$hcONq4kUMyL7DhMID0rlOuuo4d7pynq0aomZM9Kh7TDFEeBx3vye6', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:53'),
-(93, 'Meryem Kadiri', 'meryem.kadiri@eidia.ueuromed.org', 'meryem.kadiri', '$2y$10$bJuqeVISX6T9gEtzM1lwfuIH6XEe.S4on8HskZtjsuiHV8yYchzEq', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:53'),
-(94, 'Karim Guedira', 'karim.guedira@eidia.ueuromed.org', 'karim.guedira', '$2y$10$WN88nO3ehLSBVDlIvcgR.ONHP7cFSopcqK1Pl/17q/j3EhtV/x.eO', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:54'),
-(95, 'Yassine Chraibi', 'yassine.chraibi@eidia.ueuromed.org', 'yassine.chraibi', '$2y$10$oApvLohXN6B3rTT4DMHWvO7LBmzdAeOKxDslOebXMYUGDZLZCPz9y', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:54'),
-(96, 'Yassine Bennani', 'yassine.bennani@eidia.ueuromed.org', 'yassine.bennani', '$2y$10$yJGyUfLwEod/NnqFK5gd7uUjUZ90upIsJ.Qp0Ulpjh.n4mvTAJXFm', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:54'),
-(97, 'Omar Talbi', 'omar.talbi@eidia.ueuromed.org', 'omar.talbi', '$2y$10$y0L2jjaA9Ofp.5NQQiYll.TDvAqmC4fDzc0kOua48/fNw8dWyYqbG', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:54'),
-(98, 'Aya Kadiri', 'aya.kadiri@eidia.ueuromed.org', 'aya.kadiri', '$2y$10$QCBcvJ0sB8.mn/6U2tILUOKtVS.rxz2eoUuNcZ2xGyxrSctW95CKi', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:54'),
-(99, 'Ali Fassi', 'ali.fassi@eidia.ueuromed.org', 'ali.fassi', '$2y$10$q65oCEzlYKrND5MsRs5i8eYwrnsR4969SimluOM3sc9jBD0Ai1Gk6', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:54'),
-(100, 'Aya Fassi', 'aya.fassi@eidia.ueuromed.org', 'aya.fassi', '$2y$10$9qFwAqti3XpjeLBDxZSJyO5GcRRucdsXNOt6XyQxGdb068OAU1qgm', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:54'),
-(101, 'Fatima Mansouri', 'fatima.mansouri@eidia.ueuromed.org', 'fatima.mansouri', '$2y$10$QpQAZ9zKCWZQPtfjCllP.OzqUVpmmZai1ZKKXSdCyzfOv5RGRcHAG', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:54'),
-(102, 'Mehdi Fassi', 'mehdi.fassi@eidia.ueuromed.org', 'mehdi.fassi', '$2y$10$ln9ojFoRxejHb3dvRVP3.OGFoUvttfgi3vcEDDD4rxZOmFKd/.dg2', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:54'),
-(103, 'Noura Fassi', 'noura.fassi@eidia.ueuromed.org', 'noura.fassi', '$2y$10$SFKe57dcfVvpMr.oJMEOSOqc2bYJ0gwCsffO7E.GeVH7jCg9eWIFu', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:55'),
-(104, 'Sarah Benjelloun', 'sarah.benjelloun@eidia.ueuromed.org', 'sarah.benjelloun', '$2y$10$w5jtufQyHnCtHuXTb2L5KuARWAyGf/59N5oFuAVIvRggsBP6uEnX.', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:55'),
-(105, 'Rania Talbi', 'rania.talbi@eidia.ueuromed.org', 'rania.talbi', '$2y$10$gN6qUQ5nmBjYjVACO5HqOu9bZBm9ZvPL/Rk7OJugR02ZVWvE6EiVq', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:55'),
-(106, 'Hajar Alami', 'hajar.alami@eidia.ueuromed.org', 'hajar.alami', '$2y$10$65PjI.n2drcOaQVdYsAuWuwSPBGA8nNPLZR5XrsOsCb32HFo6MuTC', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:55'),
-(107, 'Youssef Berrada', 'youssef.berrada2@eidia.ueuromed.org', 'youssef.berrada2', '$2y$10$bXK42vAkjY8S/WucHfH2e.1UzVH4TbfG5Mn/Bq.qNKjLl8oKuSxza', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:55'),
-(108, 'Yassine Daoudi', 'yassine.daoudi@eidia.ueuromed.org', 'yassine.daoudi', '$2y$10$huAHNnmxXekS4hV0JrgYl.fEOOtcflhivr2scmmlpiU7m.5MBiXla', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:55'),
-(109, 'Yassine Slaoui', 'yassine.slaoui@eidia.ueuromed.org', 'yassine.slaoui', '$2y$10$9vs.84gQvv0AcEu8JzEMhuIf34JP2E7kuWXEKtEDXd.3xMdnaulZi', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:55'),
-(110, 'Hajar Slaoui', 'hajar.slaoui@eidia.ueuromed.org', 'hajar.slaoui', '$2y$10$9RFaBuEWMRx44UifMzU.jOZAI2bSm9Y0lwT9f93M3qvB4g2AMNvmi', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:55'),
-(111, 'Bilal Tahiri', 'bilal.tahiri@eidia.ueuromed.org', 'bilal.tahiri', '$2y$10$ekKOSSDT/P8uQPewB4v4IeLWCls7m2qHQaXKpRpJ87I9dZ3vjU/OC', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:56'),
-(112, 'Imane Mansouri', 'imane.mansouri2@eidia.ueuromed.org', 'imane.mansouri2', '$2y$10$zLC6nHqU8CrNlHQQyjfuPOnZ0VVGs0Y6YXgo7T9lMZxzPhGA2Lmcy', 'etudiant', 2, NULL, NULL, '2026-01-02 19:30:56'),
-(113, 'Mohamed Idrissi', 'mohamed.idrissi@eidia.ueuromed.org', 'mohamed.idrissi', '$2y$10$j2F2.ic3Klwlt3l/FlxadOiEQruUStWrzO8TUHc0wZ3VHo3KVDvju', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:03'),
-(114, 'Fatima Filali', 'fatima.filali@eidia.ueuromed.org', 'fatima.filali', '$2y$10$jiXZU40OrcDEttxA82a1mei0Wi25gLPtixzufhY4pSOqjEc09f4NS', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:03'),
-(115, 'Amine Benjelloun', 'amine.benjelloun@eidia.ueuromed.org', 'amine.benjelloun', '$2y$10$3xlHiuHfA.lbHSytjaCG7e4nTP6iLQsHwyIqb82sYWlSh6ADaTpeW', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:03'),
-(116, 'Nizar Chaoui', 'nizar.chaoui@eidia.ueuromed.org', 'nizar.chaoui', '$2y$10$UGLxi8whgTPocxprddadeeV8i3Imgdiht8hLAF8vv3oVTNGaegvW2', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:03'),
-(117, 'Karim Benjelloun', 'karim.benjelloun2@eidia.ueuromed.org', 'karim.benjelloun2', '$2y$10$X.9fwTNWDv9CYnWRyQo6P.CJrQz4JNC4fny33pkvOsvQv6wzO18Ou', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:03'),
-(118, 'Houda Filali', 'houda.filali@eidia.ueuromed.org', 'houda.filali', '$2y$10$KX0qHs6XBifHpLoY2KFZWe2Ldw9.rkD4PRwJG.9fMG1U6LtSyNKTS', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:03'),
-(119, 'Mehdi Kabbaj', 'mehdi.kabbaj2@eidia.ueuromed.org', 'mehdi.kabbaj2', '$2y$10$Dhx7w0qSAWUmGnokaJTda.oi1yGUr1MJuVIOgrmZHfVPtNjzZNOBa', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:04'),
-(120, 'Nizar Raiss', 'nizar.raiss@eidia.ueuromed.org', 'nizar.raiss', '$2y$10$IieiyTK8j6WKQs9XOJBzi.6EDOXf6knbUYDPhGPuOqDAHwdAdJCaq', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:04'),
-(121, 'Ismail Naciri', 'ismail.naciri@eidia.ueuromed.org', 'ismail.naciri', '$2y$10$YdOgYjOrbt4Jfn2hgK992OkQ5NPxZVDmvwbVJtJt.nIJRw4HZ6F4e', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:04'),
-(122, 'Kaoutar Kabbaj', 'kaoutar.kabbaj@eidia.ueuromed.org', 'kaoutar.kabbaj', '$2y$10$lEZENcjwRfZPATxzqhquIeFaWnrrfEEAySRHPadizYoig76bTCG5S', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:04'),
-(123, 'Asmaa El Amrani', 'asmaa.el amrani@eidia.ueuromed.org', 'asmaa.el amrani', '$2y$10$6/MFkzKvX928i.MGdkN7S.n524LweI1elhzOv599.7vgEx7HGMAV6', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:04'),
-(124, 'Sarah Filali', 'sarah.filali@eidia.ueuromed.org', 'sarah.filali', '$2y$10$5DrgHsrpzUNxH0/e2ArfDusOQfy7.RE2iQ1HiHlLNAvgLX2sgOacK', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:04'),
-(125, 'Mohamed Kabbaj', 'mohamed.kabbaj@eidia.ueuromed.org', 'mohamed.kabbaj', '$2y$10$7fvnGtVvKdOxLYMFoJOYLuvsWaseMsaeNpcGhpsTU4R/vWNFZ2etO', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:04'),
-(126, 'Imane Guedira', 'imane.guedira@eidia.ueuromed.org', 'imane.guedira', '$2y$10$fvjbZ9FtaVQD5zLZVCS6Z.rIU7wuj7jTVkTjDzDS5Qv0tj50A9kra', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:04'),
-(127, 'Taha Guedira', 'taha.guedira@eidia.ueuromed.org', 'taha.guedira', '$2y$10$foc/Psajxxtn5zMRmrwMgezR8BekFh0Vys2/snRG/iz0fGIUvipVe', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:04'),
-(128, 'Nizar Guedira', 'nizar.guedira@eidia.ueuromed.org', 'nizar.guedira', '$2y$10$AvYDvOE3qhf9XNwsedGEluRusMsdtEn0qCyQz7cErIY98U17gg7PC', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:05'),
-(129, 'Sofia Filali', 'sofia.filali2@eidia.ueuromed.org', 'sofia.filali2', '$2y$10$kHxMKKP7uvV86aVYehjrQOpE0iUu/5UVRxbbd4MtYFwhadawPcVPG', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:05'),
-(130, 'Mehdi Filali', 'mehdi.filali@eidia.ueuromed.org', 'mehdi.filali', '$2y$10$uXlR11o84wIxe0lvsLKvVeyqvin.P0.wd1lm2RjwQBqAGLnrSWCYC', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:05'),
-(131, 'Ghita Bennani', 'ghita.bennani@eidia.ueuromed.org', 'ghita.bennani', '$2y$10$.FGNBqkE/SAkkZn3tThBUeniL3V4FXqpxVmC4xqCm/0172aZNsxxG', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:05'),
-(132, 'Anas Idrissi', 'anas.idrissi@eidia.ueuromed.org', 'anas.idrissi', '$2y$10$Dve4v2BBrhmWySZywNHkeOUZ95UqGdwxWU8OhL4JGk7cTcc8MDQ4m', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:05'),
-(133, 'Asmaa Tazi', 'asmaa.tazi@eidia.ueuromed.org', 'asmaa.tazi', '$2y$10$3q/YVtsEc7pH0kTMoTvy.OmHVsskcMLy8EOh8sMA/h7k4LdgO4JG6', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:05'),
-(134, 'Omar Benjelloun', 'omar.benjelloun@eidia.ueuromed.org', 'omar.benjelloun', '$2y$10$qMmMb36YsvgXjEt8tmREFuQX4b.LhJw3yz2Y0RI8QwLf30/EylKI2', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:05'),
-(135, 'Walid Daoudi', 'walid.daoudi@eidia.ueuromed.org', 'walid.daoudi', '$2y$10$IQzvy8ab48hz9R5SBJLDOeCJFiKGF0gUDfrjcOEfu9fO1Rur7KQcS', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:05'),
-(136, 'Ismail Tahiri', 'ismail.tahiri@eidia.ueuromed.org', 'ismail.tahiri', '$2y$10$yNfBIiIjh.Zel4XYGw7UuOuaDMe6JITN5ZxWW/2eEliPMCRUE9zjK', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:05'),
-(137, 'Sarah Raiss', 'sarah.raiss@eidia.ueuromed.org', 'sarah.raiss', '$2y$10$enrivy/lUE4tSJ7NluIUA.esYMIyc3/Lvowqjnb7yPrcMhFhKcYr.', 'etudiant', 6, NULL, NULL, '2026-01-02 19:31:06'),
-(138, 'Salma Raiss', 'salma.raiss@eidia.ueuromed.org', 'salma.raiss', '$2y$10$DmK..PtnobIkVU5N3OGAUeB2QfSkGOieLdbTtb2B9CQZaPtuqd7ca', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:11'),
-(139, 'Kenza Kabbaj', 'kenza.kabbaj@eidia.ueuromed.org', 'kenza.kabbaj', '$2y$10$gigDjMvC3gjuWmYg33y8oepjBI6J7pv2bbM6irjzRLzitF3hEBJra', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:11'),
-(140, 'Sofia Kadiri', 'sofia.kadiri@eidia.ueuromed.org', 'sofia.kadiri', '$2y$10$rfhH0Wbg1Djr8tqOZDXjCu/F1GWbJbbulZuoXMrsuSDbHh6JCBice', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:12'),
-(141, 'Anas Chaoui', 'anas.chaoui@eidia.ueuromed.org', 'anas.chaoui', '$2y$10$vjp/TK6mXxInUuURh2VSXegUNn8jWyUUcxNuaxGLGPTUQrrTeXVsS', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:12'),
-(142, 'Salma Mansouri', 'salma.mansouri@eidia.ueuromed.org', 'salma.mansouri', '$2y$10$uyJYbnK0P7WjmYQAT9b7fuD8qrDXotBxdDM.BTEndJHGASaW2ll8u', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:12'),
-(143, 'Fatima Berrada', 'fatima.berrada@eidia.ueuromed.org', 'fatima.berrada', '$2y$10$PTNY/k.Q196E8ZxUnqZkNuEfSDKkB9pM.JKvv9rb/OR25ncyy3Hj.', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:12'),
-(144, 'Salma Daoudi', 'salma.daoudi@eidia.ueuromed.org', 'salma.daoudi', '$2y$10$SjAy4S8kfRbNZG4P3ezoWefRbMM/LzFdj4BgKBS6UgwlsXjXGGB9e', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:12'),
-(145, 'Taha Naciri', 'taha.naciri@eidia.ueuromed.org', 'taha.naciri', '$2y$10$xQucFMTZXo.dmbVVYQSNhuYyyONesoAeWT5JhL6ERLeACHaHKwQTa', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:12'),
-(146, 'Hassan Berrada', 'hassan.berrada@eidia.ueuromed.org', 'hassan.berrada', '$2y$10$Y.y5IIw5BNlJYFahptTmleCcpbSPmXE.iwbSaLD7oVb3mJjjMJDJK', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:12'),
-(147, 'Hassan Mansouri', 'hassan.mansouri@eidia.ueuromed.org', 'hassan.mansouri', '$2y$10$3/bhccoxnJ39N4H5vsvO9eST.kzuitvLTryK.nK9Z3Pa3Etu/bKiO', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:12'),
-(148, 'Fatima Raiss', 'fatima.raiss@eidia.ueuromed.org', 'fatima.raiss', '$2y$10$sx.koTuTk/1b0JSSlgdUv.UDCgwgcIt06LrZt9U6P.O31ylTRcTFe', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:12'),
-(149, 'Rim Mernissi', 'rim.mernissi@eidia.ueuromed.org', 'rim.mernissi', '$2y$10$w.xDuGCh5E8LIkUldIO46.OpaoQei7n1ij26.Ri7fxnChcQbKa5XO', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:13'),
-(150, 'Aya Tazi', 'aya.tazi@eidia.ueuromed.org', 'aya.tazi', '$2y$10$OYpvf2XncfpRnBP3zcvzCeO2lEJHGs2SpFiqXI77YNNCCBn1aqnJK', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:13'),
-(151, 'Driss Talbi', 'driss.talbi@eidia.ueuromed.org', 'driss.talbi', '$2y$10$6QWGTqZFDLSHZZhKZEiY5OKhpnczFCqyBZajzTXcM7JuR30knjklS', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:13'),
-(152, 'Taha Naciri', 'taha.naciri2@eidia.ueuromed.org', 'taha.naciri2', '$2y$10$RIQUhcpSrmy58mz9p27a4uWEVZPBtRYqWFPQHAnGqjzN.pLx0DFN6', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:13'),
-(153, 'Fatima Slaoui', 'fatima.slaoui@eidia.ueuromed.org', 'fatima.slaoui', '$2y$10$AWZPf0XWmUQkNwmgbOxIMOtVcWzw96Z8QglxITx84Zvv1bfTkmvYm', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:13'),
-(154, 'Mohamed Mansouri', 'mohamed.mansouri@eidia.ueuromed.org', 'mohamed.mansouri', '$2y$10$gSr7FchvUlxavadvwGflqObdT7qQp1jF1QJFPF6NwPUwU.REaWOGe', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:13'),
-(155, 'Imane Kadiri', 'imane.kadiri@eidia.ueuromed.org', 'imane.kadiri', '$2y$10$sBIii/p7uvj0vO7T420V9etuSo0RBXbt.wtO1sGJkp8RL/bIr2gpe', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:13'),
-(156, 'Lamia Talbi', 'lamia.talbi@eidia.ueuromed.org', 'lamia.talbi', '$2y$10$SwchqcHmcA3NMIfG1ZWJHuXRMr3n1ucv66PA2xN0S2tZaJY08Y/Na', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:13'),
-(157, 'Meryem Chaoui', 'meryem.chaoui@eidia.ueuromed.org', 'meryem.chaoui', '$2y$10$QXvh2cawIoX0oWW1thTJFOTuvpwSq6piO24mA8xrTt1P1k/Xw4tw6', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:13'),
-(158, 'Noura Chaoui', 'noura.chaoui@eidia.ueuromed.org', 'noura.chaoui', '$2y$10$EqQe4sK7HgU.nCPFHwWOiu8cH5RsfukOjdcePkq0k5dgRts7MVoyS', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:14'),
-(159, 'Taha Raiss', 'taha.raiss@eidia.ueuromed.org', 'taha.raiss', '$2y$10$djCUoqWKNjmcuEPQ7S5id.qPlr5ohzVtLE1quy9jZILhda2.xBJB6', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:14'),
-(160, 'Ghita Mansouri', 'ghita.mansouri@eidia.ueuromed.org', 'ghita.mansouri', '$2y$10$b3wt/erPb./H0cjE6XzcsuzhBEytjqmBS0h46KGjii16mSrga1vgi', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:14'),
-(161, 'Reda Benjelloun', 'reda.benjelloun@eidia.ueuromed.org', 'reda.benjelloun', '$2y$10$A58CpGhg5PQSUmGXpCzvSuLuRnrXSCsdulrLe3.Fvgu6NFWPANhNu', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:14'),
-(162, 'Asmaa Berrada', 'asmaa.berrada@eidia.ueuromed.org', 'asmaa.berrada', '$2y$10$5OM9BR2HCO8N3CF5v1uuA.Uv93nOsYwvnK44DY4mz8OgTH/MbUi/y', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:14'),
-(163, 'Kaoutar Tahiri', 'kaoutar.tahiri@eidia.ueuromed.org', 'kaoutar.tahiri', '$2y$10$.2TLUbQ99iIUo6PWR9Uc4u0Wco.vUBG8VFt/VtwcXeCzVsvjGYnWO', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:14'),
-(164, 'Oussama Tazi', 'oussama.tazi@eidia.ueuromed.org', 'oussama.tazi', '$2y$10$DnaDcwGUMtdYzk/Bpphk9utWppMRfYy52Er.oE5FktcEcb0ETiGoa', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:14'),
-(165, 'Anas Daoudi', 'anas.daoudi@eidia.ueuromed.org', 'anas.daoudi', '$2y$10$KRWMP3BNnSx8L6iUJ4ks9evLjmwp8bwqmcFzIUiw1ySFLWXHFbzRm', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:14'),
-(166, 'Walid El Amrani', 'walid.el amrani@eidia.ueuromed.org', 'walid.el amrani', '$2y$10$fQgCtFlBhllW84pcVvmCQecwYc5ekoGF88SdH7P3N8CQln2itzzDK', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:14'),
-(167, 'Meryem Idrissi', 'meryem.idrissi@eidia.ueuromed.org', 'meryem.idrissi', '$2y$10$XONKJtyI0gAHqJynHZcDCe39qVA80YEm0uT/tTfnaSXZZ3VInu3Te', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:15'),
-(168, 'Houda Kadiri', 'houda.kadiri@eidia.ueuromed.org', 'houda.kadiri', '$2y$10$izZAOrpW9xC.2UhiW2O0POOiH2XLzFTzY16l9YhyD4UDW7q5WeOMO', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:15'),
-(169, 'Houda Bennani', 'houda.bennani@eidia.ueuromed.org', 'houda.bennani', '$2y$10$j9BHE6J4OyngiGhQRhE4au01hF.Kan7vN5EHDSGoJQ9HDr5.FuZFq', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:15'),
-(170, 'Ali Slaoui', 'ali.slaoui@eidia.ueuromed.org', 'ali.slaoui', '$2y$10$gO9U30IiCLp5SNL0g05G3uCubCZuTd1gtRCOr1fhT.tHrzuwOp/Zu', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:15'),
-(171, 'Rania Daoudi', 'rania.daoudi2@eidia.ueuromed.org', 'rania.daoudi2', '$2y$10$TDS2HJvukCMko9krrsNRQek8L3MPZQN0iJ0feyJVKe.iEZPLHaLoy', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:15'),
-(172, 'Meryem Ouazzani', 'meryem.ouazzani@eidia.ueuromed.org', 'meryem.ouazzani', '$2y$10$bDam.wjEQYhAOzodEqIEHuYAIhKN1Y1sDossIQYWh5SwXlEnQiAii', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:15'),
-(173, 'Sarah Naciri', 'sarah.naciri@eidia.ueuromed.org', 'sarah.naciri', '$2y$10$.skfKnjdxz9yNlRUXAcufeYwPfs94ced7NlszhtLQAPXFstyM56rq', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:15'),
-(174, 'Oussama Guedira', 'oussama.guedira@eidia.ueuromed.org', 'oussama.guedira', '$2y$10$/IOOqKfnLYlvgvdKijn3L.rH1ztSp.KafjwpTqKWtKmAuhOaeQNfu', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:15'),
-(175, 'Karim Mansouri', 'karim.mansouri@eidia.ueuromed.org', 'karim.mansouri', '$2y$10$6XY7m9aEiyYSuprL83MpZOpyt8RXP4cIYyBCOo/E4ix27DtecK7k.', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:15'),
-(176, 'Reda Benali', 'reda.benali@eidia.ueuromed.org', 'reda.benali', '$2y$10$XqRCztOxKLfm.DPOR/OWcuk5yIvs.g8dUNy8dMXXvYiWTaaBqJxMW', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:16'),
-(177, 'Aya Slaoui', 'aya.slaoui@eidia.ueuromed.org', 'aya.slaoui', '$2y$10$z5ml5v8rP2QVv3/ccRM3Ae33LLwWLHy8dZEWz.YA6I7L6D12Jci/a', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:16'),
-(178, 'Omar Slaoui', 'omar.slaoui@eidia.ueuromed.org', 'omar.slaoui', '$2y$10$QDzCwAqkQYk59mODx6SFrOPbcUj9jrsoN6B0DQ0KeVSqaY2IG/CVy', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:16'),
-(179, 'Reda Chraibi', 'reda.chraibi@eidia.ueuromed.org', 'reda.chraibi', '$2y$10$kDMduryuZPzw3KNG55cHRuMoIqwA9eZq8XuHzcHfVmQmzpI3R.xJm', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:16'),
-(180, 'Noura Tahiri', 'noura.tahiri@eidia.ueuromed.org', 'noura.tahiri', '$2y$10$Yhqa9dFioYtf4aO4bvWOAuf/aC4FB75uyxm1V7zVv98PjVxBhRAzC', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:16'),
-(181, 'Asmaa Mansouri', 'asmaa.mansouri@eidia.ueuromed.org', 'asmaa.mansouri', '$2y$10$B1LveFa4THst5.JKOrUd.eFe8bwZhR8CB1eszYhDNkYBfG1R.P4J6', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:16'),
-(182, 'Ali Zerrad', 'ali.zerrad@eidia.ueuromed.org', 'ali.zerrad', '$2y$10$SYfhumu/06vGai2.dcGQ7.eko/452/rXDQsFkl9RSTwbh101UzrBi', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:16'),
-(183, 'Rim Guedira', 'rim.guedira@eidia.ueuromed.org', 'rim.guedira', '$2y$10$XdOHNMJo4GXMnZbDx0CWaOnHxaAXrlDNozSz2q8s7AtID4xHFMaUS', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:16'),
-(184, 'Kenza Daoudi', 'kenza.daoudi@eidia.ueuromed.org', 'kenza.daoudi', '$2y$10$kHeVbSzibuz7kMpbeDcKWe9nKG8/x1tt2yyCEsOmIQCzmneR3RIYC', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:16'),
-(185, 'Amine Mernissi', 'amine.mernissi@eidia.ueuromed.org', 'amine.mernissi', '$2y$10$xiVftpvzZHm3lKGT5wEKvOdeXD4Un466y2zql4Oi5ogm0qNWnvPUm', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:17'),
-(186, 'Hamza Alami', 'hamza.alami@eidia.ueuromed.org', 'hamza.alami', '$2y$10$WxgpUsoCELxUKzko4.NyOuVj/sVsj2Hx9n2qBS1pZe3GnrKxKgrVm', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:17'),
-(187, 'Anas Chaoui', 'anas.chaoui2@eidia.ueuromed.org', 'anas.chaoui2', '$2y$10$wPvHr3gx02Fi/xNMxAWVlerhRT6f0hD9kt3QCyZ2q/3eVdLZM4GJi', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:17'),
-(188, 'Walid Slaoui', 'walid.slaoui@eidia.ueuromed.org', 'walid.slaoui', '$2y$10$pUzt1kjgra3hLWF21kIRJ.zQarosApjCGeIC3RB8f5KxHwD5bPbs2', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:17'),
-(189, 'Omar El Amrani', 'omar.el amrani@eidia.ueuromed.org', 'omar.el amrani', '$2y$10$9Tbwjh8lT1kuPHtG3DUYGOIqI0us4vqDFpiFB3fIjmuyLR7aciAFm', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:17'),
-(190, 'Amine Ouazzani', 'amine.ouazzani@eidia.ueuromed.org', 'amine.ouazzani', '$2y$10$DOaV.nNxkckhtQAZ/8qeJux9oUDdEZG3C.yZrewRjAQmB.c7UEmdO', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:17'),
-(191, 'Karim Bennani', 'karim.bennani@eidia.ueuromed.org', 'karim.bennani', '$2y$10$PNt9Nt8RLXfgFzAkqVS0LObQ02sjxMvaxZMUEum/LoGNav5IqsqhW', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:17'),
-(192, 'Driss Talbi', 'driss.talbi2@eidia.ueuromed.org', 'driss.talbi2', '$2y$10$wSdRJd86QUQk2XFUrGTzuu5zgrr2z03IQnlDoU8Y4mUGtxxzZaiPa', 'etudiant', 4, NULL, NULL, '2026-01-02 19:31:17'),
-(193, 'Youssef Kadiri', 'youssef.kadiri@eidia.ueuromed.org', 'youssef.kadiri', '$2y$10$zKvw4sRYa6MihI7uhtitC.jpuG8ZlvsVa/CbK96RMB7767i8g1X1O', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:26'),
-(194, 'Walid Tahiri', 'walid.tahiri@eidia.ueuromed.org', 'walid.tahiri', '$2y$10$zqhrgyCPahiJC4ad9WEZ9uAmvkkYe0Yo163CIcLXUpE/VyBrYRJUy', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:26'),
-(195, 'Sofia Ouazzani', 'sofia.ouazzani@eidia.ueuromed.org', 'sofia.ouazzani', '$2y$10$xCs2pSN5pXoklaAYs.SGe.coSaNdGiJ1VuEMtrI0kzGb9.eo3Xx7C', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:26'),
-(196, 'Houda Bennani', 'houda.bennani2@eidia.ueuromed.org', 'houda.bennani2', '$2y$10$rqEYPB9.gtE6lv0S7k0o/uiGzhgQw5E4XNXXYxFfMMhEg3hhUhMDu', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:26'),
-(197, 'Taha Chraibi', 'taha.chraibi@eidia.ueuromed.org', 'taha.chraibi', '$2y$10$LixhtDAk08Pcr0xBblAcge3qEw/gsovzWuyfzrbhVv7IQyZd7LsSe', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:26'),
-(198, 'Reda Kadiri', 'reda.kadiri@eidia.ueuromed.org', 'reda.kadiri', '$2y$10$lkC7yG8aLPIN/qXQYCwGvOZPbynZfuSX8mj2MGwksZfhvP2iUF9dG', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:26'),
-(199, 'Kenza Naciri', 'kenza.naciri@eidia.ueuromed.org', 'kenza.naciri', '$2y$10$0FggZzPneePDZUycR1qble.DnofFq6lgVtkz809H5Y3cjGpEwkZe2', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:26'),
-(200, 'Fatima Tazi', 'fatima.tazi@eidia.ueuromed.org', 'fatima.tazi', '$2y$10$j6WySWr87fA3h9CbSgTD4urXtohDpxByfu7mzJ6xf5L6xFsGv5Ws2', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:26'),
-(201, 'Noura Raiss', 'noura.raiss@eidia.ueuromed.org', 'noura.raiss', '$2y$10$n.VyJm/kleuhbnNnmD4J1OCTt1qevE5AQYcbRjiCuaHL7UMHCGMoi', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:26'),
-(202, 'Ismail Benjelloun', 'ismail.benjelloun@eidia.ueuromed.org', 'ismail.benjelloun', '$2y$10$64BD047xskcnVetAT6qbNudqxrEx1/3PxYvCOd2yDrX3wpT3CQ4cO', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:27'),
-(203, 'Rania Chraibi', 'rania.chraibi@eidia.ueuromed.org', 'rania.chraibi', '$2y$10$mokhh67DHcRirEz7KRqa8uvpNHKQ4srSsu3PJxKAwWUUsFD0gMqBK', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:27'),
-(204, 'Kaoutar Tazi', 'kaoutar.tazi@eidia.ueuromed.org', 'kaoutar.tazi', '$2y$10$O1ud21GRtq/ZM3X53eB.oO3YC3himaDY4/VVaeIH5y3GfJo0ssSJK', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:27'),
-(205, 'Kenza Benali', 'kenza.benali@eidia.ueuromed.org', 'kenza.benali', '$2y$10$gFD1dLctMocgSSRy/xRvue/9IGoDpPALWwydOY9bePzkClykzd2xm', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:27'),
-(206, 'Rania Tahiri', 'rania.tahiri@eidia.ueuromed.org', 'rania.tahiri', '$2y$10$Br/MQLhsBm4nP/Y5/IQbv.IwR.EeMJAz/KqBaFC.utV1xfUPMp8Mu', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:27'),
-(207, 'Ismail Fassi', 'ismail.fassi@eidia.ueuromed.org', 'ismail.fassi', '$2y$10$hDm5SCDlFAA4kZrVuve55uL0AbgLrN8LubMgt7CRDjHTqPVTeNZwO', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:27'),
-(208, 'Ismail Kadiri', 'ismail.kadiri@eidia.ueuromed.org', 'ismail.kadiri', '$2y$10$LbqBruH7sLFM.4viV0ceTOC8z/RqKDtnF6M0VtDSgvHc6L0xnkVk2', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:27'),
-(209, 'Omar Kadiri', 'omar.kadiri@eidia.ueuromed.org', 'omar.kadiri', '$2y$10$LgAc4ZmiJqDCryspXo48hOsb1vHEW1pN2wMNUP31M2yc/DkqVI6Mm', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:27'),
-(210, 'Taha Alami', 'taha.alami@eidia.ueuromed.org', 'taha.alami', '$2y$10$QHnmfg.w72grMM8gMCKs.eGwTfh.6eFDnIbFt3BPZLCTXYdofjQnK', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:27'),
-(211, 'Lamia Ouazzani', 'lamia.ouazzani@eidia.ueuromed.org', 'lamia.ouazzani', '$2y$10$OIeSPSnJ/VwD9feUfox4CuX2NA1dz5yCutTb1EinAhE4zjPuCJhMq', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:28'),
-(212, 'Yassine Alami', 'yassine.alami@eidia.ueuromed.org', 'yassine.alami', '$2y$10$HxUJIHSflmR6JjE3bD9dbOFNAe1XwOJs4ZZpIi2Dq3csXmvuqd8hy', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:28'),
-(213, 'Yassine Filali', 'yassine.filali@eidia.ueuromed.org', 'yassine.filali', '$2y$10$8SQyi/thRZSitatqeWqR6.3YOsE/sWA3uRpkGGVUCsCFfin7iJwd.', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:28'),
-(214, 'Sofia Filali', 'sofia.filali@eidia.ueuromed.org', 'sofia.filali', '$2y$10$XwGHqn1E.yEhu1QvQhB/DOUorbWU1/H6yGqOG5XIo5sXqLeLdvDG2', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:28'),
-(215, 'Sofia Talbi', 'sofia.talbi@eidia.ueuromed.org', 'sofia.talbi', '$2y$10$SS/OBdHwyPFuueQCU5JyOOMIcPvL3nhxzirCCspLpcepSR.z4bThe', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:28'),
-(216, 'Ghita Tazi', 'ghita.tazi@eidia.ueuromed.org', 'ghita.tazi', '$2y$10$1X2GweJcyCBwd6OrCAbb5OL/MLjfuVO0xovKXqYgpNwNOf2t1hS5.', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:28'),
-(217, 'Sarah Mansouri', 'sarah.mansouri2@eidia.ueuromed.org', 'sarah.mansouri2', '$2y$10$qXmUhnCdbbfjesrrDaZGhug1jPxJBtjEOR2Or.8bwfANZVG7SIKh2', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:28'),
-(218, 'Amine Benali', 'amine.benali@eidia.ueuromed.org', 'amine.benali', '$2y$10$mnUMrfQE.M7Ig/jyjZQ1yuMX.SrnO10hIu6Ywk2vswQ.KqiG93qjG', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:28'),
-(219, 'Sanae Bennani', 'sanae.bennani@eidia.ueuromed.org', 'sanae.bennani', '$2y$10$/9Ar4jIMOWpXScx27mAyZ.kisfrD5hTGWLYUh7xHJOZbZJ3z0ENIS', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:28'),
-(220, 'Hamza Slaoui', 'hamza.slaoui@eidia.ueuromed.org', 'hamza.slaoui', '$2y$10$QrlBhSY7/esfPtvZp10E7uGxEAZiuPG/J0oEN3qkeVQlRTPLGTivS', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:29'),
-(221, 'Lamia Mernissi', 'lamia.mernissi@eidia.ueuromed.org', 'lamia.mernissi', '$2y$10$xww3fs4M4UtH6ITv70CnAuR2L52Gj7BWh8W4yGqGEjNh7n51jXlIG', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:29'),
-(222, 'Youssef Idrissi', 'youssef.idrissi@eidia.ueuromed.org', 'youssef.idrissi', '$2y$10$M.tUh4YpdlVRZc4Ff7tuy.7KValls0UmNOxu8kPIorWu.hDKWDb26', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:29'),
-(223, 'Anas Guedira', 'anas.guedira@eidia.ueuromed.org', 'anas.guedira', '$2y$10$orkn7XLt8a8gfH3B6rm4quVcu42zksM5UveY83hgzwue.9STfe.m.', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:29'),
-(224, 'Rania Raiss', 'rania.raiss@eidia.ueuromed.org', 'rania.raiss', '$2y$10$Lg0ZJZBC3RVmAqnX7CLCaebvsdFJfi2xWt74DuBo9wQWygPN2U4Py', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:29'),
-(225, 'Ismail Fassi', 'ismail.fassi2@eidia.ueuromed.org', 'ismail.fassi2', '$2y$10$j0O5.vDVx4Y4YNaRr2BVO.yhmEQKYb25/rQdX7x9iKcjbeQ8u73sq', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:29'),
-(226, 'Mehdi Talbi', 'mehdi.talbi@eidia.ueuromed.org', 'mehdi.talbi', '$2y$10$fJNxBSo3cWYZMcFuVAs.zejmcW51cFUupRbQLTAAH5EohsYL3b1Ly', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:29'),
-(227, 'Walid Chaoui', 'walid.chaoui@eidia.ueuromed.org', 'walid.chaoui', '$2y$10$bIZmbbKno/ULOFT7pifB4OA.8kjfibSIFw2qZUQ94bLJPf5fAMkiq', 'etudiant', 5, NULL, NULL, '2026-01-02 19:31:29'),
-(228, 'Pr. Khalid Berrada', 'khalid.berrada@prof.ueuromed.org', 'p.berrada', '$2y$10$koNN7dO3FIyTS2hPboUi1u8jAIytVuN7Ma8YTEARscNW5DGIM48f.', 'prof', 5, 'BIGDATA,CYBER', NULL, '2026-01-02 19:31:41'),
-(229, 'Pr. Karima Daoudi', 'karima.daoudi@prof.ueuromed.org', 'p.daoudi', '$2y$10$n2SXGqPOgBzQCQhUtCa1j.2HfWbog9rKptPRnNgk2eHBnYtobBNUK', 'prof', 3, 'AI', NULL, '2026-01-02 19:31:41'),
-(230, 'Pr. Najat Mansouri', 'najat.mansouri@prof.ueuromed.org', 'p.mansouri', '$2y$10$6Jl90.5icSkeyE82LVkP1edpG3fuwpCn1YrxJlibDS5ZuwRtQ7lrm', 'prof', 6, 'ROBO', NULL, '2026-01-02 19:31:41'),
-(231, 'Pr. Omar Sefrioui', 'omar.sefrioui@prof.ueuromed.org', 'p.sefrioui4', '$2y$10$Tlw5tjSensVmZLN7OAMsneeFdqoJo/wKBKZVeANu2EhWDt1yGxf6u', 'prof', 4, 'CYBER', NULL, '2026-01-02 19:31:41'),
-(232, 'Pr. Hassan Mansouri', 'hassan.mansouri@prof.ueuromed.org', 'p.mansouri2', '$2y$10$RNN2h.gRV63BLKsH9YVX2unwXocXlX4eV22Zf9SUd1A6qVgFdR2re', 'prof', 2, 'BIGDATA', NULL, '2026-01-02 19:31:42'),
-(233, 'Pr. Ahmed Kadiri', 'ahmed.kadiri@prof.ueuromed.org', 'p.kadiri', '$2y$10$Q2cS/BR4M.FbIWBxNDd3euWRTk2cmwXSpMLTe72kbUhTGFe1Jdoha', 'prof', 6, 'CYBER,ROBO', NULL, '2026-01-02 19:31:42'),
-(234, 'Pr. Siham Sefrioui', 'siham.sefrioui@prof.ueuromed.org', 'p.sefrioui2', '$2y$10$kwxmSZznjwCUAGZtseTN2e/FB4SZTehSg6k5g5JkH9NCvsMh/c6ru', 'prof', 5, 'CYBER,BIGDATA', NULL, '2026-01-02 19:31:42'),
-(235, 'Pr. Najat Tahiri', 'najat.tahiri@prof.ueuromed.org', 'p.tahiri', '$2y$10$xnapa1c.7uF/BvRNftnhBulXNDOrMMKRtOaaRn0eK8JXaaITHYtke', 'prof', 3, 'ROBO,FULL', NULL, '2026-01-02 19:31:42'),
-(236, 'Pr. Redouane Kabbaj', 'redouane.kabbaj@prof.ueuromed.org', 'p.kabbaj', '$2y$10$a.S3hQrriHdqmpXRZIY2IeLZEEC8m9A5KI2p0sQzXnmBbXf3RWEcW', 'prof', 6, 'AI,ROBO', NULL, '2026-01-02 19:31:42'),
-(237, 'Pr. Brahim Chraibi', 'brahim.chraibi@prof.ueuromed.org', 'p.chraibi', '$2y$10$ISC.ctZYDs5mofqZ3SlHZO5JbvkzUkYkQ6T9.wxKus0pVwxpfDDzu', 'prof', 6, 'CYBER', NULL, '2026-01-02 19:31:42'),
-(238, 'Pr. Driss Zouhair', 'driss.zouhair@prof.ueuromed.org', 'p.zouhair', '$2y$10$Gp8gw54NZkyy833y1mJyIeRFQ0IGfXBXtQZyjkl9sJkoofl98.1/e', 'prof', 6, 'BIGDATA', NULL, '2026-01-02 19:31:42'),
-(239, 'Pr. Layla Alami', 'layla.alami@prof.ueuromed.org', 'p.alami', '$2y$10$oVzSvRIB6Y/wrU7qygdwuObyAlmw5/YJNftvmF/4U5oKvUnYOxYYW', 'prof', 5, 'BIGDATA', NULL, '2026-01-02 19:31:42'),
-(240, 'Pr. Hassan Tazi', 'hassan.tazi@prof.ueuromed.org', 'p.tazi', '$2y$10$.eNFbrUabZCOKJEDHaQS2uLeegsibbYRfIbwbDVIplKN4zXqxUAOW', 'prof', 4, 'FULL', NULL, '2026-01-02 19:31:42'),
-(241, 'Pr. Fatim-Zahra Idrissi', 'fatim-zahra.idrissi@prof.ueuromed.org', 'p.idrissi', '$2y$10$jVJSIbnjQbhqx6XbQPFCMeKq8PcOcg8p7H6eEu4.9AGPzXyC6cOe2', 'prof', 2, 'BIGDATA', NULL, '2026-01-02 19:31:43'),
-(242, 'Pr. Siham Tahiri', 'siham.tahiri@prof.ueuromed.org', 'p.tahiri2', '$2y$10$5kBeOLAN.D593dYceGV5MewPsSneuYh27MUsb19oJ7himyga04mZe', 'prof', 3, 'FULL', NULL, '2026-01-02 19:31:43'),
-(243, 'Pr. Brahim El Amrani', 'brahim.el amrani@prof.ueuromed.org', 'p.el amrani', '$2y$10$94CDzDEGxO2tzmmyq1jpg.FkYpnZ7WsU6RWPH.uLbxIV7f5Etcnzu', 'prof', 3, 'FULL', NULL, '2026-01-02 19:31:43'),
-(244, 'Pr. Najat Tazi', 'najat.tazi@prof.ueuromed.org', 'p.tazi2', '$2y$10$K2TcRNsZehZk3gRIYSxaqeTY7JYnEu2om8eU/7AqR6UPgo2SKm1be', 'prof', 3, 'ROBO', NULL, '2026-01-02 19:31:43'),
-(245, 'Pr. Yassine Sefrioui', 'yassine.sefrioui@prof.ueuromed.org', 'p.sefrioui3', '$2y$10$X1IzCqtQMz7ytD4LL6GVUO/PqIMGNaw.g0/271ez1BQ/v9y34x7VC', 'prof', 4, 'ROBO', NULL, '2026-01-02 19:31:43'),
-(246, 'Pr. Khalid Kabbaj', 'khalid.kabbaj@prof.ueuromed.org', 'p.kabbaj2', '$2y$10$ls7MwdVeQfFCcr6la9oYQ.RPWcI4Ifpl5pdL77dplb2A/5avfLuGy', 'prof', 3, 'ROBO', NULL, '2026-01-02 19:31:43'),
-(247, 'Pr. Yassine Idrissi', 'yassine.idrissi@prof.ueuromed.org', 'p.idrissi2', '$2y$10$2V4if5XVw7RkUPcgM53hgOwRTsRIfxvM/hfvZV7ubJO3RThZiLxhy', 'prof', 2, 'AI,FULL', NULL, '2026-01-02 19:31:43'),
-(248, 'Pr. Samir Zouhair', 'samir.zouhair@prof.ueuromed.org', 'p.zouhair2', '$2y$10$qO4By.nVBD91ma7myLI1yO7luI8lMuPEuNY7jk4vyJqATdI4bJQ9m', 'prof', 5, 'AI', NULL, '2026-01-02 19:31:43'),
-(250, 'Pr. Layla El Amrani', 'layla.el amrani@prof.ueuromed.org', 'p.el amrani2', '$2y$10$0SPTcSVRXQz1.Nb3VsHRJe/JHoeLfxYTR2y.gRjvmRvqSDiuGE7gS', 'prof', 4, 'BIGDATA', NULL, '2026-01-02 19:31:44'),
-(251, 'Pr. Latifa Idrissi', 'latifa.idrissi@prof.ueuromed.org', 'p.idrissi3', '$2y$10$9hzlUSYY5iBGL3wTK5HcFeQ7Mp7Wo26jZSA.kIWSqZom9tXePInK.', 'prof', 5, 'BIGDATA,FULL', NULL, '2026-01-02 19:31:44'),
-(252, 'Pr. Fatim-Zahra Tazi', 'fatim-zahra.tazi@prof.ueuromed.org', 'p.tazi3', '$2y$10$kQuYV0eQNC63s8XXO0UYnehoE0O0sL3nAm.rY/Gov3QYG.ARjzWz6', 'prof', 5, 'CYBER,FULL', NULL, '2026-01-02 19:31:44'),
-(253, 'Ihab Admin', 'ihab@admin.com', 'ihab.admin', '$2y$10$MgwDHR1eL6d8TsN7Nl/.Y.o255.dU1PsgfRRQRiXXi.xut4x/JhKW', 'coordinateur', NULL, NULL, NULL, '2026-01-02 19:45:58'),
-(256, 'Mme Assistante', 'assistante@uemf.org', 'assistante.admin', '$2y$10$W83FhbK88Djqssz9LE9TBOEal8eHc0J7cGyxOLKpI1AInDkE1hhuG', 'assistante', NULL, NULL, NULL, '2026-01-02 20:16:10'),
-(257, 'Monsieur le Directeur', 'directeur@uemf.org', 'directeur.general', '$2y$10$W83FhbK88Djqssz9LE9TBOEal8eHc0J7cGyxOLKpI1AInDkE1hhuG', 'directeur', NULL, NULL, NULL, '2026-01-02 20:16:10');
+INSERT INTO `users` (`id`, `nom`, `prenom`, `email`, `username`, `login`, `password`, `role`, `filiere_id`, `specialite`, `telephone`, `created_at`, `must_change_password`) VALUES
+(256, 'Mme Assistante', NULL, 'assistante@uemf.org', NULL, 'assistante.admin', '$2y$10$W83FhbK88Djqssz9LE9TBOEal8eHc0J7cGyxOLKpI1AInDkE1hhuG', 'assistante', NULL, NULL, NULL, '2026-01-02 20:16:10', 1),
+(257, 'Monsieur le Directeur', NULL, 'directeur@uemf.org', NULL, 'directeur.general', '$2y$10$W83FhbK88Djqssz9LE9TBOEal8eHc0J7cGyxOLKpI1AInDkE1hhuG', 'directeur', NULL, NULL, NULL, '2026-01-02 20:16:10', 1),
+(283, 'Ihab Admin', NULL, 'ihab@admin.com', NULL, 'ihab.admin', '$2y$10$yP33I5WWNhc5SnwP7WfSdOUB65mwgtjq06Koes0Si.wvkMdPC6SqK', 'coordinateur', NULL, NULL, NULL, '2026-01-03 12:14:12', 1),
+(764, 'Mernissi', 'Oussama', 'oussama.mernissi@prof.ueuromed.org', NULL, 'oussama.mernissi', '9QYftMS1', 'prof', NULL, 'AI, CYBER', NULL, '2026-01-04 12:20:16', 1),
+(765, 'Bennis', 'Mehdi', 'm.bennis@prof.ueuromed.org', NULL, 'm.bennis', 'xU8MDlmX', 'prof', NULL, 'AI, CYBER', NULL, '2026-01-04 12:20:16', 1),
+(766, 'Kabbaj', 'Rania', 'rania.kabbaj@prof.ueuromed.org', NULL, 'rania.kabbaj', 'llJsd9eS', 'prof', NULL, 'ROBO, AI', NULL, '2026-01-04 12:20:16', 1),
+(767, 'Berrada', 'Sarah', 'sarah.berrada@prof.ueuromed.org', NULL, 'sarah.berrada', '0RNvFHnU', 'prof', NULL, 'ROBO, AI', NULL, '2026-01-04 12:20:16', 1),
+(768, 'Raiss', 'Brahim', 'brahim.raiss@prof.ueuromed.org', NULL, 'brahim.raiss', '6VjXZT93', 'prof', NULL, 'ROBO, CYBER', NULL, '2026-01-04 12:20:16', 1),
+(769, 'Talbi', 'Noura', 'noura.talbi@prof.ueuromed.org', NULL, 'noura.talbi', 'GLEfElNN', 'prof', NULL, 'BIGDATA, ROBO', NULL, '2026-01-04 12:20:16', 1),
+(770, 'Guedira', 'Anas', 'anas.guedira@prof.ueuromed.org', NULL, 'anas.guedira', 'oTIA4k5f', 'prof', NULL, 'BIGDATA, CYBER', NULL, '2026-01-04 12:20:16', 1),
+(771, 'Alami', 'Reda', 'reda.alami@prof.ueuromed.org', NULL, 'reda.alami', 'okSUjwMI', 'prof', NULL, 'ROBO, BIGDATA', NULL, '2026-01-04 12:20:16', 1),
+(772, 'Chraibi', 'Aya', 'aya.chraibi@prof.ueuromed.org', NULL, 'aya.chraibi', 'QMn5TiPX', 'prof', NULL, 'AI, CYBER', NULL, '2026-01-04 12:20:16', 1),
+(773, 'Mansouri', 'Zineb', 'zineb.mansouri@prof.ueuromed.org', NULL, 'zineb.mansouri', 'lDsKbIqY', 'prof', NULL, 'CYBER, AI', NULL, '2026-01-04 12:20:16', 1),
+(774, 'Chraibi', 'Mehdi', 'm.chraibi@prof.ueuromed.org', NULL, 'm.chraibi', 'AFBvuK8w', 'prof', NULL, 'FULL, BIGDATA', NULL, '2026-01-04 12:20:16', 1),
+(775, 'Lahlou', 'Najat', 'n.lahlou@prof.ueuromed.org', NULL, 'n.lahlou', '0mPQPoOH', 'prof', NULL, 'FULL, ROBO', NULL, '2026-01-04 12:20:16', 1),
+(776, 'Fassi', 'Ali', 'a.fassi@prof.ueuromed.org', NULL, 'a.fassi', 'pmzkQYS0', 'prof', NULL, 'AI, BIGDATA', NULL, '2026-01-04 12:20:16', 1),
+(777, 'Jettou', 'Oussama', 'oussama.jettou@prof.ueuromed.org', NULL, 'oussama.jettou', 'vOBpmPcQ', 'prof', NULL, 'BIGDATA, ROBO', NULL, '2026-01-04 12:20:16', 1),
+(778, 'El Amrani', 'Youssef', 'youssef.elamrani@prof.ueuromed.org', NULL, 'youssef.elamrani', 'Bl3syTNb', 'prof', NULL, 'FULL, AI', NULL, '2026-01-04 12:20:16', 1),
+(779, 'Berrada', 'Omar', 'o.berrada@prof.ueuromed.org', NULL, 'o.berrada', 'B77siU6s', 'prof', NULL, 'ROBO, FULL', NULL, '2026-01-04 12:20:16', 1),
+(780, 'Bennis', 'Salma', 's.bennis@prof.ueuromed.org', NULL, 's.bennis', '232RpRNy', 'prof', NULL, 'CYBER, ROBO', NULL, '2026-01-04 12:20:16', 1),
+(781, 'Slaoui', 'Sarah', 'sarah.slaoui@prof.ueuromed.org', NULL, 'sarah.slaoui', 'Iywm0GxU', 'prof', NULL, 'BIGDATA, AI', NULL, '2026-01-04 12:20:16', 1),
+(782, 'Chaoui', 'Brahim', 'brahim.chaoui@prof.ueuromed.org', NULL, 'brahim.chaoui', '3SLAhd4L', 'prof', NULL, 'FULL, CYBER', NULL, '2026-01-04 12:20:16', 1),
+(783, 'Berrada', 'Asmaa', 'asmaa.berrada@prof.ueuromed.org', NULL, 'asmaa.berrada', 'RbVuRTIT', 'prof', NULL, 'CYBER, ROBO', NULL, '2026-01-04 12:20:16', 1),
+(784, 'Daoudi', 'Rania', 'rania.daoudi@prof.ueuromed.org', NULL, 'rania.daoudi', '0zZmfgRj', 'prof', NULL, 'CYBER, FULL', NULL, '2026-01-04 12:20:16', 1),
+(785, 'Lahlou', 'Ali', 'ali.lahlou@prof.ueuromed.org', NULL, 'ali.lahlou', 'kldI1VXZ', 'prof', NULL, 'ROBO, CYBER', NULL, '2026-01-04 12:20:16', 1),
+(786, 'Raiss', 'Anas', 'a.raiss@prof.ueuromed.org', NULL, 'a.raiss', 'YWOpZeBz', 'prof', NULL, 'ROBO, AI', NULL, '2026-01-04 12:20:16', 1),
+(787, 'Jettou', 'Ismail', 'ismail.jettou@prof.ueuromed.org', NULL, 'ismail.jettou', 'MLaSfhui', 'prof', NULL, 'CYBER, AI', NULL, '2026-01-04 12:20:16', 1),
+(788, 'Chraibi', 'Manal', 'chraibi.manal@prof.ueuromed.org', NULL, 'chraibi.manal', 'PCib8fPB', 'prof', NULL, 'FULL, BIGDATA', NULL, '2026-01-04 12:20:16', 1),
+(789, 'Tazi', 'Ahmed', 'ahmed.tazi@eidia.ueuromed.org', NULL, 'ahmed.tazi', 'tob2eXwQ', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(790, 'Tazi', 'Reda', 'reda.tazi@eidia.ueuromed.org', NULL, 'reda.tazi', 'iTBsMvmW', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(791, 'Kabbaj', 'Oussama', 'oussama.kabbaj@eidia.ueuromed.org', NULL, 'oussama.kabbaj', 'aLSANitE', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(792, 'Slaoui', 'Walid', 'walid.slaoui@eidia.ueuromed.org', NULL, 'walid.slaoui', 'lII2f7ER', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(793, 'Daoudi', 'Youssef', 'youssef.daoudi@eidia.ueuromed.org', NULL, 'youssef.daoudi', 'xz7yiO1N', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(794, 'Jettou', 'Meryem', 'meryem.jettou@eidia.ueuromed.org', NULL, 'meryem.jettou', 'WZP1X4rc', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(795, 'Benjelloun', 'Sofia', 'sofia.benjelloun@eidia.ueuromed.org', NULL, 'sofia.benjelloun', 'kp2WhKki', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(796, 'Daoudi', 'Sarah', 'sarah.daoudi@eidia.ueuromed.org', NULL, 'sarah.daoudi', 'tbXGWe2P', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(797, 'Chraibi', 'Reda', 'reda.chraibi@eidia.ueuromed.org', NULL, 'reda.chraibi', 'hkGHDkAR', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(798, 'Bennis', 'Rania', 'rania.bennis@eidia.ueuromed.org', NULL, 'rania.bennis', '9QWP0ec3', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(799, 'Zerrad', 'Noura', 'noura.zerrad@eidia.ueuromed.org', NULL, 'noura.zerrad', 'OpwjTB92', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(800, 'Bennani', 'Ali', 'ali.bennani@eidia.ueuromed.org', NULL, 'ali.bennani', 'yTpyXvEC', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(801, 'Raiss', 'Salma', 'salma.raiss@eidia.ueuromed.org', NULL, 'salma.raiss', 'Kcg43JiS', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(802, 'Jettou', 'Latifa', 'latifa.jettou@eidia.ueuromed.org', NULL, 'latifa.jettou', 'AmTUU9tK', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(803, 'Benjelloun', 'Rania', 'rania.benjelloun@eidia.ueuromed.org', NULL, 'rania.benjelloun', 'TtTZnqu0', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(804, 'Slaoui', 'Taha', 'taha.slaoui@eidia.ueuromed.org', NULL, 'taha.slaoui', 'D0TyofHm', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(805, 'Naciri', 'Rim', 'rim.naciri@eidia.ueuromed.org', NULL, 'rim.naciri', 'y585gC2a', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(806, 'Zouhair', 'Driss', 'driss.zouhair@eidia.ueuromed.org', NULL, 'driss.zouhair', 'vlNORdCF', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(807, 'Naciri', 'Amine', 'amine.naciri@eidia.ueuromed.org', NULL, 'amine.naciri', '0fVTq1OR', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(808, 'Benjelloun', 'Latifa', 'latifa.benjelloun@eidia.ueuromed.org', NULL, 'latifa.benjelloun', 'u2M0NWcA', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(809, 'Benali', 'Bilal', 'bilal.benali@eidia.ueuromed.org', NULL, 'bilal.benali', 'kvGZYn74', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(810, 'Benali', 'Ghita', 'ghita.benali@eidia.ueuromed.org', NULL, 'ghita.benali', 'ifscmRX2', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(811, 'Daoudi', 'Reda', 'reda.daoudi@eidia.ueuromed.org', NULL, 'reda.daoudi', '2TINBb4r', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(812, 'Daoudi', 'Omar', 'omar.daoudi@eidia.ueuromed.org', NULL, 'omar.daoudi', 'zyJ6843z', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(813, 'Lahlou', 'Hassan', 'hassan.lahlou@eidia.ueuromed.org', NULL, 'hassan.lahlou', 'VfMjkaYl', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(814, 'Talbi', 'Najat', 'najat.talbi@eidia.ueuromed.org', NULL, 'najat.talbi', 'NMVHNenW', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(815, 'Chaoui', 'Aya', 'aya.chaoui@eidia.ueuromed.org', NULL, 'aya.chaoui', 'NPLREqQB', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(816, 'Kabbaj', 'Kaoutar', 'kaoutar.kabbaj@eidia.ueuromed.org', NULL, 'kaoutar.kabbaj', 'UvP53PHN', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(817, 'Chraibi', 'Kenza', 'kenza.chraibi@eidia.ueuromed.org', NULL, 'kenza.chraibi', 'No6MyWID', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(818, 'Raiss', 'Rim', 'rim.raiss@eidia.ueuromed.org', NULL, 'rim.raiss', 'SvhNF2wb', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(819, 'Zerrad', 'Sofia', 'sofia.zerrad@eidia.ueuromed.org', NULL, 'sofia.zerrad', 'rWciGNkp', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(820, 'Ouazzani', 'Sanae', 'sanae.ouazzani@eidia.ueuromed.org', NULL, 'sanae.ouazzani', 'w4n8gsCW', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(821, 'Zouhair', 'Asmaa', 'asmaa.zouhair@eidia.ueuromed.org', NULL, 'asmaa.zouhair', '2vSAWpZE', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(822, 'Guessous', 'Youssef', 'youssef.guessous@eidia.ueuromed.org', NULL, 'youssef.guessous', '9iJeF6W1', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(823, 'Mernissi', 'Rim', 'rim.mernissi2@eidia.ueuromed.org', NULL, 'rim.mernissi2', 'xt6EAfJL', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(824, 'Guedira', 'Omar', 'omar.guedira@eidia.ueuromed.org', NULL, 'omar.guedira', 'QOybCWI7', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(825, 'Daoudi', 'Karim', 'karim.daoudi@eidia.ueuromed.org', NULL, 'karim.daoudi', '7FZNHse4', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(826, 'Guessous', 'Najat', 'najat.guessous@eidia.ueuromed.org', NULL, 'najat.guessous', 'xAryfXl8', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(827, 'Bennis', 'Ali', 'ali.bennis@eidia.ueuromed.org', NULL, 'ali.bennis', '7lLVPdee', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(828, 'Fassi', 'Taha', 'taha.fassi@eidia.ueuromed.org', NULL, 'taha.fassi', 'khlujwtx', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(829, 'Lahlou', 'Hajar', 'hajar.lahlou@eidia.ueuromed.org', NULL, 'hajar.lahlou', 'cBrzNZhT', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(830, 'Guedira', 'Mohamed', 'mohamed.guedira@eidia.ueuromed.org', NULL, 'mohamed.guedira', 'KqqaNDk1', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(831, 'Kadiri', 'Omar', 'omar.kadiri@eidia.ueuromed.org', NULL, 'omar.kadiri', '53qKbw7j', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(832, 'Naciri', 'Youssef', 'youssef.naciri@eidia.ueuromed.org', NULL, 'youssef.naciri', 'tZJx0mFZ', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(833, 'Berrada', 'Manal', 'manal.berrada@eidia.ueuromed.org', NULL, 'manal.berrada', 'FOb2toRp', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(834, 'Talbi', 'Sofia', 'sofia.talbi@eidia.ueuromed.org', NULL, 'sofia.talbi', '0SY794Yb', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(835, 'Sefrioui', 'Amine', 'amine.sefrioui@eidia.ueuromed.org', NULL, 'amine.sefrioui', 'pWyEEe5B', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(836, 'Ouazzani', 'Bilal', 'bilal.ouazzani@eidia.ueuromed.org', NULL, 'bilal.ouazzani', '9tIsPoek', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(837, 'Chaoui', 'Nizar', 'nizar.chaoui@eidia.ueuromed.org', NULL, 'nizar.chaoui', 'n1kCZcjA', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(838, 'Zerrad', 'Rim', 'rim.zerrad@eidia.ueuromed.org', NULL, 'rim.zerrad', 'CbLaRyUv', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(839, 'Benali', 'Brahim', 'brahim.benali@eidia.ueuromed.org', NULL, 'brahim.benali', 'wl5gGafj', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(840, 'Zouhair', 'Bilal', 'bilal.zouhair@eidia.ueuromed.org', NULL, 'bilal.zouhair', '1FLpUSNz', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(841, 'Fassi', 'Asmaa', 'asmaa.fassi@eidia.ueuromed.org', NULL, 'asmaa.fassi', 'XrDMi4vR', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(842, 'Slaoui', 'Anas', 'anas.slaoui@eidia.ueuromed.org', NULL, 'anas.slaoui', 'Fesq4cEw', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(843, 'Chaoui', 'Bilal', 'bilal.chaoui@eidia.ueuromed.org', NULL, 'bilal.chaoui', 'mOL9MAL2', 'etudiant', 2, NULL, NULL, '2026-01-04 12:20:46', 1),
+(844, 'Lahlou', 'Driss', 'driss.lahlou@eidia.ueuromed.org', NULL, 'driss.lahlou', 'tSkjDRe5', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(845, 'Sefrioui', 'Taha', 'taha.sefrioui@eidia.ueuromed.org', NULL, 'taha.sefrioui', 'iC4bKkVl', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(846, 'Bennani', 'Rim', 'rim.bennani@eidia.ueuromed.org', NULL, 'rim.bennani', 'fqHRqX1K', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(847, 'Zouhair', 'Karim', 'karim.zouhair@eidia.ueuromed.org', NULL, 'karim.zouhair', 'QpBwSS2q', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(848, 'Naciri', 'Taha', 'taha.naciri@eidia.ueuromed.org', NULL, 'taha.naciri', '8Z2WuHiZ', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(849, 'Naciri', 'Salma', 'salma.naciri@eidia.ueuromed.org', NULL, 'salma.naciri', 'JBbszcv7', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(850, 'Bennani', 'Reda', 'reda.bennani@eidia.ueuromed.org', NULL, 'reda.bennani', 'rSjsPkNh', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(851, 'Kabbaj', 'Brahim', 'brahim.kabbaj@eidia.ueuromed.org', NULL, 'brahim.kabbaj', 'uh6eZOGB', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(852, 'Alami', 'Samir', 'samir.alami@eidia.ueuromed.org', NULL, 'samir.alami', '1CNuJbdq', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(853, 'Bennis', 'Salma', 'salma.bennis@eidia.ueuromed.org', NULL, 'salma.bennis', 'SorgfaeX', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(854, 'Bennani', 'Salma', 'salma.bennani@eidia.ueuromed.org', NULL, 'salma.bennani', 'pnS7Bqm9', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(855, 'Zerrad', 'Aya', 'aya.zerrad@eidia.ueuromed.org', NULL, 'aya.zerrad', 'vXE9JmpR', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(856, 'Bennis', 'Houda', 'houda.bennis@eidia.ueuromed.org', NULL, 'houda.bennis', 'KerrdQoS', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:58', 1),
+(857, 'Benali', 'Karim', 'karim.benali@eidia.ueuromed.org', NULL, 'karim.benali', 'WoKgmGBg', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(858, 'Slaoui', 'Oussama', 'oussama.slaoui@eidia.ueuromed.org', NULL, 'oussama.slaoui', 'iHQYLPYZ', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(859, 'Alami', 'Salma', 'salma.alami@eidia.ueuromed.org', NULL, 'salma.alami', 'jfDOBhJU', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(860, 'Jettou', 'Taha', 'taha.jettou@eidia.ueuromed.org', NULL, 'taha.jettou', 'yH0zK9XJ', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(861, 'Berrada', 'Yassine', 'yassine.berrada@eidia.ueuromed.org', NULL, 'yassine.berrada', 'ezehXY1c', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(862, 'Chraibi', 'Ahmed', 'ahmed.chraibi@eidia.ueuromed.org', NULL, 'ahmed.chraibi', 'JnHa79UZ', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(863, 'Idrissi', 'Yassine', 'yassine.idrissi@eidia.ueuromed.org', NULL, 'yassine.idrissi', 'GFtEygvh', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(864, 'El Amrani', 'Mehdi', 'mehdi.elamrani@eidia.ueuromed.org', NULL, 'mehdi.elamrani', 'StXpbFpU', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(865, 'El Amrani', 'Sofia', 'sofia.elamrani@eidia.ueuromed.org', NULL, 'sofia.elamrani', 'n40HhhuD', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(866, 'Chraibi', 'Ghita', 'ghita.chraibi@eidia.ueuromed.org', NULL, 'ghita.chraibi', '6nHScNKf', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(867, 'Berrada', 'Kaoutar', 'kaoutar.berrada@eidia.ueuromed.org', NULL, 'kaoutar.berrada', 'DrmTkV0g', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(868, 'Lahlou', 'Najat', 'najat.lahlou@eidia.ueuromed.org', NULL, 'najat.lahlou', 'WljYLAIu', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(869, 'Jettou', 'Rania', 'rania.jettou@eidia.ueuromed.org', NULL, 'rania.jettou', 'AKuxFjZB', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(870, 'Kadiri', 'Driss', 'driss.kadiri@eidia.ueuromed.org', NULL, 'driss.kadiri', 'cfLBJq8s', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(871, 'Zerrad', 'Anas', 'anas.zerrad@eidia.ueuromed.org', NULL, 'anas.zerrad', 'HuwtmNwT', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(872, 'Mansouri', 'Asmaa', 'asmaa.mansouri@eidia.ueuromed.org', NULL, 'asmaa.mansouri', 'E2csuyuh', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(873, 'Ouazzani', 'Sofia', 'sofia.ouazzani@eidia.ueuromed.org', NULL, 'sofia.ouazzani', 'mNnSGnEH', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(874, 'Alami', 'Rania', 'rania.alami@eidia.ueuromed.org', NULL, 'rania.alami', '0J4hUSIX', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(875, 'Fassi', 'Zineb', 'zineb.fassi@eidia.ueuromed.org', NULL, 'zineb.fassi', 'RaHPabtK', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(876, 'Mernissi', 'Reda', 'reda.mernissi@eidia.ueuromed.org', NULL, 'reda.mernissi', 'DPY6SWBq', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(877, 'Benali', 'Lamia', 'lamia.benali@eidia.ueuromed.org', NULL, 'lamia.benali', '7fc7g0QB', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(878, 'Chaoui', 'Taha', 'taha.chaoui@eidia.ueuromed.org', NULL, 'taha.chaoui', 'Sq1h6HcO', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(879, 'Raiss', 'Noura', 'noura.raiss@eidia.ueuromed.org', NULL, 'noura.raiss', 'vJIBDyzU', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(880, 'Zouhair', 'Noura', 'noura.zouhair@eidia.ueuromed.org', NULL, 'noura.zouhair', 'zqKsfqgz', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(881, 'Guedira', 'Hajar', 'hajar.guedira@eidia.ueuromed.org', NULL, 'hajar.guedira', 'JJ48MunF', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(882, 'Idrissi', 'Nizar', 'nizar.idrissi@eidia.ueuromed.org', NULL, 'nizar.idrissi', 'hFipW5va', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(883, 'Sefrioui', 'Reda', 'reda.sefrioui@eidia.ueuromed.org', NULL, 'reda.sefrioui', 'U5vkcg39', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(884, 'Alami', 'Najat', 'najat.alami@eidia.ueuromed.org', NULL, 'najat.alami', 'gJqyIilF', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(885, 'Fassi', 'Driss', 'driss.fassi@eidia.ueuromed.org', NULL, 'driss.fassi', 'JOAk4YNw', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(886, 'Benali', 'Noura', 'noura.benali@eidia.ueuromed.org', NULL, 'noura.benali', 'ieZbMJxJ', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(887, 'Naciri', 'Bilal', 'bilal.naciri@eidia.ueuromed.org', NULL, 'bilal.naciri', 'zLO33l3r', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(888, 'Kadiri', 'Ali', 'ali.kadiri@eidia.ueuromed.org', NULL, 'ali.kadiri', 'cGOOkMJP', 'etudiant', 3, NULL, NULL, '2026-01-04 12:20:59', 1),
+(1156, 'Zaghdane', 'Ihab', 'ihab.zaghdane@eidia.ueuromed.org', NULL, 'ihab.zaghdane', 'T6YaPbNd', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1157, 'Mossaid', 'Abdelmoughit', 'abdelmoughit.mossaid@eidia.ueuromed.org', NULL, 'abdelmoughit.mossaid', 'dXSOEYrn', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1158, 'Zouizra', 'Nizar', 'nizar.zouizra@eidia.ueuromed.org', NULL, 'nizar.zouizra', 'YSdJa65u', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1159, 'Kissiri', 'Nourddine', 'nourddine.kissiri@eidia.ueuromed.org', NULL, 'nourddine.kissiri', 'y9TxRSOr', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1160, 'Filali', 'Omar', 'omar.filali@eidia.ueuromed.org', NULL, 'omar.filali', 'APBYiVUH', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1161, 'Kabbaj', 'Zineb', 'zineb.kabbaj@eidia.ueuromed.org', NULL, 'zineb.kabbaj', 'QNijw3x3', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1162, 'Bennani', 'Yassine', 'yassine.bennani@eidia.ueuromed.org', NULL, 'yassine.bennani', 'ZxWpGU1d', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1163, 'Kabbaj', 'Houda', 'houda.kabbaj@eidia.ueuromed.org', NULL, 'houda.kabbaj', 'rnrC70sJ', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1164, 'Berrada', 'Oussama', 'oussama.berrada@eidia.ueuromed.org', NULL, 'oussama.berrada', 'ruc93z2T', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1165, 'Tahiri', 'Walid', 'walid.tahiri@eidia.ueuromed.org', NULL, 'walid.tahiri', '8fxsbpXZ', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1166, 'Zouhair', 'Ghita', 'ghita.zouhair@eidia.ueuromed.org', NULL, 'ghita.zouhair', 'C058GFxK', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1167, 'Chraibi', 'Rania', 'rania.chraibi@eidia.ueuromed.org', NULL, 'rania.chraibi', 'QtE0es3D', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1168, 'Idrissi', 'Hassan', 'hassan.idrissi@eidia.ueuromed.org', NULL, 'hassan.idrissi', 'iOVE2NFX', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1169, 'Tahiri', 'Ghita', 'ghita.tahiri@eidia.ueuromed.org', NULL, 'ghita.tahiri', '4DXR2K35', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1170, 'Chaoui', 'Asmaa', 'asmaa.chaoui@eidia.ueuromed.org', NULL, 'asmaa.chaoui', 'zSqsDepl', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1171, 'Kadiri', 'Manal', 'manal.kadiri@eidia.ueuromed.org', NULL, 'manal.kadiri', 'lwTLrdXd', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1172, 'Zouhair', 'Brahim', 'brahim.zouhair@eidia.ueuromed.org', NULL, 'brahim.zouhair', 'q55H9dxV', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1173, 'Kadiri', 'Zineb', 'zineb.kadiri@eidia.ueuromed.org', NULL, 'zineb.kadiri', 'pFJwUOYO', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1174, 'Tahiri', 'Noura', 'noura.tahiri@eidia.ueuromed.org', NULL, 'noura.tahiri', '9UI6NQta', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1175, 'Benjelloun', 'Salma', 'salma.benjelloun@eidia.ueuromed.org', NULL, 'salma.benjelloun', 'oEGA3R6V', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1176, 'Idrissi', 'Aya', 'aya.idrissi@eidia.ueuromed.org', NULL, 'aya.idrissi', 'KZPCtXU9', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1177, 'Sefrioui', 'Zineb', 'zineb.sefrioui@eidia.ueuromed.org', NULL, 'zineb.sefrioui', 'pacb1Crn', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1178, 'Alami', 'Manal', 'manal.alami@eidia.ueuromed.org', NULL, 'manal.alami', 'iWkLH3Cs', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1179, 'Mernissi', 'Khalid', 'khalid.mernissi@eidia.ueuromed.org', NULL, 'khalid.mernissi', 'xckAB3G5', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1180, 'Talbi', 'Rania', 'rania.talbi@eidia.ueuromed.org', NULL, 'rania.talbi', 'UioVxAuh', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1181, 'Chraibi', 'Manal', 'manal.chraibi@eidia.ueuromed.org', NULL, 'manal.chraibi', 'RdbdZ5sL', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1182, 'Raiss', 'Manal', 'manal.raiss@eidia.ueuromed.org', NULL, 'manal.raiss', 'cqkwquXq', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1183, 'Kadiri', 'Lamia', 'lamia.kadiri@eidia.ueuromed.org', NULL, 'lamia.kadiri', 'ITwOUCJp', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1184, 'Fassi', 'Mehdi', 'mehdi.fassi@eidia.ueuromed.org', NULL, 'mehdi.fassi', 'qE3EhYVh', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1185, 'Raiss', 'Youssef', 'youssef.raiss@eidia.ueuromed.org', NULL, 'youssef.raiss', 'NmNPSQXi', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1186, 'Zouhair', 'Khalid', 'khalid.zouhair@eidia.ueuromed.org', NULL, 'khalid.zouhair', '9YAPEJF7', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:39', 1),
+(1187, 'Mernissi', 'Rim', 'rim.mernissi@eidia.ueuromed.org', NULL, 'rim.mernissi', 'rbidsmFG', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1188, 'Daoudi', 'Walid', 'walid.daoudi@eidia.ueuromed.org', NULL, 'walid.daoudi', 'MnKOd8fN', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1189, 'Lahlou', 'Salma', 'salma.lahlou@eidia.ueuromed.org', NULL, 'salma.lahlou', 'p0tEWqwf', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1190, 'Tazi', 'Najat', 'najat.tazi@eidia.ueuromed.org', NULL, 'najat.tazi', 'bsd1sfwa', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1191, 'Slaoui', 'Amine', 'amine.slaoui@eidia.ueuromed.org', NULL, 'amine.slaoui', '8I8YQP1h', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1192, 'Naciri', 'Ahmed', 'ahmed.naciri@eidia.ueuromed.org', NULL, 'ahmed.naciri', 'YzsblEl1', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1193, 'Zouhair', 'Yassine', 'yassine.zouhair@eidia.ueuromed.org', NULL, 'yassine.zouhair', 'zTBKBmbn', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1194, 'Guessous', 'Sofia', 'sofia.guessous@eidia.ueuromed.org', NULL, 'sofia.guessous', '9JSRzSY2', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1195, 'Bennani', 'Taha', 'taha.bennani@eidia.ueuromed.org', NULL, 'taha.bennani', '76tqmOtA', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1196, 'Filali', 'Fatima', 'fatima.filali@eidia.ueuromed.org', NULL, 'fatima.filali', 'D2XOQ6FX', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1197, 'Tazi', 'Rania', 'rania.tazi@eidia.ueuromed.org', NULL, 'rania.tazi', '0hfookKy', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1198, 'Raiss', 'Sanae', 'sanae.raiss@eidia.ueuromed.org', NULL, 'sanae.raiss', 'pdVzMSwD', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1199, 'Mernissi', 'Saad', 'saad.mernissi@eidia.ueuromed.org', NULL, 'saad.mernissi', 'Yn3FEi65', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1200, 'Filali', 'Omar', 'omar.filali2@eidia.ueuromed.org', NULL, 'omar.filali2', 'lxKsU5MF', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1201, 'Chraibi', 'Mehdi', 'mehdi.chraibi@eidia.ueuromed.org', NULL, 'mehdi.chraibi', 'fW1xKO9J', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1202, 'Zouhair', 'Ahmed', 'ahmed.zouhair@eidia.ueuromed.org', NULL, 'ahmed.zouhair', 'owv5XBqc', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1203, 'Tazi', 'Kaoutar', 'kaoutar.tazi@eidia.ueuromed.org', NULL, 'kaoutar.tazi', 'qkytbvH0', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1204, 'Slaoui', 'Latifa', 'latifa.slaoui@eidia.ueuromed.org', NULL, 'latifa.slaoui', 'DxwpWyVc', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1205, 'Idrissi', 'Latifa', 'latifa.idrissi@eidia.ueuromed.org', NULL, 'latifa.idrissi', 'oDC9cy3I', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1206, 'Benjelloun', 'Anas', 'anas.benjelloun@eidia.ueuromed.org', NULL, 'anas.benjelloun', 'iKVgazjs', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1207, 'Tahiri', 'Mohamed', 'mohamed.tahiri@eidia.ueuromed.org', NULL, 'mohamed.tahiri', 'F5kO7Mlv', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1208, 'Chraibi', 'Meryem', 'meryem.chraibi@eidia.ueuromed.org', NULL, 'meryem.chraibi', 'ImUtFr4h', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1209, 'Idrissi', 'Imane', 'imane.idrissi@eidia.ueuromed.org', NULL, 'imane.idrissi', '2TxfhdDf', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1210, 'Berrada', 'Omar', 'omar.berrada@eidia.ueuromed.org', NULL, 'omar.berrada', '1kRqTxK3', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1211, 'Talbi', 'Rim', 'rim.talbi@eidia.ueuromed.org', NULL, 'rim.talbi', 'Y1lc1ULU', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1212, 'Alami', 'Youssef', 'youssef.alami@eidia.ueuromed.org', NULL, 'youssef.alami', 'pyFoSekQ', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1213, 'Slaoui', 'Najat', 'najat.slaoui@eidia.ueuromed.org', NULL, 'najat.slaoui', '5PVvHwCa', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1214, 'Berrada', 'Ghita', 'ghita.berrada@eidia.ueuromed.org', NULL, 'ghita.berrada', 'ZKkzRixT', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1215, 'Chaoui', 'Sanae', 'sanae.chaoui@eidia.ueuromed.org', NULL, 'sanae.chaoui', 'lqi5nXnd', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1216, 'Benali', 'Amine', 'amine.benali@eidia.ueuromed.org', NULL, 'amine.benali', 'SZq6OBca', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1217, 'Raiss', 'Youssef', 'youssef.raiss2@eidia.ueuromed.org', NULL, 'youssef.raiss2', 'JLCrdQyu', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1218, 'Lahlou', 'Meryem', 'meryem.lahlou@eidia.ueuromed.org', NULL, 'meryem.lahlou', 'GV85eOH0', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1219, 'Chaoui', 'Amine', 'amine.chaoui@eidia.ueuromed.org', NULL, 'amine.chaoui', '1JhQU32e', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1220, 'Benjelloun', 'Anas', 'anas.benjelloun2@eidia.ueuromed.org', NULL, 'anas.benjelloun2', 'ZDR1jCa4', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1221, 'Sefrioui', 'Rim', 'rim.sefrioui@eidia.ueuromed.org', NULL, 'rim.sefrioui', 'ttjiY60T', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1222, 'Bennis', 'Driss', 'driss.bennis@eidia.ueuromed.org', NULL, 'driss.bennis', '8GFoZE6V', 'etudiant', 1, NULL, NULL, '2026-01-04 12:25:40', 1),
+(1223, 'Bennis', 'Taha', 'taha.bennis2@eidia.ueuromed.org', NULL, 'taha.bennis2', 'NY6bshtp', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1224, 'Benali', 'Sarah', 'sarah.benali@eidia.ueuromed.org', NULL, 'sarah.benali', 'Mpcx5J86', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1225, 'Bennani', 'Brahim', 'brahim.bennani@eidia.ueuromed.org', NULL, 'brahim.bennani', '3KTePTkx', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1226, 'Bennani', 'Hassan', 'hassan.bennani@eidia.ueuromed.org', NULL, 'hassan.bennani', 'UyPdJPBL', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1227, 'Bennani', 'Ahmed', 'ahmed.bennani@eidia.ueuromed.org', NULL, 'ahmed.bennani', 'Yoeh3Rg3', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1228, 'Kadiri', 'Meryem', 'meryem.kadiri@eidia.ueuromed.org', NULL, 'meryem.kadiri', '71p3vLeB', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1229, 'Tazi', 'Ahmed', 'ahmed.tazi2@eidia.ueuromed.org', NULL, 'ahmed.tazi2', 'TrUndjuH', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1230, 'Jettou', 'Manal', 'manal.jettou@eidia.ueuromed.org', NULL, 'manal.jettou', 'zRp7nCPk', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1231, 'Guedira', 'Sanae', 'sanae.guedira@eidia.ueuromed.org', NULL, 'sanae.guedira', 'KHoNxrDO', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1232, 'Mernissi', 'Mohamed', 'mohamed.mernissi@eidia.ueuromed.org', NULL, 'mohamed.mernissi', 'biSsbKtb', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1233, 'Talbi', 'Amine', 'amine.talbi@eidia.ueuromed.org', NULL, 'amine.talbi', 'zUFUu7HF', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1234, 'Filali', 'Sarah', 'sarah.filali@eidia.ueuromed.org', NULL, 'sarah.filali', 'QHGYHbMw', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1235, 'Idrissi', 'Mohamed', 'mohamed.idrissi@eidia.ueuromed.org', NULL, 'mohamed.idrissi', 'gV4HBLBV', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1236, 'Zouhair', 'Hassan', 'hassan.zouhair@eidia.ueuromed.org', NULL, 'hassan.zouhair', 'aYWjJiS0', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1237, 'Idrissi', 'Asmaa', 'asmaa.idrissi@eidia.ueuromed.org', NULL, 'asmaa.idrissi', 'VcWbeuSo', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1238, 'Ouazzani', 'Lamia', 'lamia.ouazzani@eidia.ueuromed.org', NULL, 'lamia.ouazzani', 'qOoRl8aX', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1239, 'Bennis', 'Brahim', 'brahim.bennis@eidia.ueuromed.org', NULL, 'brahim.bennis', '6qXuC4jS', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1240, 'Tahiri', 'Salma', 'salma.tahiri@eidia.ueuromed.org', NULL, 'salma.tahiri', 'qyeOn2ex', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1241, 'Lahlou', 'Ghita', 'ghita.lahlou@eidia.ueuromed.org', NULL, 'ghita.lahlou', 'Jx8VeqTJ', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:51', 1),
+(1242, 'Ouazzani', 'Najat', 'najat.ouazzani@eidia.ueuromed.org', NULL, 'najat.ouazzani', 'noCNGrUz', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:52', 1),
+(1243, 'Naciri', 'Sofia', 'sofia.naciri@eidia.ueuromed.org', NULL, 'sofia.naciri', 'xfn0XaTq', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:52', 1),
+(1244, 'Tazi', 'Youssef', 'youssef.tazi@eidia.ueuromed.org', NULL, 'youssef.tazi', 'EBIIh1TO', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:52', 1),
+(1245, 'Bennis', 'Mehdi', 'mehdi.bennis@eidia.ueuromed.org', NULL, 'mehdi.bennis', '5QfVbkNg', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:52', 1),
+(1246, 'Idrissi', 'Hamza', 'hamza.idrissi@eidia.ueuromed.org', NULL, 'hamza.idrissi', '7i59xhxB', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:52', 1),
+(1247, 'Zouhair', 'Reda', 'reda.zouhair@eidia.ueuromed.org', NULL, 'reda.zouhair', 'nz6l1JrM', 'etudiant', 5, NULL, NULL, '2026-01-04 12:25:52', 1),
+(1248, 'Kadiri', 'Zineb', 'zineb.kadiri2@eidia.ueuromed.org', NULL, 'zineb.kadiri2', 'wwxZGUG1', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1249, 'Filali', 'Kenza', 'kenza.filali@eidia.ueuromed.org', NULL, 'kenza.filali', '7vMYw2vC', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1250, 'Chraibi', 'Hamza', 'hamza.chraibi@eidia.ueuromed.org', NULL, 'hamza.chraibi', 'ANWwcHKr', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1251, 'Alami', 'Asmaa', 'asmaa.alami@eidia.ueuromed.org', NULL, 'asmaa.alami', 'OUw90VFq', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1252, 'Fassi', 'Ali', 'ali.fassi@eidia.ueuromed.org', NULL, 'ali.fassi', 'SAjUmHiI', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1253, 'Benjelloun', 'Mohamed', 'mohamed.benjelloun@eidia.ueuromed.org', NULL, 'mohamed.benjelloun', '4F8MJqlK', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1254, 'Daoudi', 'Mohamed', 'mohamed.daoudi@eidia.ueuromed.org', NULL, 'mohamed.daoudi', '3HDjy66G', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1255, 'Berrada', 'Ali', 'ali.berrada@eidia.ueuromed.org', NULL, 'ali.berrada', 'A39bBsTn', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1256, 'Slaoui', 'Najat', 'najat.slaoui2@eidia.ueuromed.org', NULL, 'najat.slaoui2', 'xvm9bJVd', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1257, 'Bennis', 'Asmaa', 'asmaa.bennis@eidia.ueuromed.org', NULL, 'asmaa.bennis', 'EujIzNPt', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1258, 'Bennis', 'Taha', 'taha.bennis@eidia.ueuromed.org', NULL, 'taha.bennis', 'dr8BPZLw', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1259, 'Ouazzani', 'Sanae', 'sanae.ouazzani2@eidia.ueuromed.org', NULL, 'sanae.ouazzani2', 'BXsN1Hgu', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1260, 'Mernissi', 'Rania', 'rania.mernissi@eidia.ueuromed.org', NULL, 'rania.mernissi', 'paZ5KVRe', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1261, 'El Amrani', 'Ismail', 'ismail.elamrani@eidia.ueuromed.org', NULL, 'ismail.elamrani', 'qUP6Tjdf', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1262, 'Benali', 'Amine', 'amine.benali2@eidia.ueuromed.org', NULL, 'amine.benali2', '0EeWb4mY', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1263, 'Tazi', 'Aya', 'aya.tazi@eidia.ueuromed.org', NULL, 'aya.tazi', 'MTtcY1RG', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1264, 'Talbi', 'Manal', 'manal.talbi@eidia.ueuromed.org', NULL, 'manal.talbi', '9teSBbQY', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1265, 'Bennani', 'Nizar', 'nizar.bennani@eidia.ueuromed.org', NULL, 'nizar.bennani', 'u4A2DnVc', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1266, 'Berrada', 'Kenza', 'kenza.berrada@eidia.ueuromed.org', NULL, 'kenza.berrada', 'ylnRaHRb', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1267, 'Alami', 'Manal', 'manal.alami2@eidia.ueuromed.org', NULL, 'manal.alami2', 'BIPOUVUq', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:02', 1),
+(1268, 'Idrissi', 'Saad', 'saad.idrissi@eidia.ueuromed.org', NULL, 'saad.idrissi', 'qJZNkdUf', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1269, 'El Amrani', 'Mohamed', 'mohamed.elamrani@eidia.ueuromed.org', NULL, 'mohamed.elamrani', 'MzQGeAil', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1270, 'Sefrioui', 'Latifa', 'latifa.sefrioui@eidia.ueuromed.org', NULL, 'latifa.sefrioui', 'QPwsfMoi', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1271, 'Benali', 'Meryem', 'meryem.benali@eidia.ueuromed.org', NULL, 'meryem.benali', 'Zq6wqRKr', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1272, 'Berrada', 'Bilal', 'bilal.berrada@eidia.ueuromed.org', NULL, 'bilal.berrada', 'WqX2z0ad', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1273, 'Zouhair', 'Sofia', 'sofia.zouhair@eidia.ueuromed.org', NULL, 'sofia.zouhair', 'fVczA5Vv', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1274, 'Naciri', 'Youssef', 'youssef.naciri2@eidia.ueuromed.org', NULL, 'youssef.naciri2', 'VpEBJP80', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1275, 'Bennani', 'Walid', 'walid.bennani@eidia.ueuromed.org', NULL, 'walid.bennani', 'KflNr5Oh', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1276, 'Zerrad', 'Hajar', 'hajar.zerrad@eidia.ueuromed.org', NULL, 'hajar.zerrad', 'Xgl7yFKz', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1277, 'Guedira', 'Samir', 'samir.guedira@eidia.ueuromed.org', NULL, 'samir.guedira', '5tcxDW82', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1278, 'Lahlou', 'Rachid', 'rachid.lahlou@eidia.ueuromed.org', NULL, 'rachid.lahlou', 'JjD6qqO7', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1279, 'Chaoui', 'Yassine', 'yassine.chaoui@eidia.ueuromed.org', NULL, 'yassine.chaoui', 'AJiXFYTM', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1280, 'Talbi', 'Yassine', 'yassine.talbi@eidia.ueuromed.org', NULL, 'yassine.talbi', 'QdYc8hHr', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1281, 'Raiss', 'Anas', 'anas.raiss@eidia.ueuromed.org', NULL, 'anas.raiss', '8nMzVM1a', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1282, 'Bennis', 'Najat', 'najat.bennis@eidia.ueuromed.org', NULL, 'najat.bennis', 'uS4Yq9yG', 'etudiant', 4, NULL, NULL, '2026-01-04 12:26:03', 1),
+(1416, 'Bennis', NULL, 'Taha', NULL, 'taha.bennis2@eidia.ueuromed.org', '$2y$10$oOgIJVCKGtrYMqpHUhwFXuFJ32xp6t1SuBkfp/kO9hRarDAFU0ibi', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:57', 1),
+(1417, 'Filali', NULL, 'Sarah', NULL, 'sarah.filali@eidia.ueuromed.org', '$2y$10$5cqwQkty8t8U7qNXuyc2uenLB0ZVJgHIJi16ZnVVVizYkUU7zLln.', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:57', 1),
+(1418, 'Bennis', NULL, 'Brahim', NULL, 'brahim.bennis@eidia.ueuromed.org', '$2y$10$isBJSY36EfIr0MGd2NEO2.7HRmWq1gdb1JtIH.cWTdjp6DXsRRMlS', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:58', 1),
+(1419, 'Zouhair', NULL, 'Hassan', NULL, 'hassan.zouhair@eidia.ueuromed.org', '$2y$10$9fe4x3Y0ZqmH1Pwiu.zyjeh4m5JVS2imQovCW1WOrfxXBCDqsn4SO', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:58', 1),
+(1420, 'Tazi', NULL, 'Ahmed', NULL, 'ahmed.tazi2@eidia.ueuromed.org', '$2y$10$46S.p/y7N5oyxz5YVAKFo.b531ktuVGmmIzzGsKSAkOUa5yrqb6V6', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:58', 1),
+(1421, 'Kadiri', NULL, 'Meryem', NULL, 'meryem.kadiri@eidia.ueuromed.org', '$2y$10$eOS.6Q/Kcf9tIQk.vK2TpuVSjx2spvkimID95UDeL7oqodvE5DmB2', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:58', 1),
+(1423, 'Jettou', NULL, 'Manal', NULL, 'manal.jettou@eidia.ueuromed.org', '$2y$10$6pPnmxFvasCPFkLX8nOPgeOw6h93pjtqy8t9F8Ep4r6onC7x/HUye', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:58', 1),
+(1424, 'Guedira', NULL, 'Sanae', NULL, 'sanae.guedira@eidia.ueuromed.org', '$2y$10$2dsiv2qb0gBd2/etfALgN.KjleSkNbOlOVcFe90t0BPlHbY1PDjgK', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:58', 1),
+(1425, 'Idrissi', NULL, 'Mohamed', NULL, 'mohamed.idrissi@eidia.ueuromed.org', '$2y$10$wc4Qzs1UwtdQjVy6HXjx9un7drj/asLpL0rCWxSYHEaw5t9KudR/W', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:58', 1),
+(1426, 'Talbi', NULL, 'Amine', NULL, 'amine.talbi@eidia.ueuromed.org', '$2y$10$E6VSTavC0qUhYPgPIOluw.5g/jqYfou1WtGr9Jj3Gouimq1a9Vwy2', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:58', 1),
+(1430, 'Idrissi', NULL, 'Asmaa', NULL, 'asmaa.idrissi@eidia.ueuromed.org', '$2y$10$RNZg7EbRfCRt63D9ZM074OmfoLdzFqGPbuehKJ18DU4gDP3qsOpdO', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:59', 1),
+(1431, 'Ouazzani', NULL, 'Lamia', NULL, 'lamia.ouazzani@eidia.ueuromed.org', '$2y$10$AdD79/T42G/lrKX/ajgMKus7fW8IODBv0Y6OKQ5GPjaJwcMQa3IGK', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:59', 1),
+(1433, 'Tahiri', NULL, 'Salma', NULL, 'salma.tahiri@eidia.ueuromed.org', '$2y$10$WK1UMTWQJ1S4OaBB0gcxFe97zWukhCuuu4AEROLc8smIUHJQTMG52', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:59', 1),
+(1434, 'Lahlou', NULL, 'Ghita', NULL, 'ghita.lahlou@eidia.ueuromed.org', '$2y$10$IApEBe3oP1JprgcHmcFEk.N.ZsQMmTIwAXa8u34pi5C0ERZf6GJTS', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:59', 1),
+(1435, 'Ouazzani', NULL, 'Najat', NULL, 'najat.ouazzani@eidia.ueuromed.org', '$2y$10$vzz5kwpZBlVXcYVkJqWmaecHDNhhHFZTK3O5BWgl/x5FXqRNQF.dC', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:59', 1),
+(1436, 'Naciri', NULL, 'Sofia', NULL, 'sofia.naciri@eidia.ueuromed.org', '$2y$10$cA4rmaH18VzTe73jV11iqe/WyyMvmYnb4VR0KiuiGhmOB9zFYhUq6', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:59', 1),
+(1437, 'Tazi', NULL, 'Youssef', NULL, 'youssef.tazi@eidia.ueuromed.org', '$2y$10$E0FPFzwE7fbC4BFhk9ZWFeyhrbbWHGW.BW2ksZqOswp9e75Y3k3cK', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:59', 1),
+(1438, 'Bennis', NULL, 'Mehdi', NULL, 'mehdi.bennis@eidia.ueuromed.org', '$2y$10$861S7FYhinKAc5lmts0JxOM7Zg7Gk9.yvWiTLErDQLizohS9Gixw2', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:59', 1),
+(1439, 'Idrissi', NULL, 'Hamza', NULL, 'hamza.idrissi@eidia.ueuromed.org', '$2y$10$SV5Zkv2a85..iDend6TRUOCbKHVR1BLi0VG3fNszK.GuEXzQWJUse', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:59', 1),
+(1440, 'Zouhair', NULL, 'Reda', NULL, 'reda.zouhair@eidia.ueuromed.org', '$2y$10$rxXIfYyJtccFQkg2exnalebG0RdZrfGtkKLjdG1yCvBPkRWx7YFpi', 'etudiant', 3, NULL, NULL, '2026-01-04 12:40:59', 1);
 
 --
 -- Indexes for dumped tables
@@ -546,8 +632,13 @@ ALTER TABLE `jury_soutenance`
 --
 ALTER TABLE `messages`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `expediteur_id` (`expediteur_id`),
-  ADD KEY `fk_messages_projet_cascade` (`projet_id`);
+  ADD KEY `projet_id` (`projet_id`);
+
+--
+-- Indexes for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `periodes`
@@ -561,20 +652,14 @@ ALTER TABLE `periodes`
 --
 ALTER TABLE `projets`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `etudiant_id` (`etudiant_id`),
-  ADD KEY `binome_id` (`binome_id`),
-  ADD KEY `encadrant_id` (`encadrant_id`),
-  ADD KEY `filiere_id` (`filiere_id`),
-  ADD KEY `fk_pref1` (`encadrant_pref1_id`),
-  ADD KEY `fk_pref2` (`encadrant_pref2_id`),
-  ADD KEY `fk_pref3` (`encadrant_pref3_id`);
+  ADD KEY `etudiant_id` (`etudiant_id`);
 
 --
 -- Indexes for table `rapports`
 --
 ALTER TABLE `rapports`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_rapports_projet_cascade` (`projet_id`);
+  ADD KEY `projet_id` (`projet_id`);
 
 --
 -- Indexes for table `salles`
@@ -587,8 +672,7 @@ ALTER TABLE `salles`
 --
 ALTER TABLE `soutenances`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `projet_id` (`projet_id`),
-  ADD KEY `salle_id` (`salle_id`);
+  ADD KEY `projet_id` (`projet_id`);
 
 --
 -- Indexes for table `users`
@@ -613,7 +697,7 @@ ALTER TABLE `disponibilites`
 -- AUTO_INCREMENT for table `disponibilites_profs`
 --
 ALTER TABLE `disponibilites_profs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `filieres`
@@ -637,7 +721,13 @@ ALTER TABLE `jury_soutenance`
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `periodes`
@@ -649,13 +739,13 @@ ALTER TABLE `periodes`
 -- AUTO_INCREMENT for table `projets`
 --
 ALTER TABLE `projets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `rapports`
 --
 ALTER TABLE `rapports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `salles`
@@ -673,7 +763,7 @@ ALTER TABLE `soutenances`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=258;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1441;
 
 --
 -- Constraints for dumped tables
@@ -718,8 +808,7 @@ ALTER TABLE `jury_soutenance`
 -- Constraints for table `messages`
 --
 ALTER TABLE `messages`
-  ADD CONSTRAINT `fk_messages_projet_cascade` FOREIGN KEY (`projet_id`) REFERENCES `projets` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`expediteur_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`projet_id`) REFERENCES `projets` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `periodes`
@@ -731,26 +820,19 @@ ALTER TABLE `periodes`
 -- Constraints for table `projets`
 --
 ALTER TABLE `projets`
-  ADD CONSTRAINT `fk_pref1` FOREIGN KEY (`encadrant_pref1_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `fk_pref2` FOREIGN KEY (`encadrant_pref2_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `fk_pref3` FOREIGN KEY (`encadrant_pref3_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `projets_ibfk_1` FOREIGN KEY (`etudiant_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `projets_ibfk_2` FOREIGN KEY (`binome_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `projets_ibfk_3` FOREIGN KEY (`encadrant_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `projets_ibfk_4` FOREIGN KEY (`filiere_id`) REFERENCES `filieres` (`id`);
+  ADD CONSTRAINT `projets_ibfk_1` FOREIGN KEY (`etudiant_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `rapports`
 --
 ALTER TABLE `rapports`
-  ADD CONSTRAINT `fk_rapports_projet_cascade` FOREIGN KEY (`projet_id`) REFERENCES `projets` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `rapports_ibfk_1` FOREIGN KEY (`projet_id`) REFERENCES `projets` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `soutenances`
 --
 ALTER TABLE `soutenances`
-  ADD CONSTRAINT `fk_soutenances_projet_cascade` FOREIGN KEY (`projet_id`) REFERENCES `projets` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `soutenances_ibfk_2` FOREIGN KEY (`salle_id`) REFERENCES `salles` (`id`);
+  ADD CONSTRAINT `soutenances_ibfk_1` FOREIGN KEY (`projet_id`) REFERENCES `projets` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `users`
