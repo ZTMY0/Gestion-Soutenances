@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
 require_once '../../../config/database.php';
 
@@ -10,6 +13,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'prof') {
 $prof_id = $_SESSION['user_id'];
 $message = '';
 $messageType = '';
+
+// Tableau de traduction des mois (Pour remplacer strftime)
+$moisFr = [
+    1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril',
+    5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août',
+    9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre'
+];
 
 // TRAITEMENT : Saisie de note
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['saisir_note'])) {
@@ -23,10 +33,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['saisir_note'])) {
         $stmt->execute([$soutenance_id, $prof_id]);
         
         if ($stmt->fetch()) {
-            // Note stockée dans la table soutenances pour l'instant (note_finale)
-            // Ou on peut ajouter une colonne note à jurys
-            $message = "Note enregistrée avec succès !";
-            $messageType = "success";
+            // Mise à jour de la note dans la table soutenances
+            $stmtUpdate = $pdo->prepare("UPDATE soutenances SET note_finale = ? WHERE id = ?");
+            if ($stmtUpdate->execute([$note, $soutenance_id])) {
+                
+                // Optionnel : Mettre à jour le projet en "Terminé" si la note est validée
+                // Récupérer l'ID du projet
+                $stmtProj = $pdo->prepare("SELECT projet_id FROM soutenances WHERE id = ?");
+                $stmtProj->execute([$soutenance_id]);
+                $pid = $stmtProj->fetchColumn();
+                if($pid) {
+                    $pdo->prepare("UPDATE projets SET statut = 'soutenu', note_finale = ? WHERE id = ?")->execute([$note, $pid]);
+                }
+
+                $message = "Note enregistrée avec succès !";
+                $messageType = "success";
+            } else {
+                $message = "Erreur lors de l'enregistrement de la note.";
+                $messageType = "danger";
+            }
         } else {
             $message = "Erreur : Vous n'êtes pas membre de ce jury.";
             $messageType = "danger";
@@ -37,24 +62,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['saisir_note'])) {
     }
 }
 
-// Récupérer les jurys du prof (utilise la table jurys, pas jury_soutenance)
+// Récupérer les jurys du prof
 $sql = "SELECT s.id, s.date_soutenance, s.note_finale,
-               p.titre AS projet_titre,
-               p.description AS projet_description,
-               u.nom AS etudiant_nom,
-               b.nom AS binome_nom,
-               f.nom AS filiere_nom,
-               sal.nom AS salle_nom,
-               j.role_jury AS mon_role
-        FROM soutenances s
-        JOIN jurys j ON j.soutenance_id = s.id
-        JOIN projets p ON s.projet_id = p.id
-        JOIN users u ON p.etudiant_id = u.id
-        LEFT JOIN users b ON p.binome_id = b.id
-        LEFT JOIN filieres f ON p.filiere_id = f.id
-        LEFT JOIN salles sal ON s.salle_id = sal.id
-        WHERE j.prof_id = ?
-        ORDER BY s.date_soutenance DESC";
+             p.titre AS projet_titre,
+             p.description AS projet_description,
+             u.nom AS etudiant_nom,
+             p.binome_email AS binome_email,
+             f.nom AS filiere_nom,
+             s.salle AS salle_nom,
+             j.role_jury AS mon_role
+         FROM soutenances s
+         JOIN jurys j ON j.soutenance_id = s.id
+         JOIN projets p ON s.projet_id = p.id
+         JOIN users u ON p.etudiant_id = u.id
+         LEFT JOIN filieres f ON p.filiere_id = f.id
+         WHERE j.prof_id = ?
+         ORDER BY s.date_soutenance ASC";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$prof_id]);
@@ -89,7 +112,7 @@ foreach ($jurysPasses as $j) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes Jurys - Espace Professeur</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../../../public/assets/css/style.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .jury-card {
             transition: all 0.3s ease;
@@ -115,19 +138,14 @@ foreach ($jurysPasses as $j) {
     </style>
 </head>
 <body class="bg-light">
-    <nav class="navbar navbar-dark bg-dark px-4 shadow-sm mb-4">
-        <div class="d-flex align-items-center">
-            <span class="navbar-brand mb-0 h1">
-                <i class="fas fa-chalkboard-teacher me-2"></i>Espace Professeur
-            </span>
-        </div>
-        <div class="d-flex align-items-center">
-            <span class="text-white me-3 d-none d-md-block">
-                <i class="fas fa-user me-1"></i><?php echo htmlspecialchars($_SESSION['user_nom']); ?>
-            </span>
-            <a href="../auth/logout.php" class="btn btn-outline-light btn-sm">
-                <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
-            </a>
+    
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2 mb-4">
+        <div class="container">
+            <a class="navbar-brand text-uppercase fw-bold" href="index.php">UEMF Espace Prof</a>
+            <div class="d-flex align-items-center text-white-50">
+                <span class="me-3 small text-uppercase"><i class="fas fa-chalkboard-teacher me-2"></i>Pr. <?php echo $_SESSION['user_nom']; ?></span>
+                <a href="../auth/logout.php" class="text-white"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
         </div>
     </nav>
 
@@ -150,7 +168,6 @@ foreach ($jurysPasses as $j) {
             </div>
         <?php endif; ?>
 
-        <!-- Stats -->
         <div class="row mb-4">
             <div class="col-md-4">
                 <div class="card bg-primary text-white">
@@ -178,7 +195,6 @@ foreach ($jurysPasses as $j) {
             </div>
         </div>
 
-        <!-- Jurys à venir -->
         <?php if (!empty($jurysAVenir)): ?>
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-warning text-dark">
@@ -194,11 +210,13 @@ foreach ($jurysPasses as $j) {
                                     <div class="fs-4 fw-bold text-primary">
                                         <?= date('d', strtotime($jury['date_soutenance'])) ?>
                                     </div>
+                                    
                                     <div class="text-muted small">
-                                        <?= strftime('%B', strtotime($jury['date_soutenance'])) ?>
+                                        <?= $moisFr[date('n', strtotime($jury['date_soutenance']))] ?>
                                     </div>
+                                    
                                     <div class="text-muted small">
-                                        <?= substr($jury['heure_debut'], 0, 5) ?>
+                                        <?= date('H:i', strtotime($jury['date_soutenance'])) ?>
                                     </div>
                                 </div>
                             </div>
@@ -206,8 +224,8 @@ foreach ($jurysPasses as $j) {
                                 <h5 class="mb-1"><?= htmlspecialchars($jury['projet_titre']) ?></h5>
                                 <p class="text-muted mb-2">
                                     <i class="fas fa-user me-1"></i><?= htmlspecialchars($jury['etudiant_nom']) ?>
-                                    <?php if ($jury['binome_nom']): ?>
-                                        & <?= htmlspecialchars($jury['binome_nom']) ?>
+                                    <?php if (!empty($jury['binome_email'])): ?>
+                                        & <?= htmlspecialchars($jury['binome_email']) ?>
                                     <?php endif; ?>
                                 </p>
                                 <span class="badge bg-secondary me-2">
@@ -233,8 +251,11 @@ foreach ($jurysPasses as $j) {
                                     <?= ucfirst($jury['mon_role'] ?? 'Membre') ?>
                                 </span>
                             </div>
+                            
                             <div class="col-md-2 text-end">
-                                <!-- Rapport à ajouter plus tard -->
+                                <form method="POST" class="d-flex gap-2">
+                                    <input type="hidden" name="soutenance_id" value="<?= $jury['id'] ?>">
+                                    </form>
                             </div>
                         </div>
                     </div>
@@ -244,7 +265,6 @@ foreach ($jurysPasses as $j) {
         </div>
         <?php endif; ?>
 
-        <!-- Jurys passés -->
         <?php if (!empty($jurysPasses)): ?>
         <div class="card shadow-sm">
             <div class="card-header bg-secondary text-white">
@@ -265,17 +285,28 @@ foreach ($jurysPasses as $j) {
                                 <h6 class="mb-1"><?= htmlspecialchars($jury['projet_titre']) ?></h6>
                                 <small class="text-muted">
                                     <?= htmlspecialchars($jury['etudiant_nom']) ?>
-                                    <?php if (!empty($jury['binome_nom'])): ?> & <?= htmlspecialchars($jury['binome_nom']) ?><?php endif; ?>
+                                    <?php if (!empty($jury['binome_email'])): ?> & <?= htmlspecialchars($jury['binome_email']) ?><?php endif; ?>
                                 </small>
                             </div>
                             <div class="col-md-2 text-center">
                                 <span class="badge bg-secondary"><?= ucfirst($jury['mon_role'] ?? 'Membre') ?></span>
                             </div>
+                            
                             <div class="col-md-4">
                                 <?php if ($aNote): ?>
-                                    <span class="badge bg-success fs-6"><?= number_format($jury['note_finale'], 1) ?>/20</span>
+                                    <div class="text-center">
+                                        <span class="badge bg-success fs-5 px-3 py-2"><?= number_format($jury['note_finale'], 2) ?> / 20</span>
+                                        <div class="small text-muted mt-1"><i class="fas fa-check-circle"></i> Noté</div>
+                                    </div>
                                 <?php else: ?>
-                                    <span class="badge bg-warning text-dark">En attente de note finale</span>
+                                    <form method="POST" class="d-flex align-items-center gap-2">
+                                        <input type="hidden" name="soutenance_id" value="<?= $jury['id'] ?>">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text fw-bold">Note</span>
+                                            <input type="number" step="0.1" min="0" max="20" name="note" class="form-control" placeholder="/20" required>
+                                            <button type="submit" name="saisir_note" class="btn btn-primary fw-bold">OK</button>
+                                        </div>
+                                    </form>
                                 <?php endif; ?>
                             </div>
                         </div>
