@@ -76,10 +76,43 @@
   ```php
   if($_SESSION['user_role'] !== 'directeur') { header('Location: ../auth/login.php'); exit(); }
 
-### 4. NOURDDINE (Responsable Secrétaire Générale & Reporting) - 🔄 EN COURS
-* **Logistique :** Référentiel des salles (Capacité, équipements type vidéoprojecteur/visio).
-* **Reporting PDF :** Automatisation des Convocations, Grilles d'évaluation et Attestations de réussite.
-* **Archivage :** Numérisation et classement des PV signés par année universitaire.
+# MODULE ASSISTANTE GÉNÉRAL - NOURDDINE (TASKS)
+
+**Objectif :** Gestion logistique des salles, génération des documents officiels (PDF) et archivage numérique.
+
+---
+
+## 1. GESTION DES SALLES & LOGISTIQUE
+*Fichier cible : `src/views/assistante/salles.php`*
+- [ ] **Référentiel des salles :** Créer une interface pour lister les salles disponibles (Nom, Bâtiment, Capacité).
+- [ ] **Gestion des équipements :** Ajouter des tags pour chaque salle (Vidéoprojecteur, Visio, Wi-Fi).
+- [ ] **Planning d'occupation :** Vue simple pour vérifier qu'une salle n'est pas réservée pour deux soutenances simultanées.
+
+## 2. GÉNÉRATION AUTOMATIQUE (PDF)
+*Fichiers cibles : `src/services/PdfService.php` & `src/views/assistante/documents.php`*
+- [ ] **Convocations :** Générer les convocations PDF personnalisées pour les étudiants et les membres du jury (Date, Heure, Salle).
+- [ ] **Feuilles d'émargement :** Créer un document PDF regroupant les noms des membres du jury pour signature physique le jour J.
+- [ ] **PV de Soutenance :** Maquetter le Procès-Verbal officiel qui récupère automatiquement les notes et mentions finales.
+
+## 3. ARCHIVAGE & RÉCEPTION
+*Fichier cible : `src/views/assistante/archivage.php`*
+- [ ] **Collecte des PV :** Interface pour uploader les PV scannés après signature ou confirmer la réception des PV numériques.
+- [ ] **Organisation du dépôt :** Système de classement automatique des fichiers : `Archives/ANNEE/FILIERE/NOM_ETUDIANT_PV.pdf`.
+- [ ] **Attestations :** Générer une attestation de réussite provisoire une fois le PV validé et signé.
+
+## 4. COMMUNICATION ADMINISTRATIVE
+*Fichier cible : `src/views/assistante/notifications.php`*
+- [ ] **Envoi des documents :** Interface pour envoyer par email les convocations générées en un clic.
+- [ ] **Relances :** Envoyer des rappels automatiques aux jurys à J-2 de la soutenance.
+
+---
+
+## CONTRAINTES TECHNIQUES
+- [ ] **Bibliothèque PDF :** Intégrer **FPDF** ou **DomPDF** dans le dossier `vendor/` ou `libs/`.
+- [ ] **Héritage CSS :** Utiliser exclusivement `<link rel="stylesheet" href="../../../public/assets/css/style.css">`.
+- [ ] **Sécurité (RBAC) :** Vérifier en haut de chaque fichier : 
+  ```php
+  if($_SESSION['user_role'] !== 'assistante') { header('Location: ../auth/login.php'); exit(); }
 
 ---
 
