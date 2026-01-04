@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 session_start();
 require_once '../../../config/database.php';
 
@@ -39,22 +42,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['saisir_note'])) {
 
 // Récupérer les jurys du prof (utilise la table jurys, pas jury_soutenance)
 $sql = "SELECT s.id, s.date_soutenance, s.note_finale,
-               p.titre AS projet_titre,
-               p.description AS projet_description,
-               u.nom AS etudiant_nom,
-               b.nom AS binome_nom,
-               f.nom AS filiere_nom,
-               sal.nom AS salle_nom,
-               j.role_jury AS mon_role
-        FROM soutenances s
-        JOIN jurys j ON j.soutenance_id = s.id
-        JOIN projets p ON s.projet_id = p.id
-        JOIN users u ON p.etudiant_id = u.id
-        LEFT JOIN users b ON p.binome_id = b.id
-        LEFT JOIN filieres f ON p.filiere_id = f.id
-        LEFT JOIN salles sal ON s.salle_id = sal.id
-        WHERE j.prof_id = ?
-        ORDER BY s.date_soutenance DESC";
+             p.titre AS projet_titre,
+             p.description AS projet_description,
+             u.nom AS etudiant_nom,
+             p.binome_email AS binome_email,
+             f.nom AS filiere_nom,
+             s.salle AS salle_nom,
+             j.role_jury AS mon_role
+         FROM soutenances s
+         JOIN jurys j ON j.soutenance_id = s.id
+         JOIN projets p ON s.projet_id = p.id
+         JOIN users u ON p.etudiant_id = u.id
+         LEFT JOIN filieres f ON p.filiere_id = f.id
+         WHERE j.prof_id = ?
+         ORDER BY s.date_soutenance DESC";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$prof_id]);
@@ -198,7 +199,7 @@ foreach ($jurysPasses as $j) {
                                         <?= strftime('%B', strtotime($jury['date_soutenance'])) ?>
                                     </div>
                                     <div class="text-muted small">
-                                        <?= substr($jury['heure_debut'], 0, 5) ?>
+                                        <?= date('H:i', strtotime($jury['date_soutenance'])) ?>
                                     </div>
                                 </div>
                             </div>
@@ -206,8 +207,8 @@ foreach ($jurysPasses as $j) {
                                 <h5 class="mb-1"><?= htmlspecialchars($jury['projet_titre']) ?></h5>
                                 <p class="text-muted mb-2">
                                     <i class="fas fa-user me-1"></i><?= htmlspecialchars($jury['etudiant_nom']) ?>
-                                    <?php if ($jury['binome_nom']): ?>
-                                        & <?= htmlspecialchars($jury['binome_nom']) ?>
+                                    <?php if (!empty($jury['binome_email'])): ?>
+                                        & <?= htmlspecialchars($jury['binome_email']) ?>
                                     <?php endif; ?>
                                 </p>
                                 <span class="badge bg-secondary me-2">
@@ -265,7 +266,7 @@ foreach ($jurysPasses as $j) {
                                 <h6 class="mb-1"><?= htmlspecialchars($jury['projet_titre']) ?></h6>
                                 <small class="text-muted">
                                     <?= htmlspecialchars($jury['etudiant_nom']) ?>
-                                    <?php if (!empty($jury['binome_nom'])): ?> & <?= htmlspecialchars($jury['binome_nom']) ?><?php endif; ?>
+                                    <?php if (!empty($jury['binome_email'])): ?> & <?= htmlspecialchars($jury['binome_email']) ?><?php endif; ?>
                                 </small>
                             </div>
                             <div class="col-md-2 text-center">
