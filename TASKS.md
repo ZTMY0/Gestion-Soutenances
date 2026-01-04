@@ -1,4 +1,4 @@
-# 🎓 GESTION SOUTENANCES - ÉTAT D'AVANCEMENT (V4)
+#  GESTION SOUTENANCES - ÉTAT D'AVANCEMENT (V4)
 
 **PROJET :** Plateforme de Gestion des Soutenances de Fin d'Études (PFE)  
 **STATUS :** Opérationnel / En phase de finalisation  
@@ -6,7 +6,7 @@
 
 ---
 
-## 👥 RÉPARTITION DES RÔLES ET MISSIONS
+##  RÉPARTITION DES RÔLES ET MISSIONS
 
 | Membre | Module Responsable | Tâches Principales |
 | :--- | :--- | :--- |
@@ -18,7 +18,7 @@
 
 ---
 
-## 🛠️ DÉTAIL DES RÉALISATIONS PAR MODULE
+##  DÉTAIL DES RÉALISATIONS PAR MODULE
 
 ### 1. IHAB (Responsable Étudiant & Coordinateur) - ✅ FAIT
 * **Module Étudiant :** Formulaire d'inscription (Titre, Mots-clés), gestion des binômes et upload du rapport PDF (< 50 Mo).
@@ -32,10 +32,49 @@
     * `PlanificationService.php` : Génération de planning sans conflits (salle/prof/étudiant).
     * `JuryService.php` : Constitution automatique respectant la règle (Président ≠ Encadrant).
 
-### 3. NIZAR (Responsable Directeur) - 🔄 EN COURS
-* **Validation Stratégique :** Interface de revue globale du planning avant publication officielle.
-* **Signature Électronique :** Système de validation des Procès-verbaux (PV) avec horodatage certifié.
-* **Dashboard :** Vue d'ensemble des statistiques de réussite par filière et alertes anomalies.
+#  MODULE DIRECTEUR - NIZAR (TASKS)
+
+**Objectif :** Supervision stratégique, validation du planning et signature officielle des PV.
+
+---
+
+## 1.  DASHBOARD EXÉCUTIF (STATISTIQUES)
+*Fichier cible : `src/views/directeur/index.php`*
+- [ ] **Visualisation de données :** Intégrer Chart.js pour afficher la répartition des PFE par filière.
+- [ ] **KPIs de progression :** Compteur dynamique des rapports déposés vs rapports attendus.
+- [ ] **Système d'Alertes :** - Liste des projets sans encadrant (Urgent).
+    - Liste des étudiants n'ayant pas déposé leur rapport à J-7.
+- [ ] **Comparaisons :** Graphique affichant les moyennes des notes des 3 dernières années.
+
+## 2.  VALIDATION STRATÉGIQUE (PLANNING)
+*Fichier cible : `src/views/directeur/validation.php`*
+- [ ] **Vue globale :** Consulter le calendrier complet généré par l'algorithme d'Abdelmoughit.
+- [ ] **Workflow d'approbation :**
+    - Bouton "Approuver tout le planning" (Statut `planifié` -> `confirmé`).
+    - Option "Demander correction" envoyant un message au Coordinateur (Ihab).
+- [ ] **Revue des Jurys :** Vérifier visuellement qu'il n'y a pas de surcharge sur un professeur spécifique.
+
+## 3.  SIGNATURE ÉLECTRONIQUE DES PV
+*Fichier cible : `src/views/directeur/signatures.php`*
+- [ ] **File d'attente :** Lister tous les PV générés par Nourddine après les soutenances.
+- [ ] **Validation sécurisée :** - Bouton "Signer numériquement" (Simuler le hachage SHA-256 du document).
+    - Passage du statut `pv_genere` à `pv_signe`.
+- [ ] **Archivage :** Déclenchement du déplacement du PDF final vers le dossier d'archivage sécurisé.
+
+## 4.  GESTION DES COMPTES & PARAMÈTRES
+*Fichier cible : `src/views/directeur/parametres.php`*
+- [ ] **Contrôle des accès :** Interface pour activer/désactiver les comptes des Coordinateurs de filières.
+- [ ] **Règles métier :**
+    - Configurer la durée standard d'une soutenance (ex: 60 min).
+    - Définir les dates limites de soumission pour l'ensemble de l'université.
+
+---
+
+##  CONTRAINTES TECHNIQUES (UI/UX & SÉCURITÉ)
+- [ ] **Héritage CSS :** Utiliser exclusivement `<link rel="stylesheet" href="../../../public/assets/css/style.css">`.
+- [ ] **Sécurité (RBAC) :** Vérifier en haut de chaque fichier : 
+  ```php
+  if($_SESSION['user_role'] !== 'directeur') { header('Location: ../auth/login.php'); exit(); }
 
 ### 4. NOURDDINE (Responsable Secrétaire Générale & Reporting) - 🔄 EN COURS
 * **Logistique :** Référentiel des salles (Capacité, équipements type vidéoprojecteur/visio).
@@ -44,7 +83,7 @@
 
 ---
 
-## 🔐 AXES TRANSVERSAUX (TRAVAIL COLLECTIF)
+##  AXES TRANSVERSAUX (TRAVAIL COLLECTIF)
 
 ### **Sécurité & Intégrité**
 * **RBAC (Contrôle d'accès) :** Vérification stricte des permissions à chaque requête (un étudiant ne voit que son projet).
@@ -57,6 +96,6 @@
 
 ---
 
-## 🚀 RAPPEL DES ACCÈS
+##  RAPPEL DES ACCÈS
 * **BDD :** Réimporter `soutenances_db.sql` (Tables `jurys`, `rapports`, `disponibilites` mises à jour).
 * **Git :** `git pull origin main` avant toute modification sur l'UI ou la Sécurité.
