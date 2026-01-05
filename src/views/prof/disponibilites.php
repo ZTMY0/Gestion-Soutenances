@@ -71,55 +71,52 @@ foreach ($resultats as $res) {
 </head>
 <body>
     
-    <!-- NAVBAR -->
-    <nav class="navbar-modern">
+    <!-- NAVBAR HARMONISÉE -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center w-100">
-                <a href="index.php" class="navbar-brand-modern text-white text-decoration-none">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>UEMF Professeur</span>
+            <a class="navbar-brand text-uppercase fw-bold" href="index.php">
+                <i class="fas fa-graduation-cap me-2"></i>UEMF Professeur
+            </a>
+            <div class="d-flex align-items-center text-white-50">
+                <span class="me-3 small">Pr. <?= htmlspecialchars($_SESSION['user_nom']) ?></span>
+                <a href="../auth/logout.php" class="btn btn-sm btn-logout">
+                    <i class="fas fa-sign-out-alt me-1"></i>
+                    <span class="d-none d-md-inline">Déconnexion</span>
                 </a>
-                <div class="user-info">
-                    <i class="fas fa-user-circle text-white-50"></i>
-                    <span class="text-white d-none d-md-inline">Pr. <?= htmlspecialchars($_SESSION['user_nom']) ?></span>
-                    <a href="../auth/logout.php" class="btn btn-sm btn-danger btn-modern">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="d-none d-md-inline">Déconnexion</span>
-                    </a>
-                </div>
             </div>
         </div>
     </nav>
     
-    <div class="container py-5">
-        
-        <!-- HEADER -->
-        <div class="row mb-4 align-items-center animate-fade-in">
-            <div class="col-md-8">
-                <h2 class="fw-bold text-dark mb-1">
-                    <i class="fas fa-calendar-check text-primary me-2"></i>
-                    Mes Disponibilités
-                </h2>
-                <p class="text-muted mb-0">
-                    Définissez vos créneaux horaires pour les jurys de soutenance
-                </p>
-                <div class="d-flex gap-2 mt-3 flex-wrap">
-                    <span class="badge-modern primary">
-                        <i class="fas fa-mouse-pointer me-1"></i>
-                        Cliquez et glissez pour sélectionner
-                    </span>
-                    <span class="badge-modern secondary">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Créneaux de 30 minutes
-                    </span>
+    <!-- HERO HARMONISÉ -->
+    <div class="dashboard-hero">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-end">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Mes Disponibilités
+                    </h2>
+                    <p class="mb-0 opacity-75">Définissez vos créneaux horaires pour les jurys de soutenance</p>
                 </div>
-            </div>
-            <div class="col-md-4 text-end mt-3 mt-md-0">
-                <a href="index.php" class="btn btn-outline-modern">
-                    <i class="fas fa-arrow-left me-2"></i>
-                    Retour au dashboard
+                <a href="index.php" class="btn btn-sm btn-outline-light d-none d-md-inline">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
                 </a>
             </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        
+        <!-- INFO BADGES -->
+        <div class="d-flex gap-2 mb-4 flex-wrap">
+            <span class="badge-modern primary">
+                <i class="fas fa-mouse-pointer me-1"></i>
+                Cliquez et glissez pour sélectionner
+            </span>
+            <span class="badge-modern secondary">
+                <i class="fas fa-info-circle me-1"></i>
+                Créneaux de 30 minutes
+            </span>
         </div>
 
         <!-- MESSAGES -->
@@ -134,7 +131,7 @@ foreach ($resultats as $res) {
         <?php endif; ?>
 
         <!-- PLANNING CARD -->
-        <div class="card" style="border-radius: var(--radius-xl); border: 1px solid var(--gray-200); overflow: hidden; box-shadow: var(--shadow-lg);">
+        <div class="card shadow-sm border-0">
             <form method="POST" id="scheduleForm">
                 
                 <!-- TABLE PLANNING -->
@@ -180,43 +177,33 @@ foreach ($resultats as $res) {
                 <!-- STATS BAR -->
                 <div class="stats-bar">
                     <div class="d-flex align-items-center gap-4 flex-wrap">
-                        <div class="stat-indicator">
+                        <div>
                             <span class="text-white-50 small d-block mb-1">Sélection actuelle</span>
-                            <span class="fw-bold fs-5" id="counter">0 créneaux</span>
+                            <span class="fw-bold fs-6" id="counter">0 créneaux</span>
                         </div>
                         
-                        <div class="vr bg-white opacity-25 d-none d-md-block" style="height: 50px;"></div>
+                        <div class="vr bg-white opacity-25 d-none d-md-block" style="height: 40px;"></div>
                         
                         <div>
                             <span class="text-white-50 small d-block mb-1">
                                 <i class="fas fa-clock me-1"></i>
                                 Durée totale
                             </span>
-                            <span class="fw-bold text-info fs-5" id="timeCounter">0h 00</span>
-                        </div>
-                        
-                        <div class="vr bg-white opacity-25 d-none d-md-block" style="height: 50px;"></div>
-                        
-                        <div>
-                            <span class="text-white-50 small d-block mb-1">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Astuce
-                            </span>
-                            <span class="small">Maintenez le clic et glissez pour sélectionner rapidement</span>
+                            <span class="fw-bold text-info fs-6" id="timeCounter">0h 00</span>
                         </div>
                     </div>
 
                     <div class="d-flex gap-2 mt-3 mt-md-0">
-                        <button type="button" class="btn btn-outline-light btn-modern" onclick="resetGrid()">
-                            <i class="fas fa-undo me-2"></i>
-                            Réinitialiser
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="resetGrid()">
+                            <i class="fas fa-undo me-1"></i>
+                            <span class="d-none d-md-inline">Réinitialiser</span>
                         </button>
-                        <button type="button" class="btn btn-outline-light btn-modern" onclick="selectAll()">
-                            <i class="fas fa-check-double me-2"></i>
-                            Tout sélectionner
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="selectAll()">
+                            <i class="fas fa-check-double me-1"></i>
+                            <span class="d-none d-md-inline">Tout sélectionner</span>
                         </button>
-                        <button type="submit" class="btn btn-success-modern px-4">
-                            <i class="fas fa-save me-2"></i>
+                        <button type="submit" class="btn btn-sm btn-success-modern">
+                            <i class="fas fa-save me-1"></i>
                             Enregistrer
                         </button>
                     </div>
@@ -227,15 +214,15 @@ foreach ($resultats as $res) {
         </div>
 
         <!-- AIDE -->
-        <div class="row mt-4">
-            <div class="col-md-6 animate-fade-in" style="animation-delay: 0.1s">
-                <div class="card" style="border-radius: var(--radius-xl); border: 1px solid var(--gray-200);">
+        <div class="row mt-4 g-4">
+            <div class="col-md-6">
+                <div class="card">
                     <div class="card-body">
-                        <h5 class="fw-bold mb-3">
+                        <h6 class="fw-bold mb-3">
                             <i class="fas fa-question-circle text-info me-2"></i>
                             Comment ça marche ?
-                        </h5>
-                        <ul class="list-unstyled">
+                        </h6>
+                        <ul class="list-unstyled mb-0 small">
                             <li class="mb-2">
                                 <i class="fas fa-check text-success me-2"></i>
                                 Cliquez sur une cellule pour la sélectionner
@@ -248,7 +235,7 @@ foreach ($resultats as $res) {
                                 <i class="fas fa-check text-success me-2"></i>
                                 Cliquez sur un créneau sélectionné pour le désélectionner
                             </li>
-                            <li class="mb-2">
+                            <li class="mb-0">
                                 <i class="fas fa-check text-success me-2"></i>
                                 N'oubliez pas d'enregistrer vos modifications
                             </li>
@@ -257,14 +244,14 @@ foreach ($resultats as $res) {
                 </div>
             </div>
             
-            <div class="col-md-6 animate-fade-in" style="animation-delay: 0.2s">
-                <div class="card" style="border-radius: var(--radius-xl); border: 1px solid var(--gray-200);">
+            <div class="col-md-6">
+                <div class="card">
                     <div class="card-body">
-                        <h5 class="fw-bold mb-3">
+                        <h6 class="fw-bold mb-3">
                             <i class="fas fa-lightbulb text-warning me-2"></i>
                             Conseils
-                        </h5>
-                        <ul class="list-unstyled">
+                        </h6>
+                        <ul class="list-unstyled mb-0 small">
                             <li class="mb-2">
                                 <i class="fas fa-star text-warning me-2"></i>
                                 Plus vous avez de disponibilités, plus il sera facile de planifier les jurys
@@ -277,7 +264,7 @@ foreach ($resultats as $res) {
                                 <i class="fas fa-star text-warning me-2"></i>
                                 Pensez à mettre à jour vos disponibilités régulièrement
                             </li>
-                            <li class="mb-2">
+                            <li class="mb-0">
                                 <i class="fas fa-star text-warning me-2"></i>
                                 Les jurys durent généralement 1 à 2 heures
                             </li>
@@ -293,9 +280,7 @@ foreach ($resultats as $res) {
         let isMouseDown = false;
         let isSelecting = true; 
 
-        // Initialiser le compteur au chargement
         document.addEventListener('DOMContentLoaded', updateCounter);
-
         document.addEventListener('dragstart', function(e) { e.preventDefault(); });
         document.addEventListener('mouseup', function() { isMouseDown = false; });
 
@@ -330,8 +315,8 @@ foreach ($resultats as $res) {
             const hours = Math.floor(count / 2);
             const minutes = (count % 2) * 30;
             
-            document.getElementById('counter').innerHTML = `<i class="fas fa-calendar-check me-2"></i>${count} créneaux`;
-            document.getElementById('timeCounter').innerHTML = `<i class="fas fa-clock me-2"></i>${hours}h ${minutes > 0 ? minutes : '00'}`;
+            document.getElementById('counter').innerHTML = `${count} créneaux`;
+            document.getElementById('timeCounter').innerHTML = `${hours}h ${minutes > 0 ? minutes : '00'}`;
         }
 
         function resetGrid() {
@@ -364,16 +349,6 @@ foreach ($resultats as $res) {
                 input.name = 'slots[]';
                 input.value = cell.getAttribute('data-value');
                 container.appendChild(input);
-            });
-        });
-
-        // Animation de succès sur les cellules
-        document.querySelectorAll('.slot-cell').forEach(cell => {
-            cell.addEventListener('click', function() {
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                }, 100);
             });
         });
     </script>

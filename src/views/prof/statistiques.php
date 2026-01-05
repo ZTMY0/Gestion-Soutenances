@@ -93,50 +93,45 @@ for ($i = 1; $i <= 12; $i++) {
 </head>
 <body>
     
-    <!-- NAVBAR -->
-    <nav class="navbar-modern">
+    <!-- NAVBAR HARMONISÉE -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center w-100">
-                <a href="index.php" class="navbar-brand-modern text-white text-decoration-none">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>UEMF Professeur</span>
+            <a class="navbar-brand text-uppercase fw-bold" href="index.php">
+                <i class="fas fa-graduation-cap me-2"></i>UEMF Professeur
+            </a>
+            <div class="d-flex align-items-center text-white-50">
+                <span class="me-3 small">Pr. <?= htmlspecialchars($_SESSION['user_nom']) ?></span>
+                <a href="../auth/logout.php" class="btn btn-sm btn-logout">
+                    <i class="fas fa-sign-out-alt me-1"></i>
+                    <span class="d-none d-md-inline">Déconnexion</span>
                 </a>
-                <div class="user-info">
-                    <i class="fas fa-user-circle text-white-50"></i>
-                    <span class="text-white d-none d-md-inline">Pr. <?= htmlspecialchars($_SESSION['user_nom']) ?></span>
-                    <a href="../auth/logout.php" class="btn btn-sm btn-danger btn-modern">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="d-none d-md-inline">Déconnexion</span>
-                    </a>
-                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container py-5">
-        
-        <!-- HEADER -->
-        <div class="row mb-4 align-items-center animate-fade-in">
-            <div class="col-md-8">
-                <h2 class="fw-bold text-dark mb-1">
-                    <i class="fas fa-chart-bar text-primary me-2"></i>
-                    Mes Statistiques
-                </h2>
-                <p class="text-muted mb-0">
-                    Vue d'ensemble de votre activité académique
-                </p>
-            </div>
-            <div class="col-md-4 text-end mt-3 mt-md-0">
-                <a href="index.php" class="btn btn-outline-modern">
-                    <i class="fas fa-arrow-left me-2"></i>
-                    Retour
+    <!-- HERO HARMONISÉ -->
+    <div class="dashboard-hero">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-end">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Mes Statistiques
+                    </h2>
+                    <p class="mb-0 opacity-75">Vue d'ensemble de votre activité académique</p>
+                </div>
+                <a href="index.php" class="btn btn-sm btn-outline-light d-none d-md-inline">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
                 </a>
             </div>
         </div>
+    </div>
+
+    <div class="container pb-5">
 
         <!-- STATS PRINCIPALES -->
         <div class="row g-4 mb-5">
-            <div class="col-md-3 col-sm-6 animate-fade-in" style="animation-delay: 0.1s">
+            <div class="col-md-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-icon primary">
                         <i class="fas fa-user-graduate"></i>
@@ -146,7 +141,7 @@ for ($i = 1; $i <= 12; $i++) {
                 </div>
             </div>
             
-            <div class="col-md-3 col-sm-6 animate-fade-in" style="animation-delay: 0.2s">
+            <div class="col-md-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-icon success">
                         <i class="fas fa-check-circle"></i>
@@ -156,7 +151,7 @@ for ($i = 1; $i <= 12; $i++) {
                 </div>
             </div>
             
-            <div class="col-md-3 col-sm-6 animate-fade-in" style="animation-delay: 0.3s">
+            <div class="col-md-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-icon danger">
                         <i class="fas fa-gavel"></i>
@@ -166,7 +161,7 @@ for ($i = 1; $i <= 12; $i++) {
                 </div>
             </div>
             
-            <div class="col-md-3 col-sm-6 animate-fade-in" style="animation-delay: 0.4s">
+            <div class="col-md-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-icon warning">
                         <i class="fas fa-calendar-check"></i>
@@ -180,21 +175,21 @@ for ($i = 1; $i <= 12; $i++) {
         <!-- GRAPHIQUES -->
         <div class="row g-4 mb-5">
             <!-- Encadrement par filière -->
-            <div class="col-lg-6 animate-fade-in" style="animation-delay: 0.1s">
-                <div class="card" style="border-radius: var(--radius-xl); border: 1px solid var(--gray-200); height: 100%;">
-                    <div class="card-header bg-white border-0 pt-4">
-                        <h5 class="fw-bold mb-0">
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h6 class="fw-bold mb-0">
                             <i class="fas fa-graduation-cap text-primary me-2"></i>
                             Encadrement par filière
-                        </h5>
+                        </h6>
                     </div>
                     <div class="card-body">
                         <?php if (!empty($parFiliere)): ?>
-                            <canvas id="filiereChart" height="250"></canvas>
+                            <canvas id="filiereChart" height="200"></canvas>
                         <?php else: ?>
                             <div class="text-center py-5 text-muted">
                                 <i class="fas fa-chart-pie fa-3x mb-3 opacity-50"></i>
-                                <p>Aucun projet encadré pour le moment</p>
+                                <p class="mb-0">Aucun projet encadré pour le moment</p>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -202,45 +197,45 @@ for ($i = 1; $i <= 12; $i++) {
             </div>
 
             <!-- Rôles dans les jurys -->
-            <div class="col-lg-6 animate-fade-in" style="animation-delay: 0.2s">
-                <div class="card" style="border-radius: var(--radius-xl); border: 1px solid var(--gray-200); height: 100%;">
-                    <div class="card-header bg-white border-0 pt-4">
-                        <h5 class="fw-bold mb-0">
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h6 class="fw-bold mb-0">
                             <i class="fas fa-users text-info me-2"></i>
                             Rôles dans les jurys
-                        </h5>
+                        </h6>
                     </div>
                     <div class="card-body">
                         <?php if (!empty($juryStats)): ?>
                             <div class="row text-center g-3">
                                 <div class="col-4">
-                                    <div class="p-4 rounded" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);">
-                                        <i class="fas fa-crown fa-3x text-danger mb-3"></i>
-                                        <h3 class="mb-0 fw-bold"><?= $juryStats['president'] ?? 0 ?></h3>
+                                    <div class="p-3 rounded bg-light">
+                                        <i class="fas fa-crown fa-2x text-danger mb-2"></i>
+                                        <h4 class="mb-0 fw-bold"><?= $juryStats['president'] ?? 0 ?></h4>
                                         <small class="text-muted fw-semibold">Président</small>
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div class="p-4 rounded" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
-                                        <i class="fas fa-file-alt fa-3x text-success mb-3"></i>
-                                        <h3 class="mb-0 fw-bold"><?= $juryStats['rapporteur'] ?? 0 ?></h3>
+                                    <div class="p-3 rounded bg-light">
+                                        <i class="fas fa-file-alt fa-2x text-success mb-2"></i>
+                                        <h4 class="mb-0 fw-bold"><?= $juryStats['rapporteur'] ?? 0 ?></h4>
                                         <small class="text-muted fw-semibold">Rapporteur</small>
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div class="p-4 rounded" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
-                                        <i class="fas fa-search fa-3x text-primary mb-3"></i>
-                                        <h3 class="mb-0 fw-bold"><?= $juryStats['examinateur'] ?? 0 ?></h3>
+                                    <div class="p-3 rounded bg-light">
+                                        <i class="fas fa-search fa-2x text-primary mb-2"></i>
+                                        <h4 class="mb-0 fw-bold"><?= $juryStats['examinateur'] ?? 0 ?></h4>
                                         <small class="text-muted fw-semibold">Examinateur</small>
                                     </div>
                                 </div>
                             </div>
                             
                             <?php if ($moyenneNotes): ?>
-                            <div class="text-center mt-4 p-4 rounded" style="background: var(--gradient-primary);">
-                                <p class="text-white mb-2 small fw-semibold">Moyenne des notes attribuées</p>
-                                <div class="badge-modern success fs-4 px-4 py-3">
-                                    <i class="fas fa-star me-2"></i>
+                            <div class="text-center mt-4 p-3 rounded bg-primary text-white">
+                                <p class="mb-2 small fw-semibold opacity-75">Moyenne des notes attribuées</p>
+                                <div class="badge bg-white text-primary px-4 py-2 fs-5">
+                                    <i class="fas fa-star me-1"></i>
                                     <?= number_format($moyenneNotes, 1) ?>/20
                                 </div>
                             </div>
@@ -248,7 +243,7 @@ for ($i = 1; $i <= 12; $i++) {
                         <?php else: ?>
                             <div class="text-center py-5 text-muted">
                                 <i class="fas fa-gavel fa-3x mb-3 opacity-50"></i>
-                                <p>Aucune participation aux jurys</p>
+                                <p class="mb-0">Aucune participation aux jurys</p>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -257,53 +252,53 @@ for ($i = 1; $i <= 12; $i++) {
         </div>
 
         <!-- Graphique activité annuelle -->
-        <div class="card mb-5 animate-fade-in" style="animation-delay: 0.3s; border-radius: var(--radius-xl); border: 1px solid var(--gray-200);">
-            <div class="card-header bg-white border-0 pt-4">
-                <h5 class="fw-bold mb-0">
+        <div class="card mb-5 shadow-sm border-0">
+            <div class="card-header bg-white border-0 pt-3">
+                <h6 class="fw-bold mb-0">
                     <i class="fas fa-chart-line text-success me-2"></i>
                     Activité jury <?= date('Y') ?>
-                </h5>
+                </h6>
             </div>
             <div class="card-body">
-                <canvas id="activityChart" height="100"></canvas>
+                <canvas id="activityChart" height="80"></canvas>
             </div>
         </div>
 
         <!-- RÉSUMÉ DÉTAILLÉ -->
         <div class="row g-4">
-            <div class="col-md-6 animate-fade-in" style="animation-delay: 0.1s">
-                <div class="card" style="border-radius: var(--radius-xl); border: 1px solid var(--gray-200);">
-                    <div class="card-header bg-white border-0 pt-4">
-                        <h5 class="fw-bold mb-0">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h6 class="fw-bold mb-0">
                             <i class="fas fa-clipboard-list text-primary me-2"></i>
                             Résumé Encadrement
-                        </h5>
+                        </h6>
                     </div>
                     <div class="card-body">
                         <ul class="list-unstyled mb-0">
-                            <li class="d-flex justify-content-between align-items-center py-3 border-bottom">
-                                <span>
+                            <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <span class="small">
                                     <i class="fas fa-folder text-primary me-2"></i>
                                     Total projets
                                 </span>
                                 <strong><?= $nbEncadres ?></strong>
                             </li>
-                            <li class="d-flex justify-content-between align-items-center py-3 border-bottom">
-                                <span>
+                            <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <span class="small">
                                     <i class="fas fa-check-circle text-success me-2"></i>
                                     Projets validés
                                 </span>
                                 <strong><?= $nbValides ?></strong>
                             </li>
-                            <li class="d-flex justify-content-between align-items-center py-3 border-bottom">
-                                <span>
+                            <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <span class="small">
                                     <i class="fas fa-graduation-cap text-info me-2"></i>
                                     Projets soutenus
                                 </span>
                                 <strong><?= $nbSoutenus ?></strong>
                             </li>
-                            <li class="d-flex justify-content-between align-items-center py-3">
-                                <span>
+                            <li class="d-flex justify-content-between align-items-center py-2">
+                                <span class="small">
                                     <i class="fas fa-percent text-warning me-2"></i>
                                     Taux de réussite
                                 </span>
@@ -316,24 +311,24 @@ for ($i = 1; $i <= 12; $i++) {
                 </div>
             </div>
             
-            <div class="col-md-6 animate-fade-in" style="animation-delay: 0.2s">
-                <div class="card" style="border-radius: var(--radius-xl); border: 1px solid var(--gray-200);">
-                    <div class="card-header bg-white border-0 pt-4">
-                        <h5 class="fw-bold mb-0">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h6 class="fw-bold mb-0">
                             <i class="fas fa-trophy text-warning me-2"></i>
                             Performance
-                        </h5>
+                        </h6>
                     </div>
                     <div class="card-body">
                         <div class="text-center py-4">
-                            <div class="mb-4">
-                                <i class="fas fa-medal fa-4x mb-3" style="color: #f59e0b;"></i>
-                                <h3 class="fw-bold mb-2">Excellent travail !</h3>
-                                <p class="text-muted mb-0">Vous avez contribué à la formation de <?= $nbEncadres ?> étudiants</p>
+                            <div class="mb-3">
+                                <i class="fas fa-medal fa-4x mb-3 text-warning"></i>
+                                <h5 class="fw-bold mb-2">Excellent travail !</h5>
+                                <p class="text-muted mb-0 small">Vous avez contribué à la formation de <?= $nbEncadres ?> étudiants</p>
                             </div>
                             
                             <?php if($nbJurys > 0): ?>
-                            <div class="alert alert-success mb-0">
+                            <div class="alert alert-success mb-0 small">
                                 <i class="fas fa-star me-2"></i>
                                 <?= $nbJurys ?> participation<?= $nbJurys > 1 ? 's' : '' ?> aux jurys de soutenance
                             </div>
@@ -347,7 +342,7 @@ for ($i = 1; $i <= 12; $i++) {
 
     <script>
         // Configuration globale Chart.js
-        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
         Chart.defaults.color = '#64748b';
         
         // Graphique filières (Doughnut)
@@ -359,12 +354,12 @@ for ($i = 1; $i <= 12; $i++) {
                 datasets: [{
                     data: <?= json_encode(array_column($parFiliere, 'total')) ?>,
                     backgroundColor: [
-                        'rgba(59, 130, 246, 0.8)',
-                        'rgba(16, 185, 129, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(239, 68, 68, 0.8)',
-                        'rgba(139, 92, 246, 0.8)',
-                        'rgba(236, 72, 153, 0.8)'
+                        '#004d99',
+                        '#198754',
+                        '#f59e0b',
+                        '#ef4444',
+                        '#8b5cf6',
+                        '#ec4899'
                     ],
                     borderWidth: 2,
                     borderColor: '#fff'
@@ -377,17 +372,17 @@ for ($i = 1; $i <= 12; $i++) {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            padding: 15,
+                            padding: 12,
                             usePointStyle: true,
-                            font: { size: 12, weight: '600' }
+                            font: { size: 11, weight: '600' }
                         }
                     },
                     tooltip: {
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        borderRadius: 8,
-                        titleFont: { size: 14, weight: 'bold' },
-                        bodyFont: { size: 13 },
+                        padding: 10,
+                        borderRadius: 4,
+                        titleFont: { size: 13, weight: 'bold' },
+                        bodyFont: { size: 12 },
                         callbacks: {
                             label: function(context) {
                                 return context.label + ': ' + context.parsed + ' projets';
@@ -407,8 +402,8 @@ for ($i = 1; $i <= 12; $i++) {
                 datasets: [{
                     label: 'Soutenances',
                     data: <?= json_encode($moisData) ?>,
-                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                    borderRadius: 8,
+                    backgroundColor: '#004d99',
+                    borderRadius: 4,
                     borderSkipped: false
                 }]
             },
@@ -419,10 +414,10 @@ for ($i = 1; $i <= 12; $i++) {
                     legend: { display: false },
                     tooltip: {
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        borderRadius: 8,
-                        titleFont: { size: 14, weight: 'bold' },
-                        bodyFont: { size: 13 }
+                        padding: 10,
+                        borderRadius: 4,
+                        titleFont: { size: 13, weight: 'bold' },
+                        bodyFont: { size: 12 }
                     }
                 },
                 scales: {
@@ -430,7 +425,7 @@ for ($i = 1; $i <= 12; $i++) {
                         beginAtZero: true,
                         ticks: {
                             stepSize: 1,
-                            font: { size: 12 }
+                            font: { size: 11 }
                         },
                         grid: {
                             color: 'rgba(0, 0, 0, 0.05)'
@@ -438,7 +433,7 @@ for ($i = 1; $i <= 12; $i++) {
                     },
                     x: {
                         grid: { display: false },
-                        ticks: { font: { size: 12 } }
+                        ticks: { font: { size: 11 } }
                     }
                 }
             }

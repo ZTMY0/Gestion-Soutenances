@@ -61,37 +61,37 @@ $projetsRecents = $stmt->fetchAll();
     <link rel="stylesheet" href="../../../public/assets/css/style.css">
 </head>
 <body>
-    <!-- NAVBAR MODERNE -->
-    <nav class="navbar-modern">
+    
+    <!-- NAVBAR STYLE COORDINATEUR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center w-100">
-                <a href="index.php" class="navbar-brand-modern text-white text-decoration-none">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>UEMF Professeur</span>
+            <a class="navbar-brand text-uppercase fw-bold" href="index.php">
+                <i class="fas fa-graduation-cap me-2"></i>UEMF Professeur
+            </a>
+            <div class="d-flex align-items-center text-white-50">
+                <span class="me-3 small">Pr. <?= htmlspecialchars($_SESSION['user_nom']) ?></span>
+                <a href="../auth/logout.php" class="btn btn-sm btn-logout">
+                    <i class="fas fa-sign-out-alt me-1"></i>
+                    <span class="d-none d-md-inline">Déconnexion</span>
                 </a>
-                <div class="user-info">
-                    <i class="fas fa-user-circle text-white-50"></i>
-                    <span class="text-white d-none d-md-inline">Pr. <?= htmlspecialchars($_SESSION['user_nom']) ?></span>
-                    <a href="../auth/logout.php" class="btn btn-sm btn-danger btn-modern">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="d-none d-md-inline">Déconnexion</span>
-                    </a>
-                </div>
             </div>
         </div>
     </nav>
 
-    <!-- HERO SECTION -->
-    <div class="hero-section">
+    <!-- HERO SECTION STYLE COORDINATEUR -->
+    <div class="dashboard-hero">
         <div class="container">
-            <div class="hero-content text-center animate-fade-in">
-                <h1 class="hero-title">Bienvenue, Pr. <?= htmlspecialchars($_SESSION['user_nom']) ?> 👋</h1>
-                <p class="hero-subtitle">Gérez vos encadrements et disponibilités en toute simplicité</p>
+            <div class="d-flex justify-content-between align-items-end">
+                <div>
+                    <h2 class="mb-1">Bonjour, Pr. <?= htmlspecialchars($_SESSION['user_nom']) ?></h2>
+                    <p class="mb-0 opacity-75">Gérez vos encadrements et disponibilités en toute simplicité</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="container py-4">
+    <div class="container pb-5">
+        
         <!-- STATISTIQUES -->
         <div class="row g-4 mb-5">
             <div class="col-md-3 col-sm-6 animate-fade-in" style="animation-delay: 0.1s">
@@ -147,10 +147,10 @@ $projetsRecents = $stmt->fetchAll();
         <?php endif; ?>
 
         <!-- MENU PRINCIPAL -->
-        <h4 class="mb-4 fw-bold">
+        <h5 class="mb-3 fw-bold text-dark">
             <i class="fas fa-th-large text-primary me-2"></i>
             Accès rapide
-        </h4>
+        </h5>
         
         <div class="row g-4 mb-5">
             <div class="col-md-4 animate-fade-in" style="animation-delay: 0.1s">
@@ -242,21 +242,21 @@ $projetsRecents = $stmt->fetchAll();
             </div>
             
             <div class="col-md-6 animate-fade-in" style="animation-delay: 0.5s">
-                <div class="card" style="border-radius: var(--radius-xl); border: 1px solid var(--gray-200);">
-                    <div class="card-header bg-white border-0 pt-4">
-                        <h5 class="fw-bold mb-0">
+                <div class="card">
+                    <div class="card-header bg-white border-0 pt-3">
+                        <h6 class="fw-bold mb-0">
                             <i class="fas fa-clock text-primary me-2"></i>
                             Activité récente
-                        </h5>
+                        </h6>
                     </div>
                     <div class="card-body">
                         <?php if (!empty($projetsRecents)): ?>
                             <div class="list-group list-group-flush">
                                 <?php foreach ($projetsRecents as $projet): ?>
-                                    <div class="list-group-item px-0 py-3 border-0 border-bottom">
+                                    <div class="list-group-item px-0 py-2 border-0 border-bottom">
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div class="flex-grow-1">
-                                                <h6 class="mb-1 fw-semibold"><?= htmlspecialchars($projet['titre']) ?></h6>
+                                                <h6 class="mb-1 fw-semibold small"><?= htmlspecialchars($projet['titre']) ?></h6>
                                                 <small class="text-muted">
                                                     <i class="fas fa-user me-1"></i>
                                                     <?= htmlspecialchars($projet['etudiant_nom']) ?>
@@ -278,37 +278,15 @@ $projetsRecents = $stmt->fetchAll();
                         <?php else: ?>
                             <div class="text-center py-4 text-muted">
                                 <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
-                                <p>Aucune activité récente</p>
+                                <p class="mb-0">Aucune activité récente</p>
                             </div>
                         <?php endif; ?>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- ...existing code... -->
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Animation des statistiques au chargement
-        document.addEventListener('DOMContentLoaded', function() {
-            const statNumbers = document.querySelectorAll('.stat-number');
-            statNumbers.forEach(stat => {
-                const target = parseInt(stat.textContent);
-                let current = 0;
-                const increment = target / 50;
-                const timer = setInterval(() => {
-                    current += increment;
-                    if (current >= target) {
-                        stat.textContent = target;
-                        clearInterval(timer);
-                    } else {
-                        stat.textContent = Math.floor(current);
-                    }
-                }, 20);
-            });
-        });
-    </script>
 </body>
 </html>

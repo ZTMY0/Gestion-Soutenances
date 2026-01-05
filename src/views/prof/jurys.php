@@ -1,6 +1,5 @@
 <?php
 ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
 require_once '../../../config/database.php';
@@ -27,26 +26,20 @@ $joursFr = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Same
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['saisir_note'])) {
     $soutenance_id = intval($_POST['soutenance_id']);
     $note = floatval($_POST['note']);
-    $commentaire = trim($_POST['commentaire'] ?? '');
     
     if ($note >= 0 && $note <= 20) {
-        // Vérifier que ce prof fait partie du jury
         $stmt = $pdo->prepare("SELECT id FROM jurys WHERE soutenance_id = ? AND prof_id = ?");
         $stmt->execute([$soutenance_id, $prof_id]);
         
         if ($stmt->fetch()) {
-            // Mise à jour de la note dans la table soutenances
             $stmtUpdate = $pdo->prepare("UPDATE soutenances SET note_finale = ? WHERE id = ?");
             if ($stmtUpdate->execute([$note, $soutenance_id])) {
-
-                // Mettre à jour le statut du projet
                 $stmtProj = $pdo->prepare("SELECT projet_id FROM soutenances WHERE id = ?");
                 $stmtProj->execute([$soutenance_id]);
                 $pid = $stmtProj->fetchColumn();
                 if($pid) {
                     $pdo->prepare("UPDATE projets SET statut = 'soutenu' WHERE id = ?")->execute([$pid]);
                 }
-
                 $message = "Note enregistrée avec succès !";
                 $messageType = "success";
             } else {
@@ -66,7 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['saisir_note'])) {
 // Récupérer les jurys du prof
 $sql = "SELECT s.id, s.date_soutenance, s.note_finale, s.salle,
              p.titre AS projet_titre,
-             p.description AS projet_description,
              u.nom AS etudiant_nom,
              p.binome_email AS binome_email,
              f.nom AS filiere_nom,
@@ -117,46 +109,41 @@ foreach ($jurysPasses as $j) {
 </head>
 <body>
     
-    <!-- NAVBAR -->
-    <nav class="navbar-modern">
+    <!-- NAVBAR HARMONISÉE -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center w-100">
-                <a href="index.php" class="navbar-brand-modern text-white text-decoration-none">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>UEMF Professeur</span>
+            <a class="navbar-brand text-uppercase fw-bold" href="index.php">
+                <i class="fas fa-graduation-cap me-2"></i>UEMF Professeur
+            </a>
+            <div class="d-flex align-items-center text-white-50">
+                <span class="me-3 small">Pr. <?= htmlspecialchars($_SESSION['user_nom']) ?></span>
+                <a href="../auth/logout.php" class="btn btn-sm btn-logout">
+                    <i class="fas fa-sign-out-alt me-1"></i>
+                    <span class="d-none d-md-inline">Déconnexion</span>
                 </a>
-                <div class="user-info">
-                    <i class="fas fa-user-circle text-white-50"></i>
-                    <span class="text-white d-none d-md-inline">Pr. <?= htmlspecialchars($_SESSION['user_nom']) ?></span>
-                    <a href="../auth/logout.php" class="btn btn-sm btn-danger btn-modern">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="d-none d-md-inline">Déconnexion</span>
-                    </a>
-                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container py-5">
-        
-        <!-- HEADER -->
-        <div class="row mb-4 align-items-center animate-fade-in">
-            <div class="col-md-8">
-                <h2 class="fw-bold text-dark mb-1">
-                    <i class="fas fa-gavel text-primary me-2"></i>
-                    Mes Participations aux Jurys
-                </h2>
-                <p class="text-muted mb-0">
-                    Consultez vos convocations et saisissez vos notes de soutenance
-                </p>
-            </div>
-            <div class="col-md-4 text-end mt-3 mt-md-0">
-                <a href="index.php" class="btn btn-outline-modern">
-                    <i class="fas fa-arrow-left me-2"></i>
-                    Retour
+    <!-- HERO HARMONISÉ -->
+    <div class="dashboard-hero">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-end">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-gavel me-2"></i>
+                        Mes Participations aux Jurys
+                    </h2>
+                    <p class="mb-0 opacity-75">Consultez vos convocations et saisissez vos notes de soutenance</p>
+                </div>
+                <a href="index.php" class="btn btn-sm btn-outline-light d-none d-md-inline">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
                 </a>
             </div>
         </div>
+    </div>
+
+    <div class="container pb-5">
 
         <!-- MESSAGES -->
         <?php if ($message): ?>
@@ -171,7 +158,7 @@ foreach ($jurysPasses as $j) {
 
         <!-- STATS -->
         <div class="row g-4 mb-5">
-            <div class="col-md-4 animate-fade-in" style="animation-delay: 0.1s">
+            <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-icon primary">
                         <i class="fas fa-gavel"></i>
@@ -181,7 +168,7 @@ foreach ($jurysPasses as $j) {
                 </div>
             </div>
             
-            <div class="col-md-4 animate-fade-in" style="animation-delay: 0.2s">
+            <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-icon warning">
                         <i class="fas fa-calendar-day"></i>
@@ -191,7 +178,7 @@ foreach ($jurysPasses as $j) {
                 </div>
             </div>
             
-            <div class="col-md-4 animate-fade-in" style="animation-delay: 0.3s">
+            <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-icon success">
                         <i class="fas fa-check-circle"></i>
@@ -204,20 +191,18 @@ foreach ($jurysPasses as $j) {
 
         <!-- JURYS À VENIR -->
         <?php if (!empty($jurysAVenir)): ?>
-        <div class="card mb-5 animate-fade-in" style="border-radius: var(--radius-xl); border: 1px solid var(--gray-200); overflow: hidden;">
-            <div class="card-header py-3" style="background: var(--gradient-warning);">
-                <h5 class="mb-0 fw-bold text-white">
-                    <i class="fas fa-calendar-check me-2"></i>
-                    Soutenances à venir (<?= count($jurysAVenir) ?>)
-                </h5>
+        <div class="card mb-4 shadow-sm border-0">
+            <div class="card-header bg-warning text-dark py-3 fw-bold">
+                <i class="fas fa-calendar-check me-2"></i>
+                Soutenances à venir (<?= count($jurysAVenir) ?>)
             </div>
-            <div class="card-body p-4">
-                <?php foreach ($jurysAVenir as $index => $jury): 
+            <div class="card-body p-3">
+                <?php foreach ($jurysAVenir as $jury): 
                     $dateObj = new DateTime($jury['date_soutenance']);
                     $jourSemaine = $joursFr[$dateObj->format('w')];
                 ?>
-                <div class="jury-card mb-3" style="animation-delay: <?= $index * 0.1 ?>s">
-                    <div class="card-body p-4">
+                <div class="jury-card mb-3">
+                    <div class="card-body p-3">
                         <div class="row align-items-center">
                             <div class="col-md-2 text-center mb-3 mb-md-0">
                                 <div class="jury-date-badge">
@@ -232,11 +217,11 @@ foreach ($jurysPasses as $j) {
                             </div>
                             
                             <div class="col-md-6 mb-3 mb-md-0">
-                                <h5 class="mb-2 fw-bold text-primary">
+                                <h6 class="mb-2 fw-bold text-primary">
                                     <i class="fas fa-project-diagram me-2"></i>
                                     <?= htmlspecialchars($jury['projet_titre']) ?>
-                                </h5>
-                                <p class="text-muted mb-2">
+                                </h6>
+                                <p class="text-muted mb-2 small">
                                     <i class="fas fa-user-graduate me-2"></i>
                                     <strong><?= htmlspecialchars($jury['etudiant_nom']) ?></strong>
                                     <?php if (!empty($jury['binome_email'])): ?>
@@ -283,16 +268,9 @@ foreach ($jurysPasses as $j) {
                                         $roleIcon = 'user';
                                 }
                                 ?>
-                                <div class="role-badge <?= $roleClass ?> d-inline-flex mb-3">
-                                    <i class="fas fa-<?= $roleIcon ?> me-2"></i>
+                                <div class="role-badge <?= $roleClass ?> d-inline-flex">
+                                    <i class="fas fa-<?= $roleIcon ?> me-1"></i>
                                     <?= $roleText ?>
-                                </div>
-                                
-                                <div class="d-flex gap-2 justify-content-center mt-3">
-                                    <button class="btn btn-sm btn-primary-modern" onclick="alert('Détails de la soutenance')">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Détails
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -305,40 +283,33 @@ foreach ($jurysPasses as $j) {
 
         <!-- JURYS PASSÉS -->
         <?php if (!empty($jurysPasses)): ?>
-        <div class="card animate-fade-in" style="border-radius: var(--radius-xl); border: 1px solid var(--gray-200); overflow: hidden;">
-            <div class="card-header bg-secondary text-white py-3">
-                <h5 class="mb-0 fw-bold">
-                    <i class="fas fa-history me-2"></i>
-                    Soutenances passées (<?= count($jurysPasses) ?>)
-                </h5>
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-secondary text-white py-3 fw-bold">
+                <i class="fas fa-history me-2"></i>
+                Soutenances passées (<?= count($jurysPasses) ?>)
             </div>
-            <div class="card-body p-4">
-                <?php foreach ($jurysPasses as $index => $jury): 
+            <div class="card-body p-3">
+                <?php foreach ($jurysPasses as $jury): 
                     $aNote = ($jury['note_finale'] !== null);
                     $dateObj = new DateTime($jury['date_soutenance']);
                 ?>
-                <div class="jury-card passe mb-3" style="animation-delay: <?= $index * 0.05 ?>s">
-                    <div class="card-body p-4">
+                <div class="jury-card passe mb-3">
+                    <div class="card-body p-3">
                         <div class="row align-items-center">
-                            <div class="col-md-2 text-center mb-3 mb-md-0">
-                                <div class="jury-date-badge bg-secondary bg-opacity-10">
-                                    <div class="text-muted fw-bold"><?= $dateObj->format('d/m/Y') ?></div>
-                                    <div class="text-muted small mt-1"><?= $dateObj->format('H:i') ?></div>
-                                </div>
+                            <div class="col-md-2 text-center mb-2 mb-md-0">
+                                <div class="small fw-bold text-muted"><?= $dateObj->format('d/m/Y') ?></div>
+                                <div class="small text-muted"><?= $dateObj->format('H:i') ?></div>
                             </div>
                             
-                            <div class="col-md-4 mb-3 mb-md-0">
-                                <h6 class="mb-1 fw-bold"><?= htmlspecialchars($jury['projet_titre']) ?></h6>
+                            <div class="col-md-4 mb-2 mb-md-0">
+                                <h6 class="mb-1 fw-bold small"><?= htmlspecialchars($jury['projet_titre']) ?></h6>
                                 <small class="text-muted">
                                     <i class="fas fa-user me-1"></i>
                                     <?= htmlspecialchars($jury['etudiant_nom']) ?>
-                                    <?php if (!empty($jury['binome_email'])): ?>
-                                        & <?= htmlspecialchars($jury['binome_email']) ?>
-                                    <?php endif; ?>
                                 </small>
                             </div>
                             
-                            <div class="col-md-2 text-center mb-3 mb-md-0">
+                            <div class="col-md-2 text-center mb-2 mb-md-0">
                                 <span class="badge-modern secondary small">
                                     <?= ucfirst($jury['mon_role'] ?? 'Membre') ?>
                                 </span>
@@ -347,11 +318,11 @@ foreach ($jurysPasses as $j) {
                             <div class="col-md-4">
                                 <?php if ($aNote): ?>
                                     <div class="text-center">
-                                        <div class="badge-modern success fs-5 px-4 py-3">
-                                            <i class="fas fa-star me-2"></i>
+                                        <div class="badge-modern success px-3 py-2">
+                                            <i class="fas fa-star me-1"></i>
                                             <?= number_format($jury['note_finale'], 2) ?> / 20
                                         </div>
-                                        <div class="small text-muted mt-2">
+                                        <div class="small text-muted mt-1">
                                             <i class="fas fa-check-circle text-success me-1"></i>
                                             Note enregistrée
                                         </div>
@@ -360,7 +331,7 @@ foreach ($jurysPasses as $j) {
                                     <form method="POST" class="row g-2 align-items-center">
                                         <input type="hidden" name="soutenance_id" value="<?= $jury['id'] ?>">
                                         <div class="col-7">
-                                            <div class="input-group">
+                                            <div class="input-group input-group-sm">
                                                 <span class="input-group-text">
                                                     <i class="fas fa-star text-warning"></i>
                                                 </span>
@@ -368,7 +339,7 @@ foreach ($jurysPasses as $j) {
                                             </div>
                                         </div>
                                         <div class="col-5">
-                                            <button type="submit" name="saisir_note" class="btn btn-success-modern w-100">
+                                            <button type="submit" name="saisir_note" class="btn btn-success-modern btn-sm w-100">
                                                 <i class="fas fa-check me-1"></i>
                                                 Valider
                                             </button>
@@ -386,7 +357,7 @@ foreach ($jurysPasses as $j) {
 
         <!-- AUCUN JURY -->
         <?php if (empty($jurys)): ?>
-        <div class="card animate-fade-in" style="border-radius: var(--radius-xl); border: 1px solid var(--gray-200);">
+        <div class="card">
             <div class="card-body text-center py-5">
                 <i class="fas fa-gavel fa-4x text-muted mb-3 opacity-50"></i>
                 <h5 class="text-muted">Aucune participation aux jurys</h5>
@@ -397,28 +368,5 @@ foreach ($jurysPasses as $j) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Animation au scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.jury-card').forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            card.style.transition = `all 0.6s ease-out ${index * 0.1}s`;
-            observer.observe(card);
-        });
-    </script>
 </body>
 </html>
