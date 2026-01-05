@@ -38,13 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['saisir_note'])) {
             // Mise à jour de la note dans la table soutenances
             $stmtUpdate = $pdo->prepare("UPDATE soutenances SET note_finale = ? WHERE id = ?");
             if ($stmtUpdate->execute([$note, $soutenance_id])) {
-                
-                // Mettre à jour le projet
+
+                // Mettre à jour le statut du projet
                 $stmtProj = $pdo->prepare("SELECT projet_id FROM soutenances WHERE id = ?");
                 $stmtProj->execute([$soutenance_id]);
                 $pid = $stmtProj->fetchColumn();
                 if($pid) {
-                    $pdo->prepare("UPDATE projets SET statut = 'soutenu', note_finale = ? WHERE id = ?")->execute([$note, $pid]);
+                    $pdo->prepare("UPDATE projets SET statut = 'soutenu' WHERE id = ?")->execute([$pid]);
                 }
 
                 $message = "Note enregistrée avec succès !";
