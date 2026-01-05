@@ -1,134 +1,86 @@
-#  GESTION SOUTENANCES - ÉTAT D'AVANCEMENT (V4)
+# GESTION SOUTENANCES - ÉTAT D'AVANCEMENT
 
 **PROJET :** Plateforme de Gestion des Soutenances de Fin d'Études (PFE)  
-**STATUS :** Opérationnel / En phase de finalisation  
-**URL RÉFÉRENCE :** [Cahier des charges EIDIA](https://cs-eidia-projects-2025.netlify.app/projet_3_projet3)
+**STATUS :** 🟢 **BETA-TEST (Modules Coord., Prof, Étudiant, Directeur Intégrés)** **URL RÉFÉRENCE :** [Cahier des charges EIDIA](https://cs-eidia-projects-2025.netlify.app/projet_3_projet3)
 
 ---
 
 ##  RÉPARTITION DES RÔLES ET MISSIONS
 
-| Membre | Module Responsable | Tâches Principales |
-| :--- | :--- | :--- |
-| **IHAB** | **Étudiants & Coordinateur** | Inscription, Dépôts, Affectations encadrants, Supervision. |
-| **ABDELMOUGHIT** | **Professeurs & Algorithmes** | Disponibilités, Validation rapports, Planning Auto, Constitution Jurys. |
-| **NIZAR** | **Directeur** | Validation planning, KPIs, Signature électronique des PV. |
-| **NOURDDINE** | **Secrétaire Générale** | Logistique salles, Génération PDF (Convocations/PV), Archivage. |
-| **TOUTE L'ÉQUIPE** | **UI/UX & SÉCURITÉ** | Harmonisation design, RBAC, Audit de sécurité et Intégrité des notes. |
+| Membre | Module Responsable | Tâches Principales | État |
+| :--- | :--- | :--- | :--- |
+| **IHAB** | **Coord. & Étudiant** | Espace Coordinateur, Espace Étudiant. | ✅ TERMINÉ |
+| **ABDELMOUGHIT** | **Prof & Algo** | Espace Professeur, Algorithmes (Affectation, Planning, Jury). | ✅ TERMINÉ |
+| **NIZAR** | **Directeur** | Validation planning, KPIs, Signature électronique. | ✅ TERMINÉ |
+| **NOURDDINE** | **Secrétaire Générale** | Logistique, PDF, Archivage. | ⏳ EN COURS |
 
 ---
 
-##  DÉTAIL DES RÉALISATIONS PAR MODULE
+##  DÉTAIL DES RÉALISATIONS
 
-### 1. IHAB (Responsable Étudiant & Coordinateur) - ✅ FAIT
-* **Module Étudiant :** Formulaire d'inscription (Titre, Mots-clés), gestion des binômes et upload du rapport PDF (< 50 Mo).
-* **Module Coordinateur :** Interface de matching intelligent entre projets (mots-clés) et spécialités des professeurs.
-* **Architecture BDD :** Implémentation des tables `filières`, `utilisateurs` et `projets` avec gestion des statuts (Inscrit → Soutenu).
+### 1. IHAB (Lead Dev Front & Intégration) - ✅ TERMINÉ
 
-### 2. ABDELMOUGHIT (Responsable Professeurs & Algo) - ✅ FAIT
-* **Module Professeur :** Saisie des disponibilités sur calendrier et interface de validation finale des rapports.
-* **Algorithmes (Services PHP) :**
-    * `AffectationService.php` : Répartition équitable des charges d'encadrement.
-    * `PlanificationService.php` : Génération de planning sans conflits (salle/prof/étudiant).
-    * `JuryService.php` : Constitution automatique respectant la règle (Président ≠ Encadrant).
+**A. REFONTE UI/UX GLOBALE (Charte UEMF)**
+* [x] **Design System :** Création d'une charte graphique "Pilotage" (Bleu UEMF `#004d99`, Hero Headers, Cartes flottantes).
+* [x] **Composants :** Développement du `style.css` unifié (Navbar responsive, Badges carrés, Tableaux aérés).
+* [x] **Navigation :** Mise en place du flux logique (Dashboard → Actions → Détails).
 
-#  MODULE DIRECTEUR - NIZAR (TASKS)
+**B. ESPACE COORDINATEUR (`src/views/coordinateur/`)**
+* [x] **Dashboard :** Vue d'ensemble avec KPIs temps réel et graphiques Chart.js.
+* [x] **Gestion Projets :** Liste avec filtres, Validation des sujets en attente, Suppression sécurisée.
+* [x] **Intégration Affectation IA :** Interface pour lancer l'algorithme d'Abdelmoughit et valider les propositions.
+* [x] **Planification :** Interface double colonne (Accordéon pour planifier vs Tableau du planning confirmé).
+* [x] **Gestion Jurys :** Système d'accordéon pour assigner Président et Examinateur.
+* [x] **Administration :** Imports CSV fonctionnels pour la base Étudiants et Professeurs.
 
-**Objectif :** Supervision stratégique, validation du planning et signature officielle des PV.
+**C. ESPACE ÉTUDIANT (`src/views/etudiant/`)**
+* [x] **Dashboard Immersif :** Timeline de progression visuelle (Inscription → Encadré → Rapport → Soutenance → Terminé).
+* [x] **Communication :** Système de Chat intégré en temps réel avec l'encadrant.
+* [x] **Gestion Dossier :** Upload de rapport, affichage conditionnel de la convocation et de la note finale.
 
----
+### 2. ABDELMOUGHIT (Professeurs & Backend) - ✅ INTÉGRÉ
 
-## 1.  DASHBOARD EXÉCUTIF (STATISTIQUES)
-*Fichier cible : `src/views/directeur/index.php`*
-- [ ] **Visualisation de données :** Intégrer Chart.js pour afficher la répartition des PFE par filière.
-- [ ] **KPIs de progression :** Compteur dynamique des rapports déposés vs rapports attendus.
-- [ ] **Système d'Alertes :** - Liste des projets sans encadrant (Urgent).
-    - Liste des étudiants n'ayant pas déposé leur rapport à J-7.
-- [ ] **Comparaisons :** Graphique affichant les moyennes des notes des 3 dernières années.
+**A. ESPACE PROFESSEUR (`src/views/prof/`)**
+* [x] **Dashboard :** Suivi des étudiants encadrés (avec notif messages) et des convocations jurys.
+* [x] **Disponibilités :** Grille interactive (Drag & Drop) pour définir les créneaux horaires.
+* [x] **Encadrement :** Interface de validation des rapports étudiants et messagerie.
+* [x] **Soutenances :** Liste des jurys à venir/passés et formulaire de saisie de note finale.
 
-## 2.  VALIDATION STRATÉGIQUE (PLANNING)
-*Fichier cible : `src/views/directeur/validation.php`*
-- [ ] **Vue globale :** Consulter le calendrier complet généré par l'algorithme d'Abdelmoughit.
-- [ ] **Workflow d'approbation :**
-    - Bouton "Approuver tout le planning" (Statut `planifié` -> `confirmé`).
-    - Option "Demander correction" envoyant un message au Coordinateur (Ihab).
-- [ ] **Revue des Jurys :** Vérifier visuellement qu'il n'y a pas de surcharge sur un professeur spécifique.
+**B. SERVICES CORE (ALGORITHMES)**
+* [x] **Algorithmes Intelligents :**
+    * `AffectationService.php` : Score de compatibilité (Mots-clés + Charge + Préférences).
+    * `PlanificationService.php` : Détection de conflits et suggestion de créneaux.
+    * `JuryService.php` : Règles de constitution (Président ≠ Encadrant).
 
-## 3.  SIGNATURE ÉLECTRONIQUE DES PV
-*Fichier cible : `src/views/directeur/signatures.php`*
-- [ ] **File d'attente :** Lister tous les PV générés par Nourddine après les soutenances.
-- [ ] **Validation sécurisée :** - Bouton "Signer numériquement" (Simuler le hachage SHA-256 du document).
-    - Passage du statut `pv_genere` à `pv_signe`.
-- [ ] **Archivage :** Déclenchement du déplacement du PDF final vers le dossier d'archivage sécurisé.
+### 3. MODULE DIRECTEUR - NIZAR - ✅ INTÉGRÉ
 
-## 4.  GESTION DES COMPTES & PARAMÈTRES
-*Fichier cible : `src/views/directeur/parametres.php`*
-- [ ] **Contrôle des accès :** Interface pour activer/désactiver les comptes des Coordinateurs de filières.
-- [ ] **Règles métier :**
-    - Configurer la durée standard d'une soutenance (ex: 60 min).
-    - Définir les dates limites de soumission pour l'ensemble de l'université.
-
----
-
-##  CONTRAINTES TECHNIQUES (UI/UX & SÉCURITÉ)
-- [ ] **Héritage CSS :** Utiliser exclusivement `<link rel="stylesheet" href="../../../public/assets/css/style.css">`.
-- [ ] **Sécurité (RBAC) :** Vérifier en haut de chaque fichier : 
-  ```php
-  if($_SESSION['user_role'] !== 'directeur') { header('Location: ../auth/login.php'); exit(); }
-
-# MODULE ASSISTANTE GÉNÉRAL - NOURDDINE (TASKS)
-
-**Objectif :** Gestion logistique des salles, génération des documents officiels (PDF) et archivage numérique.
+**ESPACE DIRECTION (`src/views/directeur/`)**
+* [x] **Dashboard Exécutif (`index.php`) :**
+    * KPIs Stratégiques (Total Étudiants, Taux de validation, Alertes dossiers).
+    * Navigation rapide vers les outils de décision.
+* [x] **Validation Planning (`validation.php`) :**
+    * Vue synthétique des soutenances par filière.
+    * Système d'approbation globale du planning (Boutons Valider/Corriger).
+* [x] **Signature PV (`signatures.php`) :**
+    * Liste des étudiants ayant soutenu avec note finale.
+    * Simulation de signature électronique des PV.
+* [x] **Paramètres Système (`parametres.php`) :**
+    * Configuration des règles (Durée soutenance, Dates limites).
+    * Gestion des droits d'accès avancés.
 
 ---
 
-## 1. GESTION DES SALLES & LOGISTIQUE
-*Fichier cible : `src/views/assistante/salles.php`*
-- [ ] **Référentiel des salles :** Créer une interface pour lister les salles disponibles (Nom, Bâtiment, Capacité).
-- [ ] **Gestion des équipements :** Ajouter des tags pour chaque salle (Vidéoprojecteur, Visio, Wi-Fi).
-- [ ] **Planning d'occupation :** Vue simple pour vérifier qu'une salle n'est pas réservée pour deux soutenances simultanées.
+##  MODULES RESTANTS
 
-## 2. GÉNÉRATION AUTOMATIQUE (PDF)
-*Fichiers cibles : `src/services/PdfService.php` & `src/views/assistante/documents.php`*
-- [ ] **Convocations :** Générer les convocations PDF personnalisées pour les étudiants et les membres du jury (Date, Heure, Salle).
-- [ ] **Feuilles d'émargement :** Créer un document PDF regroupant les noms des membres du jury pour signature physique le jour J.
-- [ ] **PV de Soutenance :** Maquetter le Procès-Verbal officiel qui récupère automatiquement les notes et mentions finales.
-
-## 3. ARCHIVAGE & RÉCEPTION
-*Fichier cible : `src/views/assistante/archivage.php`*
-- [ ] **Collecte des PV :** Interface pour uploader les PV scannés après signature ou confirmer la réception des PV numériques.
-- [ ] **Organisation du dépôt :** Système de classement automatique des fichiers : `Archives/ANNEE/FILIERE/NOM_ETUDIANT_PV.pdf`.
-- [ ] **Attestations :** Générer une attestation de réussite provisoire une fois le PV validé et signé.
-
-## 4. COMMUNICATION ADMINISTRATIVE
-*Fichier cible : `src/views/assistante/notifications.php`*
-- [ ] **Envoi des documents :** Interface pour envoyer par email les convocations générées en un clic.
-- [ ] **Relances :** Envoyer des rappels automatiques aux jurys à J-2 de la soutenance.
+### 4. MODULE SECRÉTAIRE GÉNÉRALE - NOURDDINE
+*Fichier cible : `src/views/assistante/`*
+- [ ] **Gestion Salles :** CRUD des salles et équipements.
+- [ ] **Génération PDF :** Convocations et PV (Utilisation de FPDF/DomPDF).
+- [ ] **Archivage :** Stockage final des documents signés.
 
 ---
 
-## CONTRAINTES TECHNIQUES
-- [ ] **Bibliothèque PDF :** Intégrer **FPDF** ou **DomPDF** dans le dossier `vendor/` ou `libs/`.
-- [ ] **Héritage CSS :** Utiliser exclusivement `<link rel="stylesheet" href="../../../public/assets/css/style.css">`.
-- [ ] **Sécurité (RBAC) :** Vérifier en haut de chaque fichier : 
-  ```php
-  if($_SESSION['user_role'] !== 'assistante') { header('Location: ../auth/login.php'); exit(); }
-
----
-
-##  AXES TRANSVERSAUX (TRAVAIL COLLECTIF)
-
-### **Sécurité & Intégrité**
-* **RBAC (Contrôle d'accès) :** Vérification stricte des permissions à chaque requête (un étudiant ne voit que son projet).
-* **Protection des Documents :** Rapports stockés hors du répertoire web public avec noms aléatoires pour éviter les fuites.
-* **Audit Trail :** Journalisation (Logs) de toutes les modifications de notes et d'affectations.
-
-### **UI/UX & Design**
-* **Harmonisation :** Utilisation de composants communs (Alertes Succès/Erreur, Boutons, Modals).
-* **Workflow :** Validation du parcours utilisateur de l'étape 1 (Inscription) à l'étape 9 (Notes & PV).
-
----
-
-##  RAPPEL DES ACCÈS
-* **BDD :** Réimporter `soutenances_db.sql` (Tables `jurys`, `rapports`, `disponibilites` mises à jour).
-* **Git :** `git pull origin main` avant toute modification sur l'UI ou la Sécurité.
+##  SÉCURITÉ & DEPLOY
+- [x] **Git Workflow :** IHAB sur `main` (Core/Coord/Etu), autres membres sur branches isolées pour protection DB.
+- [x] **Session Management :** Vérification stricte des rôles (`$_SESSION['user_role']`) sur toutes les pages.
+- [x] **Base de données :** Tables `messages`, `jurys`, et `disponibilites_profs` opérationnelles.
