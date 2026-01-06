@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 04, 2026 at 03:42 PM
+-- Generation Time: Jan 05, 2026 at 12:50 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -66,7 +66,9 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (8, 783, 'Mercredi', '10:30:00', '11:00:00', 1),
 (9, 783, 'Vendredi', '11:30:00', '12:00:00', 1),
 (10, 783, 'Mardi', '13:00:00', '13:30:00', 1),
-(11, 783, 'Vendredi', '14:30:00', '15:00:00', 1);
+(11, 783, 'Vendredi', '14:30:00', '15:00:00', 1),
+(12, 767, 'Lundi', '08:00:00', '08:30:00', 1),
+(13, 767, 'Lundi', '12:00:00', '12:30:00', 1);
 
 -- --------------------------------------------------------
 
@@ -93,7 +95,7 @@ INSERT INTO `filieres` (`id`, `code`, `nom`, `description`, `coordinateur_id`, `
 (3, 'BIGDATA', 'Big Data & Analyse', NULL, NULL, 60, '2026-01-02 18:11:49'),
 (4, 'AI', 'Intelligence Artificielle', NULL, NULL, 60, '2026-01-02 18:11:49'),
 (5, 'ROBO', 'Robotique & Cobotique', NULL, NULL, 60, '2026-01-02 18:11:49'),
-(6, 'FULL', 'Fullstack Web & Mobile', NULL, NULL, 60, '2026-01-02 18:11:49');
+(7, 'FULLSTACK', 'Développement FullStack', NULL, NULL, 60, '2026-01-04 22:54:52');
 
 -- --------------------------------------------------------
 
@@ -108,6 +110,16 @@ CREATE TABLE `jurys` (
   `role_jury` enum('president','examinateur','rapporteur','encadrant','invite') NOT NULL,
   `present` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `jurys`
+--
+
+INSERT INTO `jurys` (`id`, `soutenance_id`, `prof_id`, `role_jury`, `present`) VALUES
+(1, 3, 777, 'president', 1),
+(2, 3, 770, 'examinateur', 1),
+(3, 4, 788, 'president', 1),
+(4, 4, 767, 'examinateur', 1);
 
 -- --------------------------------------------------------
 
@@ -144,9 +156,8 @@ CREATE TABLE `messages` (
 --
 
 INSERT INTO `messages` (`id`, `projet_id`, `sender_id`, `message`, `created_at`) VALUES
-(1, 1, 1157, 'test', '2026-01-04 13:59:50'),
-(2, 1, 1157, 'test', '2026-01-04 14:07:29'),
-(3, 1, 783, 'bien recu', '2026-01-04 14:07:39');
+(5, 8, 1249, 'kk', '2026-01-05 00:46:58'),
+(6, 8, 767, 'ok', '2026-01-05 00:47:13');
 
 -- --------------------------------------------------------
 
@@ -204,15 +215,18 @@ CREATE TABLE `projets` (
   `encadrant_pref3_id` int(11) DEFAULT NULL,
   `statut` varchar(50) DEFAULT 'inscrit',
   `annee_universitaire` varchar(20) DEFAULT '2025-2026',
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `rapport_chemin` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `projets`
 --
 
-INSERT INTO `projets` (`id`, `titre`, `description`, `domaine`, `technologies`, `binome_email`, `etudiant_id`, `encadrant_id`, `filiere_id`, `encadrant_pref1_id`, `encadrant_pref2_id`, `encadrant_pref3_id`, `statut`, `annee_universitaire`, `created_at`) VALUES
-(1, 'Système de détection d\'intrusions', 'Système de détection d\'intrusions', 'Cyber', 'Docker,PHP', '', 1157, 783, 1, 764, 765, 784, 'rapport_soumis', '2025-2026', '2026-01-04 13:58:41');
+INSERT INTO `projets` (`id`, `titre`, `description`, `domaine`, `technologies`, `binome_email`, `etudiant_id`, `encadrant_id`, `filiere_id`, `encadrant_pref1_id`, `encadrant_pref2_id`, `encadrant_pref3_id`, `statut`, `annee_universitaire`, `created_at`, `rapport_chemin`) VALUES
+(6, 'Système de recommandation de films', '......', 'IA', 'IA : Python (Scikit-learn)  Backend : FastAPI  Front : React', '', 855, 772, 3, 772, NULL, NULL, 'valide', '2025-2026', '2026-01-04 23:23:11', 'rapport_6_1767565475.pdf'),
+(7, 'Système de détection d\'intrusions', 'test', 'Cyber', 'Docker,PHP', '', 1157, 780, 1, 780, NULL, NULL, 'valide', '2025-2026', '2026-01-04 23:29:50', 'rapport_7_1767565862.pdf'),
+(8, 'RFID based Gate', 'test', 'Robotique', 'C++ Arduino', '', 1249, 767, 4, 767, 785, NULL, 'valide', '2025-2026', '2026-01-05 00:43:50', 'rapport_8_1767570411.pdf');
 
 -- --------------------------------------------------------
 
@@ -238,7 +252,9 @@ CREATE TABLE `rapports` (
 --
 
 INSERT INTO `rapports` (`id`, `projet_id`, `nom_fichier`, `chemin_fichier`, `taille_fichier`, `resume`, `mots_cles`, `remerciements`, `est_original`, `created_at`) VALUES
-(1, 1, 'rapport.pdf', 'uploads/rapport_1_1767532629.pdf', 856, 'resumé mock', NULL, NULL, 1, '2026-01-04 14:17:09');
+(5, 6, 'mini-projets_2025.pdf', 'uploads/rapport_6_1767565475.pdf', 169547, 'test', NULL, NULL, 1, '2026-01-04 23:24:35'),
+(6, 7, 'mini-projets_2025.pdf', 'uploads/rapport_7_1767565862.pdf', 169547, 'test', NULL, NULL, 1, '2026-01-04 23:31:02'),
+(7, 8, 'Revision_question - Exercises.pdf', 'uploads/rapport_8_1767570411.pdf', 182147, 'rapport', NULL, NULL, 1, '2026-01-05 00:46:51');
 
 -- --------------------------------------------------------
 
@@ -278,6 +294,14 @@ CREATE TABLE `soutenances` (
   `commentaire_jury` text DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `soutenances`
+--
+
+INSERT INTO `soutenances` (`id`, `projet_id`, `date_soutenance`, `salle`, `jury_infos`, `note_finale`, `mention`, `commentaire_jury`, `created_at`) VALUES
+(3, 7, '2026-04-13 13:00:00', 'B4 - 2.15', NULL, NULL, NULL, NULL, '2026-01-04 23:52:31'),
+(4, 8, '2026-08-27 12:47:00', 'Amphi A', NULL, NULL, NULL, NULL, '2026-01-05 00:47:54');
 
 -- --------------------------------------------------------
 
@@ -697,19 +721,19 @@ ALTER TABLE `disponibilites`
 -- AUTO_INCREMENT for table `disponibilites_profs`
 --
 ALTER TABLE `disponibilites_profs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `filieres`
 --
 ALTER TABLE `filieres`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `jurys`
 --
 ALTER TABLE `jurys`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `jury_soutenance`
@@ -721,7 +745,7 @@ ALTER TABLE `jury_soutenance`
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `password_resets`
@@ -739,13 +763,13 @@ ALTER TABLE `periodes`
 -- AUTO_INCREMENT for table `projets`
 --
 ALTER TABLE `projets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `rapports`
 --
 ALTER TABLE `rapports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `salles`
@@ -757,7 +781,7 @@ ALTER TABLE `salles`
 -- AUTO_INCREMENT for table `soutenances`
 --
 ALTER TABLE `soutenances`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `users`
