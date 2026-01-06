@@ -29,35 +29,32 @@ $stmt->execute([$etudiant_id]);
 $projet = $stmt->fetch();
 >>>>>>> origin/main
 
-// Si pas de projet ou pas d'encadrant, on éjecte
 if (!$projet || !$projet['encadrant_id']) {
     header("Location: index.php");
     exit();
 }
 
-// 3. VÉRIFICATION DOUBLONS (Apport de Nizar)
-$stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM rapports WHERE projet_id = ?");
-$stmtCheck->execute([$projet['id']]);
-$dejaSoumis = $stmtCheck->fetchColumn();
+// 3. VÉRIFICATION DOUBLONS
+// On vérifie directement dans la table PROJETS maintenant (plus fiable)
+$dejaSoumis = !empty($projet['rapport_chemin']);
 
 // 4. TRAITEMENT DE L'UPLOAD
 if (isset($_POST['upload_btn'])) {
     
-    // A. Blocage si déjà soumis
-    if ($dejaSoumis > 0) {
-        $error = "Un rapport est déjà présent. Demandez à votre encadrant de le rejeter pour en déposer un nouveau.";
+    if ($dejaSoumis) {
+        $error = "Un rapport est déjà présent.";
     }
-    // B. Vérification case "Originalité"
     elseif (!isset($_POST['originalite'])) {
         $error = "Vous devez cocher la case certifiant l'originalité de votre travail.";
     }
-    // C. Vérification du fichier
     elseif (isset($_FILES['rapport']) && $_FILES['rapport']['error'] == 0) {
         
         $file = $_FILES['rapport'];
         $resume = trim($_POST['resume']);
+        // On récupère aussi les nouveaux champs (si tu veux les sauvegarder, il faudra adapter la BDD, mais je les laisse pour ne pas casser le code)
+        $mots_cles = $_POST['mots_cles_rapport'] ?? ''; 
+        $remerciements = $_POST['remerciements'] ?? '';
         
-        // Configuration
         $maxSize = 50 * 1024 * 1024; // 50 Mo
         $allowedExt = ['pdf'];
         $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
@@ -68,47 +65,47 @@ if ($mime !== 'application/pdf') {
 }
 
 
-        // D. SÉCURITÉ AVANCÉE (Apport de Nizar - Corrigé)
-        // On vérifie le vrai type MIME pour éviter les faux PDF (virus)
+        // SÉCURITÉ MIME
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->file($file['tmp_name']);
 
-        // E. CHAÎNE DE CONTRÔLE ROBUSTE
         if ($file['size'] > $maxSize) {
-            $error = "Fichier trop lourd (Max 50 Mo). Compressez votre PDF.";
+            $error = "Fichier trop lourd (Max 50 Mo).";
         } elseif (!in_array($fileExt, $allowedExt)) {
             $error = "Extension invalide. Seul le .pdf est autorisé.";
         } elseif ($mime !== 'application/pdf') {
-            // C'est ici qu'on bloque les virus renommés (Le bug de Nizar est corrigé ici)
-            $error = "Fichier corrompu ou format invalide (MIME incorrect).";
+            $error = "Fichier corrompu ou format invalide.";
         } else {
-            // F. UPLOAD FINAL (Seulement si tout est vert)
+            // UPLOAD
             $uploadDir = __DIR__ . '/../../../public/uploads/';
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
-            // Nom unique : rapport_IDPROJET_TIMESTAMP.pdf
             $fileName = "rapport_" . $projet['id'] . "_" . time() . ".pdf";
             $destPath = $uploadDir . $fileName;
 
             if (move_uploaded_file($file['tmp_name'], $destPath)) {
                 
-                // Insertion BDD
+                // --- INSERTION DANS LA TABLE RAPPORTS (Pour l'historique) ---
                 $sql = "INSERT INTO rapports (projet_id, nom_fichier, chemin_fichier, taille_fichier, resume, est_original) 
                         VALUES (?, ?, ?, ?, ?, 1)";
                 $stmtInsert = $pdo->prepare($sql);
+                // Note : On garde 'uploads/' pour la table rapports si tu veux
                 $stmtInsert->execute([$projet['id'], $file['name'], 'uploads/' . $fileName, $file['size'], $resume]);
 
-                // Mise à jour statut projet
-                $pdo->prepare("UPDATE projets SET statut = 'rapport_soumis' WHERE id = ?")->execute([$projet['id']]);
+                // --- 🚨 C'EST ICI LA CORRECTION IMPORTANTE 🚨 ---
+                // On met à jour la table PROJETS avec le nom du fichier pour l'affichage dashboard
+                // On sauvegarde juste le $fileName car index.php ajoute déjà le chemin
+                $sqlUpdate = "UPDATE projets SET statut = 'rapport_soumis', rapport_chemin = ? WHERE id = ?";
+                $pdo->prepare($sqlUpdate)->execute([$fileName, $projet['id']]);
 
                 $message = "Votre rapport a été déposé avec succès !";
-                $dejaSoumis = 1; // Blocage immédiat de l'interface
+                $dejaSoumis = true; 
             } else {
                 $error = "Erreur serveur lors de l'enregistrement du fichier.";
             }
         }
     } else {
-        $error = "Veuillez glisser ou sélectionner un fichier PDF.";
+        $error = "Veuillez sélectionner un fichier PDF.";
     }
 }
 ?>
@@ -121,7 +118,6 @@ if ($mime !== 'application/pdf') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* CSS Moderne que Nizar a oublié */
         .upload-area {
             border: 2px dashed #ced4da;
             border-radius: 10px;
@@ -166,7 +162,7 @@ if ($mime !== 'application/pdf') {
                                 <a href="index.php" class="btn btn-primary px-5 rounded-pill">Retour à l'accueil</a>
                             </div>
                         
-                        <?php elseif($dejaSoumis > 0): ?>
+                        <?php elseif($dejaSoumis): ?>
                             <div class="text-center py-5">
                                 <div class="mb-3 text-success">
                                     <i class="fas fa-check-circle fa-5x"></i>
@@ -209,6 +205,15 @@ if ($mime !== 'application/pdf') {
                                     </div>
                                 </div>
 
+                                <div class="mb-3">
+                                    <label class="fw-bold">Mots-clés du rapport</label>
+                                    <input type="text" name="mots_cles_rapport" class="form-control" placeholder="Séparés par des virgules" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="fw-bold">Remerciements (pour le PV)</label>
+                                    <textarea name="remerciements" class="form-control" rows="3" placeholder="Texte court pour les remerciements..."></textarea>
+                                </div>
+
                                 <div class="form-check bg-light p-3 border rounded-3 mb-4">
                                     <input class="form-check-input" type="checkbox" name="originalite" id="checkOrigine" required style="transform: scale(1.2); margin-top: 0.3rem;">
                                     <label class="form-check-label ps-2 text-danger fw-bold" for="checkOrigine">
@@ -221,16 +226,8 @@ if ($mime !== 'application/pdf') {
                                         <i class="fas fa-paper-plane me-2"></i>Soumettre définitivement
                                     </button>
                                 </div>
-                            </form>
-                            <div class="mb-3">
-    <label class="fw-bold">Mots-clés du rapport</label>
-    <input type="text" name="mots_cles_rapport" class="form-control" placeholder="Séparés par des virgules" required>
-</div>
-<div class="mb-3">
-    <label class="fw-bold">Remerciements (pour le PV)</label>
-    <textarea name="remerciements" class="form-control" rows="3" placeholder="Texte court pour les remerciements..."></textarea>
-</div>
-                        <?php endif; ?>
+                            </form> 
+                            <?php endif; ?>
 
                     </div>
                 </div>
@@ -244,7 +241,6 @@ if ($mime !== 'application/pdf') {
         const filePreview = document.getElementById('filePreview');
         const fileName = document.getElementById('fileName');
 
-        // Effet visuel au survol
         ['dragenter', 'dragover'].forEach(eventName => {
             dropArea.addEventListener(eventName, (e) => {
                 e.preventDefault();
@@ -258,17 +254,12 @@ if ($mime !== 'application/pdf') {
             });
         });
 
-        // Gestion de l'affichage du fichier
         function handleFile(input) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
                 fileName.textContent = file.name;
-                
-                // Masquer l'invite d'upload et afficher l'aperçu
                 uploadContent.classList.add('d-none');
                 filePreview.classList.remove('d-none');
-                
-                // Bordure verte de succès
                 dropArea.style.borderColor = '#198754';
                 dropArea.style.backgroundColor = '#d1e7dd';
             }

@@ -3,87 +3,178 @@ session_start();
 require_once '../../../config/database.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'coordinateur') {
-    header("Location: ../auth/login.php");
-    exit();
+    header("Location: ../auth/login.php"); exit();
 }
 
-// Stats pour les cartes
-$nbAttente = $pdo->query("SELECT COUNT(*) FROM projets WHERE statut = 'inscrit'")->fetchColumn();
-$nbValides = $pdo->query("SELECT COUNT(*) FROM projets WHERE statut = 'valide_encadrant'")->fetchColumn();
+// --- DONNÉES ---
+$nbAttente = $pdo->query("SELECT COUNT(*) FROM projets WHERE statut = 'inscrit' OR statut = 'rapport_soumis'")->fetchColumn();
+$nbPrets = $pdo->query("SELECT COUNT(*) FROM projets p WHERE (p.statut = 'valide' OR p.statut = 'pret_soutenance' OR (p.statut = 'valide_encadrant' AND p.rapport_chemin IS NOT NULL AND p.rapport_chemin != '')) AND p.id NOT IN (SELECT projet_id FROM soutenances)")->fetchColumn();
+$nbPlanifiees = $pdo->query("SELECT COUNT(*) FROM soutenances")->fetchColumn();
 
-// Stats pour le graphique (Etudiants par filière)
-$sqlStats = "SELECT f.code, COUNT(u.id) as total 
-             FROM users u 
-             JOIN filieres f ON u.filiere_id = f.id 
-             WHERE u.role = 'etudiant' 
-             GROUP BY f.code";
-$stmtStats = $pdo->query($sqlStats);
+// Chart & Avancement
+$stmtChart = $pdo->query("SELECT f.code, COUNT(p.id) as total FROM filieres f LEFT JOIN projets p ON p.filiere_id = f.id GROUP BY f.id, f.code");
 $labels = []; $dataCount = [];
-while($row = $stmtStats->fetch()) {
-    $labels[] = $row['code'];
-    $dataCount[] = $row['total'];
-}
+while($row = $stmtChart->fetch()) { $labels[] = $row['code']; $dataCount[] = $row['total']; }
+
+$avancement = $pdo->query("SELECT f.code, COUNT(p.id) as total_projets, SUM(CASE WHEN s.id IS NOT NULL THEN 1 ELSE 0 END) as sout_planifiees FROM filieres f LEFT JOIN projets p ON p.filiere_id = f.id LEFT JOIN soutenances s ON s.projet_id = p.id GROUP BY f.id, f.code")->fetchAll();
+
+$dateDuJour = date('d M Y');
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>Dashboard Coordinateur</title>
+    <title>Pilotage PFE | UEMF</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../public/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-light">
-    <?php 
-    // FIX SÉCURISÉ POUR LA NAVBAR
-    $dir = __DIR__ . '/../';
-    $navbar = file_exists($dir . 'layout/navbar_coordinateur.php') 
-              ? $dir . 'layout/navbar_coordinateur.php' 
-              : $dir . 'layouts/navbar_coordinateur.php';
-    include $navbar; 
-    ?>
+<body>
+    
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2">
+        <div class="container">
+            <span class="navbar-text text-white-50"><i class="fas fa-shield-alt me-2"></i>Portail Sécurisé UEMF</span>
+            <div class="ms-auto">
+                <a href="../auth/logout.php" class="text-white-50 text-decoration-none hover-white"><i class="fas fa-sign-out-alt me-1"></i>Déconnexion</a>
+            </div>
+        </div>
+    </nav>
 
-    <div class="container mt-5">
-        <div class="row mb-4">
+    <div class="dashboard-hero">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-end">
+                <div>
+                    <h2 class="mb-1">Bonjour, Coordinateur</h2>
+                    <p class="mb-0">Situation des PFE au <strong><?= $dateDuJour ?></strong>.</p>
+                </div>
+                <div class="d-none d-md-block">
+                    <a href="affectation.php" class="btn btn-outline-light btn-sm me-2 opacity-75"><i class="fas fa-magic me-2"></i>IA Auto-Affectation</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        
+        <div class="row g-4 mb-5">
+            
             <div class="col-md-4">
-                <div class="card bg-warning text-dark shadow border-0 h-100">
-                    <div class="card-body text-center">
-                        <i class="fas fa-clock fa-2x mb-2"></i>
-                        <h5>Projets en attente</h5>
-                        <h2 class="display-4 fw-bold"><?php echo $nbAttente; ?></h2>
-                        <a href="projets.php" class="btn btn-sm btn-dark mt-2">Gérer les projets</a>
+                <a href="projets.php" class="text-decoration-none">
+                    <div class="stat-card-modern">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="stat-modern-label">Dossiers reçus</div>
+                                <div class="stat-modern-value"><?= $nbAttente ?></div>
+                                <div class="stat-badge warning"><i class="fas fa-eye me-1"></i>À valider</div>
+                            </div>
+                            <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
+                                <i class="fas fa-inbox fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="planification.php" class="text-decoration-none">
+                    <div class="stat-card-modern">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="stat-modern-label">Prêts pour Soutenance</div>
+                                <div class="stat-modern-value text-success"><?= $nbPrets ?></div>
+                                <div class="stat-badge success"><i class="fas fa-calendar-plus me-1"></i>Fixer une date</div>
+                            </div>
+                            <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success">
+                                <i class="fas fa-clock fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="jurys.php" class="text-decoration-none">
+                    <div class="stat-card-modern">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="stat-modern-label">Soutenances Calées</div>
+                                <div class="stat-modern-value text-primary"><?= $nbPlanifiees ?></div>
+                                <div class="stat-badge primary"><i class="fas fa-gavel me-1"></i>Gérer les Jurys</div>
+                            </div>
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                                <i class="fas fa-calendar-check fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            
+            <div class="col-lg-8">
+                <div class="card shadow-sm h-100 border-0">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="m-0 fw-bold text-dark"><i class="fas fa-chart-bar me-2 text-primary"></i>État d'avancement par Filière</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light text-muted">
+                                    <tr>
+                                        <th class="ps-4 text-uppercase small border-0">Filière</th>
+                                        <th class="text-center text-uppercase small border-0">Volumétrie</th>
+                                        <th class="text-center text-uppercase small border-0">Planifiés</th>
+                                        <th class="text-end pe-4 text-uppercase small border-0">Progression</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach($avancement as $row): 
+                                        $percent = ($row['total_projets'] > 0) ? round(($row['sout_planifiees']/$row['total_projets'])*100) : 0;
+                                    ?>
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-dark"><?= $row['code'] ?></td>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark border"><?= $row['total_projets'] ?> sujets</span>
+                                        </td>
+                                        <td class="text-center fw-bold text-primary"><?= $row['sout_planifiees'] ?></td>
+                                        <td class="pe-4">
+                                            <div class="d-flex align-items-center justify-content-end">
+                                                <span class="me-3 small fw-bold"><?= $percent ?>%</span>
+                                                <div class="progress" style="width: 100px; height: 6px;">
+                                                    <div class="progress-bar bg-gradient-primary" style="width: <?= $percent ?>%; background-color: var(--uemf-blue);"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card bg-success text-white shadow border-0 h-100">
-                    <div class="card-body text-center">
-                        <i class="fas fa-check-circle fa-2x mb-2"></i>
-                        <h5>Projets Validés</h5>
-                        <h2 class="display-4 fw-bold"><?php echo $nbValides; ?></h2>
-                        <p class="mb-0">Prêts pour le planning</p>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100 border-0">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="m-0 fw-bold text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i>Répartition</h6>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-info text-white shadow border-0 h-100">
-                    <div class="card-body text-center">
-                        <i class="fas fa-users-cog fa-2x mb-2"></i>
-                        <h5>Administration</h5>
-                        <p>Importation des données</p>
-                        <div class="d-grid gap-2">
-                            <a href="import_etudiants.php" class="btn btn-light btn-sm fw-bold">Étudiants</a>
-                            <a href="import_profs.php" class="btn btn-dark btn-sm fw-bold">Professeurs</a>
+                    <div class="card-body d-flex align-items-center justify-content-center p-4">
+                        <div style="width: 100%; height: 250px;">
+                            <canvas id="myChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card shadow p-4 border-0 mb-5">
-            <h5 class="text-center mb-4"><i class="fas fa-chart-pie me-2"></i>Effectifs EIDIA par Filière</h5>
-            <div style="height: 350px;">
-                <canvas id="myChart"></canvas>
-            </div>
+        <div class="mt-5 text-center border-top pt-4">
+            <p class="text-muted small mb-3">Zone d'administration technique</p>
+            <a href="import_etudiants.php" class="btn btn-sm btn-outline-secondary me-2"><i class="fas fa-file-csv me-1"></i> Import Étudiants</a>
+            <a href="import_profs.php" class="btn btn-sm btn-outline-secondary"><i class="fas fa-file-csv me-1"></i> Import Professeurs</a>
         </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -95,13 +186,17 @@ while($row = $stmtStats->fetch()) {
                 labels: <?php echo json_encode($labels); ?>,
                 datasets: [{
                     data: <?php echo json_encode($dataCount); ?>,
-                    backgroundColor: ['#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#dc3545', '#fd7e14']
+                    backgroundColor: ['#004d99', '#c9a227', '#198754', '#6c757d', '#00264d', '#17a2b8'],
+                    borderWidth: 0,
+                    hoverOffset: 4
                 }]
             },
             options: {
+                responsive: true,
                 maintainAspectRatio: false,
+                cutout: '70%',
                 plugins: {
-                    legend: { position: 'bottom' }
+                    legend: { position: 'bottom', labels: { boxWidth: 10, padding: 15, font: { size: 11 } } }
                 }
             }
         });

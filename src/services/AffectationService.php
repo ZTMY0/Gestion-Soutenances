@@ -6,8 +6,7 @@
  * Auteur: Abdelmoughit
  * Date: Janvier 2026
  * 
- * Algorithme de matching entre projets et professeurs
- * basé sur les mots-clés/spécialités et l'équilibrage des charges.
+ * CORRECTION: Gestion des projets sans préférences
  */
 
 class AffectationService 
@@ -24,13 +23,13 @@ class AffectationService
      */
     public function getProjetsNonAffectes(): array 
     {
-        $sql = "SELECT p.*, u.nom as nom_etudiant, f.code as filiere_code
-                FROM projets p
-                JOIN users u ON p.etudiant_id = u.id
-                JOIN filieres f ON p.filiere_id = f.id
-                WHERE p.encadrant_id IS NULL 
-                AND p.statut = 'inscrit'
-                ORDER BY p.created_at ASC";
+        $sql = "SELECT p.*, u.nom as nom_etudiant, 
+               COALESCE(f.code, 'NON_DEFINIE') as filiere_code
+        FROM projets p
+        JOIN users u ON p.etudiant_id = u.id
+        LEFT JOIN filieres f ON p.filiere_id = f.id  -- LEFT JOIN au lieu de JOIN
+        WHERE p.encadrant_id IS NULL
+        ORDER BY p.created_at ASC";
         
         $stmt = $this->pdo->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -68,25 +67,29 @@ class AffectationService
         $score = 0;
         $maxScore = 100;
         
-        // 1. MATCHING MOTS-CLÉS / SPÉCIALITÉS (40 points max)
+        // SCORE DE BASE : 20 points (NOUVEAU)
+        // Tout professeur disponible a un score minimum
+        $score += 20;
+        
+        // 1. MATCHING MOTS-CLÉS / SPÉCIALITÉS (30 points max, réduit de 40)
         $motsClesProjets = $this->parseMotsCles($projet['mots_cles'] ?? '');
         $motsClesTechnos = $this->parseMotsCles($projet['technologies'] ?? '');
         $specialitesProf = $this->parseMotsCles($professeur['specialite'] ?? '');
         
         $motsClesProjet = array_merge($motsClesProjets, $motsClesTechnos);
-        $motsCommuns = $this->compterMotsCommuns($motsClesProjet, $specialitesProf);
         
         if (count($motsClesProjet) > 0 && count($specialitesProf) > 0) {
+            $motsCommuns = $this->compterMotsCommuns($motsClesProjet, $specialitesProf);
             $tauxMatching = $motsCommuns / max(count($motsClesProjet), 1);
-            $score += min(40, $tauxMatching * 60); // Boost si matching
+            $score += min(30, $tauxMatching * 50); // Boost si matching
         }
         
         // 2. PRÉFÉRENCES DE L'ÉTUDIANT (30 points max)
-        if ($projet['encadrant_pref1_id'] == $professeur['id']) {
+        if (isset($projet['encadrant_pref1_id']) && $projet['encadrant_pref1_id'] == $professeur['id']) {
             $score += 30; // 1er choix
-        } elseif ($projet['encadrant_pref2_id'] == $professeur['id']) {
+        } elseif (isset($projet['encadrant_pref2_id']) && $projet['encadrant_pref2_id'] == $professeur['id']) {
             $score += 20; // 2ème choix
-        } elseif ($projet['encadrant_pref3_id'] == $professeur['id']) {
+        } elseif (isset($projet['encadrant_pref3_id']) && $projet['encadrant_pref3_id'] == $professeur['id']) {
             $score += 10; // 3ème choix
         }
         
@@ -195,7 +198,9 @@ class AffectationService
                 }
             }
             
-            if ($meilleurProf !== null && $meilleurScore > 10) {
+            // SEUIL RÉDUIT : Accepter tout score > 0 (MODIFIÉ)
+            // Avant c'était > 10, maintenant on accepte même les faibles scores
+            if ($meilleurProf !== null && $meilleurScore > 0) {
                 $affectations[] = [
                     'projet_id' => $projet['id'],
                     'projet_titre' => $projet['titre'],
@@ -213,7 +218,7 @@ class AffectationService
                     'projet_id' => $projet['id'],
                     'projet_titre' => $projet['titre'],
                     'etudiant_nom' => $projet['nom_etudiant'],
-                    'raison' => 'Aucun professeur disponible ou compatible'
+                    'raison' => 'Aucun professeur disponible (tous à charge maximale)'
                 ];
             }
         }
@@ -246,12 +251,15 @@ class AffectationService
         $raisons = [];
         
         // Préférence étudiant
-        if ($projet['encadrant_pref1_id'] == $professeur['id']) {
+        if (isset($projet['encadrant_pref1_id']) && $projet['encadrant_pref1_id'] == $professeur['id']) {
             $raisons[] = "1er choix de l'étudiant";
-        } elseif ($projet['encadrant_pref2_id'] == $professeur['id']) {
+        } elseif (isset($projet['encadrant_pref2_id']) && $projet['encadrant_pref2_id'] == $professeur['id']) {
             $raisons[] = "2ème choix de l'étudiant";
-        } elseif ($projet['encadrant_pref3_id'] == $professeur['id']) {
+        } elseif (isset($projet['encadrant_pref3_id']) && $projet['encadrant_pref3_id'] == $professeur['id']) {
             $raisons[] = "3ème choix de l'étudiant";
+        } else {
+            // NOUVEAU : Message si pas de préférences
+            $raisons[] = "Affectation automatique (pas de préférence exprimée)";
         }
         
         // Matching spécialités

@@ -60,7 +60,7 @@ if (isset($_POST['submit_projet'])) {
                                 <option value="Cyber">Cybersécurité</option>
                                 <option value="Dev">Développement Web/Mobile</option>
                                 <option value="BigData">Big Data</option>
-                                <option value="Reseau">Réseaux & Télécoms</option>
+                                <option value="Robotique">Robotique & Cobotique</option>
                             </select>
                         </div>
                     </div>

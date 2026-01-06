@@ -64,193 +64,108 @@ foreach ($resultats as $res) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planning Interactif</title>
+    <title>Mes Disponibilités - UEMF</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #334155ff; /* Indigo */
-            --primary-light: #e0e7ff;
-            --hover-color: #f3f4f6;
-            --border-color: #f0f0f0;
-        }
-
-        body {
-            background-color: #f8fafc;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
-
-        /* Navbar custom styles */
-        .navbar-brand { font-weight: 600; letter-spacing: 0.5px; }
-        
-        /* Card Modernization */
-        .card-custom {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            background: white;
-            overflow: hidden;
-        }
-
-        /* Table Styling */
-        .schedule-container {
-            max-height: 70vh; /* Ajusté pour laisser place à la navbar */
-            overflow-y: auto;
-            position: relative;
-            scrollbar-width: thin;
-        }
-        
-        .schedule-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            user-select: none;
-        }
-
-        /* Sticky Headers */
-        .schedule-table thead th {
-            position: sticky;
-            top: 0;
-            background: white;
-            z-index: 10;
-            padding: 15px;
-            font-weight: 600;
-            color: #334155;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-            border-bottom: 2px solid var(--border-color);
-            text-align: center;
-        }
-        
-        /* Time Column */
-        .time-col {
-            position: sticky;
-            left: 0;
-            background: white;
-            z-index: 5;
-            width: 70px;
-            color: #94a3b8;
-            font-size: 0.75rem;
-            font-weight: 500;
-            text-align: right;
-            padding-right: 15px;
-            border-right: 1px solid var(--border-color);
-            vertical-align: middle;
-        }
-
-        /* Cells */
-        .slot-cell {
-            height: 32px;
-            border-bottom: 1px solid var(--border-color);
-            border-right: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: background-color 0.1s ease;
-            position: relative;
-        }
-        
-        .slot-cell:hover {
-            background-color: var(--hover-color);
-        }
-
-        .slot-cell.selected {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        
-        .slot-cell.selected::after {
-            content: '';
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 4px; height: 4px;
-            background: rgba(255,255,255,0.4);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .stats-bar {
-            background: #1e293b;
-            color: white;
-            border-radius: 0 0 16px 16px;
-        }
-        
-        /* Scrollbar */
-        .schedule-container::-webkit-scrollbar { width: 8px; }
-        .schedule-container::-webkit-scrollbar-track { background: #f1f1f1; }
-        .schedule-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    </style>
+    <link rel="stylesheet" href="../../../public/assets/css/style.css">
 </head>
 <body>
-
-    <nav class="navbar navbar-dark bg-dark px-4 shadow-sm mb-4">
-        <div class="d-flex align-items-center">
-            <span class="navbar-brand mb-0 h1">
-                <i class="fas fa-chalkboard-teacher me-2"></i>Espace Professeur
-            </span>
-        </div>
-        <div class="d-flex align-items-center">
-            <span class="text-white me-3 d-none d-md-block">
-                <i class="fas fa-user me-1"></i><?php echo htmlspecialchars($_SESSION['user_nom']); ?>
-            </span>
-            <a href="../auth/logout.php" class="btn btn-outline-light btn-sm">
-                <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
-            </a>
-        </div>
-    </nav>
     
-    <div class="container pb-5">
-        
-        <div class="row mb-4 align-items-center">
-            <div class="col-md-8">
-                <h2 class="fw-bold text-dark mb-1">
-                    <i class="fas fa-calendar-check text-primary me-2"></i>Mes Disponibilités
-                </h2>
-                <p class="text-muted mb-0">
-                    Définissez vos créneaux pour les jurys.
-                    <span class="badge bg-white text-dark border ms-2 shadow-sm">
-                        <i class="fas fa-mouse-pointer me-1 text-primary"></i>Cliquez et glissez pour sélectionner
-                    </span>
-                </p>
-            </div>
-            <div class="col-md-4 text-end">
-                <a href="index.php" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>Retour
+    <!-- NAVBAR HARMONISÉE -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2">
+        <div class="container">
+            <a class="navbar-brand text-uppercase fw-bold" href="index.php">
+                <i class="fas fa-graduation-cap me-2"></i>UEMF Professeur
+            </a>
+            <div class="d-flex align-items-center text-white-50">
+                <span class="me-3 small">Pr. <?= htmlspecialchars($_SESSION['user_nom']) ?></span>
+                <a href="../auth/logout.php" class="btn btn-sm btn-logout">
+                    <i class="fas fa-sign-out-alt me-1"></i>
+                    <span class="d-none d-md-inline">Déconnexion</span>
                 </a>
             </div>
         </div>
+    </nav>
+    
+    <!-- HERO HARMONISÉ -->
+    <div class="dashboard-hero">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-end">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Mes Disponibilités
+                    </h2>
+                    <p class="mb-0 opacity-75">Définissez vos créneaux horaires pour les jurys de soutenance</p>
+                </div>
+                <a href="index.php" class="btn btn-sm btn-outline-light d-none d-md-inline">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+        </div>
+    </div>
 
+    <div class="container pb-5">
+        
+        <!-- INFO BADGES -->
+        <div class="d-flex gap-2 mb-4 flex-wrap">
+            <span class="badge-modern primary">
+                <i class="fas fa-mouse-pointer me-1"></i>
+                Cliquez et glissez pour sélectionner
+            </span>
+            <span class="badge-modern secondary">
+                <i class="fas fa-info-circle me-1"></i>
+                Créneaux de 30 minutes
+            </span>
+        </div>
+
+        <!-- MESSAGES -->
         <?php if ($message): ?>
-            <div class="alert alert-<?php echo $messageType; ?> shadow-sm border-0 rounded-3 mb-4">
-                <i class="fas fa-info-circle me-2"></i><?php echo $message; ?>
+            <div class="alert-modern <?= $messageType ?> animate-fade-in">
+                <i class="fas fa-<?= $messageType === 'success' ? 'check-circle' : ($messageType === 'warning' ? 'exclamation-triangle' : 'times-circle') ?>"></i>
+                <div>
+                    <strong><?= $messageType === 'success' ? 'Succès !' : ($messageType === 'warning' ? 'Attention !' : 'Erreur !') ?></strong><br>
+                    <span class="small"><?= $message ?></span>
+                </div>
             </div>
         <?php endif; ?>
 
-        <div class="card card-custom">
+        <!-- PLANNING CARD -->
+        <div class="card shadow-sm border-0">
             <form method="POST" id="scheduleForm">
                 
+                <!-- TABLE PLANNING -->
                 <div class="schedule-container">
                     <table class="schedule-table">
                         <thead>
                             <tr>
-                                <th style="z-index: 20;"></th> <?php foreach ($jours as $jour): ?>
-                                    <th><?php echo $jour; ?></th>
+                                <th style="z-index: 20; width: 70px;"></th>
+                                <?php foreach ($jours as $jour): ?>
+                                    <th>
+                                        <i class="fas fa-calendar-day me-1 d-none d-md-inline"></i>
+                                        <?= $jour ?>
+                                    </th>
                                 <?php endforeach; ?>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($heures as $heure): ?>
                                 <tr>
-                                    <td class="time-col"><?php echo $heure; ?></td>
+                                    <td class="time-col">
+                                        <i class="far fa-clock me-1 d-none d-md-inline"></i>
+                                        <?= $heure ?>
+                                    </td>
                                     <?php foreach ($jours as $jour): ?>
                                         <?php 
                                             $key = $jour . '_' . $heure;
                                             $isSelected = in_array($key, $slots_actifs) ? 'selected' : '';
                                         ?>
-                                        <td class="slot-cell <?php echo $isSelected; ?>" 
-                                            data-value="<?php echo $key; ?>"
+                                        <td class="slot-cell <?= $isSelected ?>" 
+                                            data-value="<?= $key ?>"
                                             onmousedown="startDrag(this)"
                                             onmouseover="dragOver(this)"
-                                            onmouseup="endDrag()">
+                                            onmouseup="endDrag()"
+                                            title="<?= $jour ?> à <?= $heure ?>">
                                         </td>
                                     <?php endforeach; ?>
                                 </tr>
@@ -259,31 +174,104 @@ foreach ($resultats as $res) {
                     </table>
                 </div>
 
-                <div class="stats-bar p-3 d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center gap-3">
+                <!-- STATS BAR -->
+                <div class="stats-bar">
+                    <div class="d-flex align-items-center gap-4 flex-wrap">
                         <div>
-                            <span class="text-white-50 small d-block">Sélection</span>
-                            <span class="fw-bold" id="counter">0 créneaux</span>
+                            <span class="text-white-50 small d-block mb-1">Sélection actuelle</span>
+                            <span class="fw-bold fs-6" id="counter">0 créneaux</span>
                         </div>
-                        <div class="vr bg-secondary mx-2"></div>
+                        
+                        <div class="vr bg-white opacity-25 d-none d-md-block" style="height: 40px;"></div>
+                        
                         <div>
-                            <span class="text-white-50 small d-block">Durée estimée</span>
-                            <span class="fw-bold text-info" id="timeCounter">0h 00</span>
+                            <span class="text-white-50 small d-block mb-1">
+                                <i class="fas fa-clock me-1"></i>
+                                Durée totale
+                            </span>
+                            <span class="fw-bold text-info fs-6" id="timeCounter">0h 00</span>
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-outline-light btn-sm" onclick="resetGrid()">
-                            <i class="fas fa-undo me-1"></i>Reset
+                    <div class="d-flex gap-2 mt-3 mt-md-0">
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="resetGrid()">
+                            <i class="fas fa-undo me-1"></i>
+                            <span class="d-none d-md-inline">Réinitialiser</span>
                         </button>
-                        <button type="submit" class="btn btn-primary px-4 fw-bold shadow">
-                            <i class="fas fa-save me-2"></i>Enregistrer
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="selectAll()">
+                            <i class="fas fa-check-double me-1"></i>
+                            <span class="d-none d-md-inline">Tout sélectionner</span>
+                        </button>
+                        <button type="submit" class="btn btn-sm btn-success-modern">
+                            <i class="fas fa-save me-1"></i>
+                            Enregistrer
                         </button>
                     </div>
                 </div>
 
                 <div id="hiddenInputsContainer"></div>
             </form>
+        </div>
+
+        <!-- AIDE -->
+        <div class="row mt-4 g-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-question-circle text-info me-2"></i>
+                            Comment ça marche ?
+                        </h6>
+                        <ul class="list-unstyled mb-0 small">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Cliquez sur une cellule pour la sélectionner
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Maintenez et glissez pour sélectionner plusieurs créneaux
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Cliquez sur un créneau sélectionné pour le désélectionner
+                            </li>
+                            <li class="mb-0">
+                                <i class="fas fa-check text-success me-2"></i>
+                                N'oubliez pas d'enregistrer vos modifications
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Conseils
+                        </h6>
+                        <ul class="list-unstyled mb-0 small">
+                            <li class="mb-2">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                Plus vous avez de disponibilités, plus il sera facile de planifier les jurys
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                Privilégiez des plages continues pour une meilleure organisation
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                Pensez à mettre à jour vos disponibilités régulièrement
+                            </li>
+                            <li class="mb-0">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                Les jurys durent généralement 1 à 2 heures
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -292,9 +280,7 @@ foreach ($resultats as $res) {
         let isMouseDown = false;
         let isSelecting = true; 
 
-        // Initialiser le compteur au chargement
         document.addEventListener('DOMContentLoaded', updateCounter);
-
         document.addEventListener('dragstart', function(e) { e.preventDefault(); });
         document.addEventListener('mouseup', function() { isMouseDown = false; });
 
@@ -329,13 +315,20 @@ foreach ($resultats as $res) {
             const hours = Math.floor(count / 2);
             const minutes = (count % 2) * 30;
             
-            document.getElementById('counter').innerText = count + " créneaux";
-            document.getElementById('timeCounter').innerText = `${hours}h ${minutes > 0 ? minutes : '00'}`;
+            document.getElementById('counter').innerHTML = `${count} créneaux`;
+            document.getElementById('timeCounter').innerHTML = `${hours}h ${minutes > 0 ? minutes : '00'}`;
         }
 
         function resetGrid() {
-            if(confirm("Tout effacer ?")) {
+            if(confirm("Voulez-vous vraiment tout effacer ?")) {
                 document.querySelectorAll('.slot-cell.selected').forEach(c => c.classList.remove('selected'));
+                updateCounter();
+            }
+        }
+
+        function selectAll() {
+            if(confirm("Sélectionner tous les créneaux ?")) {
+                document.querySelectorAll('.slot-cell').forEach(c => c.classList.add('selected'));
                 updateCounter();
             }
         }
