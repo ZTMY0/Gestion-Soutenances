@@ -113,6 +113,11 @@ if ($projet) {
         <div class="container">
             <a class="navbar-brand text-uppercase fw-bold" href="#">UEMF Espace PFE</a>
             <div class="d-flex align-items-center text-white-50">
+                
+                <a href="profil.php" class="btn btn-outline-light btn-sm me-3 border-0">
+                    <i class="fas fa-user-cog me-1"></i> Mon Profil
+                </a>
+                
                 <span class="me-3 small text-uppercase"><i class="fas fa-user-graduate me-2"></i><?php echo $_SESSION['user_nom']; ?></span>
                 <a href="../auth/logout.php" class="text-white"><i class="fas fa-sign-out-alt"></i></a>
             </div>
@@ -312,6 +317,7 @@ if ($projet) {
                                     <p>L'espace de discussion s'ouvrira dès qu'un encadrant vous sera assigné.</p>
                                 </div>
                             <?php endif; ?>
+                            
 
                         </div>
                     </div>

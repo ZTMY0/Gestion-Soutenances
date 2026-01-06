@@ -22,6 +22,7 @@ require_once '../config/database.php';
         <a href="../src/views/etudiant/" class="list-group-item list-group-item-action"> Espace Étudiant (Nizar)</a>
         <a href="../src/views/prof/" class="list-group-item list-group-item-action"> Espace Professeur (Abdel)</a>
         <a href="../src/views/coordinateur/" class="list-group-item list-group-item-action"> Espace Coordinateur (Ihab)</a>
+        <a href="../src/views/directeur/index.php" class="list-group-item list-group-item-action"> Espace Directeur(Nizar)</a>
     </div>
 </body>
 </html>

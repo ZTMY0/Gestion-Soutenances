@@ -10,7 +10,71 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'coordinateur') {
 $message = "";
 $msg_type = "";
 
-// 1. TRAITEMENT : AFFECTER LE JURY
+// ---------------------------------------------------------
+// 1. TRAITEMENT : AFFECTATION AUTOMATIQUE (IA JURY)
+// ---------------------------------------------------------
+if (isset($_POST['auto_jury'])) {
+    try {
+        $pdo->beginTransaction();
+        
+        // A. Récupérer les soutenances SANS jury complet (moins de 2 membres)
+        $sql = "SELECT s.id 
+                FROM soutenances s 
+                LEFT JOIN jurys j ON s.id = j.soutenance_id 
+                GROUP BY s.id 
+                HAVING COUNT(j.id) < 2";
+        $soutenancesVides = $pdo->query($sql)->fetchAll(PDO::FETCH_COLUMN);
+
+        // B. Récupérer tous les professeurs
+        $profs = $pdo->query("SELECT id FROM users WHERE role = 'prof'")->fetchAll(PDO::FETCH_COLUMN);
+
+        if (count($profs) < 2) {
+            throw new Exception("Pas assez de professeurs dans la base (minimum 2 requis).");
+        }
+
+        $count = 0;
+        if (!empty($soutenancesVides)) {
+            // Préparation des requêtes
+            $stmtInsert = $pdo->prepare("INSERT INTO jurys (soutenance_id, prof_id, role_jury) VALUES (?, ?, ?)");
+            $stmtClean  = $pdo->prepare("DELETE FROM jurys WHERE soutenance_id = ?");
+
+            foreach ($soutenancesVides as $sid) {
+                // 1. Nettoyage préventif (au cas où il y en aurait 1 seul)
+                $stmtClean->execute([$sid]);
+
+                // 2. Tirage au sort de 2 profs distincts
+                $keys = array_rand($profs, 2);
+                $p1 = $profs[$keys[0]];
+                $p2 = $profs[$keys[1]];
+
+                // 3. Insertion
+                $stmtInsert->execute([$sid, $p1, 'president']);
+                $stmtInsert->execute([$sid, $p2, 'examinateur']);
+                
+                $count++;
+            }
+        }
+        
+        $pdo->commit();
+        
+        if ($count > 0) {
+            $message = "<strong>Succès IA !</strong> $count jury(s) ont été constitués automatiquement.";
+            $msg_type = "success";
+        } else {
+            $message = "Tous les jurys sont déjà complets.";
+            $msg_type = "warning";
+        }
+
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        $message = "Erreur IA : " . $e->getMessage();
+        $msg_type = "danger";
+    }
+}
+
+// ---------------------------------------------------------
+// 2. TRAITEMENT : AFFECTATION MANUELLE (Classique)
+// ---------------------------------------------------------
 if (isset($_POST['affecter_jury'])) {
     $soutenance_id = $_POST['soutenance_id'];
     $president_id = $_POST['president_id'];
@@ -23,20 +87,20 @@ if (isset($_POST['affecter_jury'])) {
         try {
             $pdo->beginTransaction();
 
-            // 1. On nettoie les anciens membres de ce jury (Reset)
+            // Reset du jury pour cette soutenance
             $stmt = $pdo->prepare("DELETE FROM jurys WHERE soutenance_id = ?");
             $stmt->execute([$soutenance_id]);
 
-            // 2. On insère le Président
+            // Insertion Président
             $stmt = $pdo->prepare("INSERT INTO jurys (soutenance_id, prof_id, role_jury) VALUES (?, ?, 'president')");
             $stmt->execute([$soutenance_id, $president_id]);
 
-            // 3. On insère l'Examinateur
+            // Insertion Examinateur
             $stmt = $pdo->prepare("INSERT INTO jurys (soutenance_id, prof_id, role_jury) VALUES (?, ?, 'examinateur')");
             $stmt->execute([$soutenance_id, $examinateur_id]);
 
             $pdo->commit();
-            $message = "Jury constitué avec succès !";
+            $message = "Jury modifié manuellement.";
             $msg_type = "success";
         } catch (Exception $e) {
             $pdo->rollBack();
@@ -46,8 +110,9 @@ if (isset($_POST['affecter_jury'])) {
     }
 }
 
-// 2. RÉCUPÉRATION DES SOUTENANCES PLANIFIÉES
-// On récupère aussi les infos des jurys déjà affectés (via LEFT JOIN multiple ou GROUP_CONCAT)
+// ---------------------------------------------------------
+// 3. RÉCUPÉRATION DES DONNÉES
+// ---------------------------------------------------------
 $sql = "SELECT s.id as sid, s.date_soutenance, s.salle,
                p.titre, u.nom as etu_nom, u.prenom as etu_prenom,
                j1.prof_id as pres_id, u1.nom as pres_nom, u1.prenom as pres_prenom,
@@ -55,19 +120,17 @@ $sql = "SELECT s.id as sid, s.date_soutenance, s.salle,
         FROM soutenances s
         JOIN projets p ON s.projet_id = p.id
         JOIN users u ON p.etudiant_id = u.id
-        -- Jointure pour le Président
         LEFT JOIN jurys j1 ON s.id = j1.soutenance_id AND j1.role_jury = 'president'
         LEFT JOIN users u1 ON j1.prof_id = u1.id
-        -- Jointure pour l'Examinateur
         LEFT JOIN jurys j2 ON s.id = j2.soutenance_id AND j2.role_jury = 'examinateur'
         LEFT JOIN users u2 ON j2.prof_id = u2.id
         ORDER BY s.date_soutenance ASC";
 $soutenances = $pdo->query($sql)->fetchAll();
 
-// 3. LISTE DES PROFS (Pour les select)
+// Liste des profs pour le select
 $profs = $pdo->query("SELECT id, nom, prenom FROM users WHERE role = 'prof' ORDER BY nom")->fetchAll();
 
-// STATS
+// Stats
 $total = count($soutenances);
 $complets = 0;
 foreach($soutenances as $s) { if($s['pres_id'] && $s['exam_id']) $complets++; }
@@ -97,8 +160,17 @@ $incomplets = $total - $complets;
 
     <div class="dashboard-hero">
         <div class="container">
-            <h2 class="mb-1"><i class="fas fa-gavel me-2"></i>Gestion des Jurys</h2>
-            <p class="mb-0 opacity-75">Constitution des commissions d'évaluation pour les soutenances planifiées.</p>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1"><i class="fas fa-gavel me-2"></i>Gestion des Jurys</h2>
+                    <p class="mb-0 opacity-75">Constitution des commissions d'évaluation.</p>
+                </div>
+                <form method="POST">
+                    <button type="submit" name="auto_jury" class="btn btn-light text-primary fw-bold shadow-sm">
+                        <i class="fas fa-magic me-2"></i>Constituer Jurys Auto
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -108,7 +180,7 @@ $incomplets = $total - $complets;
             <div class="col-md-4">
                 <div class="stat-card-modern p-3 d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="stat-modern-label">Soutenances</div>
+                        <div class="stat-modern-label">Total Soutenances</div>
                         <div class="stat-modern-value"><?= $total ?></div>
                     </div>
                     <i class="fas fa-calendar-alt fa-2x opacity-25 text-primary"></i>
@@ -135,15 +207,16 @@ $incomplets = $total - $complets;
         </div>
 
         <?php if($message): ?>
-            <div class="alert alert-<?= $msg_type ?> shadow-sm border-0 mb-4 rounded d-flex align-items-center">
-                <i class="fas fa-info-circle me-2 fa-lg"></i>
+            <div class="alert alert-<?= $msg_type ?> shadow-sm border-0 mb-4 rounded d-flex align-items-center fade show">
+                <i class="fas fa-<?= ($msg_type=='success')?'check-circle':'exclamation-triangle' ?> me-3 fa-lg"></i>
                 <div><?= $message ?></div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
 
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white py-3">
-                <h6 class="m-0 fw-bold text-dark"><i class="fas fa-list me-2 text-primary"></i>Liste des sessions d'examen</h6>
+                <h6 class="m-0 fw-bold text-dark"><i class="fas fa-list me-2 text-primary"></i>Liste des sessions</h6>
             </div>
             <div class="card-body p-0">
                 
@@ -179,7 +252,7 @@ $incomplets = $total - $complets;
                                                     <div class="small"><span class="badge bg-light text-dark border">P</span> <?= $s['pres_nom'] ?></div>
                                                     <div class="small"><span class="badge bg-light text-dark border">E</span> <?= $s['exam_nom'] ?></div>
                                                 <?php else: ?>
-                                                    <span class="small text-muted fst-italic">-- Non assigné --</span>
+                                                    <span class="small text-muted fst-italic">-- En attente --</span>
                                                 <?php endif; ?>
                                             </div>
                                             <div class="col-md-2 text-end pe-4">
@@ -196,32 +269,26 @@ $incomplets = $total - $complets;
                                             
                                             <div class="col-md-5">
                                                 <label class="form-label small fw-bold text-uppercase text-muted mb-1">Président du Jury</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-white"><i class="fas fa-crown text-warning"></i></span>
-                                                    <select name="president_id" class="form-select" required>
-                                                        <option value="">-- Sélectionner --</option>
-                                                        <?php foreach($profs as $p): ?>
-                                                            <option value="<?= $p['id'] ?>" <?= ($p['id'] == $s['pres_id'])?'selected':'' ?>>
-                                                                <?= $p['nom'].' '.$p['prenom'] ?>
-                                                            </option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                </div>
+                                                <select name="president_id" class="form-select" required>
+                                                    <option value="">-- Sélectionner --</option>
+                                                    <?php foreach($profs as $p): ?>
+                                                        <option value="<?= $p['id'] ?>" <?= ($p['id'] == $s['pres_id'])?'selected':'' ?>>
+                                                            <?= $p['nom'].' '.$p['prenom'] ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
                                             </div>
 
                                             <div class="col-md-5">
                                                 <label class="form-label small fw-bold text-uppercase text-muted mb-1">Examinateur</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-white"><i class="fas fa-search text-primary"></i></span>
-                                                    <select name="examinateur_id" class="form-select" required>
-                                                        <option value="">-- Sélectionner --</option>
-                                                        <?php foreach($profs as $p): ?>
-                                                            <option value="<?= $p['id'] ?>" <?= ($p['id'] == $s['exam_id'])?'selected':'' ?>>
-                                                                <?= $p['nom'].' '.$p['prenom'] ?>
-                                                            </option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                </div>
+                                                <select name="examinateur_id" class="form-select" required>
+                                                    <option value="">-- Sélectionner --</option>
+                                                    <?php foreach($profs as $p): ?>
+                                                        <option value="<?= $p['id'] ?>" <?= ($p['id'] == $s['exam_id'])?'selected':'' ?>>
+                                                            <?= $p['nom'].' '.$p['prenom'] ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
                                             </div>
 
                                             <div class="col-md-2">

@@ -62,13 +62,18 @@ $projetsRecents = $stmt->fetchAll();
 </head>
 <body>
     
-    <!-- NAVBAR STYLE COORDINATEUR -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2">
         <div class="container">
             <a class="navbar-brand text-uppercase fw-bold" href="index.php">
                 <i class="fas fa-graduation-cap me-2"></i>UEMF Professeur
             </a>
+            
             <div class="d-flex align-items-center text-white-50">
+                
+                <a href="profil.php" class="btn btn-outline-light btn-sm me-3 border-0">
+                    <i class="fas fa-user-circle me-1"></i> Mon Profil
+                </a>
+
                 <span class="me-3 small">Pr. <?= htmlspecialchars($_SESSION['user_nom']) ?></span>
                 <a href="../auth/logout.php" class="btn btn-sm btn-logout">
                     <i class="fas fa-sign-out-alt me-1"></i>
@@ -78,7 +83,6 @@ $projetsRecents = $stmt->fetchAll();
         </div>
     </nav>
 
-    <!-- HERO SECTION STYLE COORDINATEUR -->
     <div class="dashboard-hero">
         <div class="container">
             <div class="d-flex justify-content-between align-items-end">
@@ -92,7 +96,6 @@ $projetsRecents = $stmt->fetchAll();
 
     <div class="container pb-5">
         
-        <!-- STATISTIQUES -->
         <div class="row g-4 mb-5">
             <div class="col-md-3 col-sm-6 animate-fade-in" style="animation-delay: 0.1s">
                 <div class="stat-card">
@@ -135,7 +138,6 @@ $projetsRecents = $stmt->fetchAll();
             </div>
         </div>
 
-        <!-- ALERT SI PAS DE DISPO -->
         <?php if ($nbDispos == 0): ?>
             <div class="alert-modern warning mb-4 animate-fade-in">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -146,7 +148,6 @@ $projetsRecents = $stmt->fetchAll();
             </div>
         <?php endif; ?>
 
-        <!-- MENU PRINCIPAL -->
         <h5 class="mb-3 fw-bold text-dark">
             <i class="fas fa-th-large text-primary me-2"></i>
             Accès rapide
@@ -223,7 +224,6 @@ $projetsRecents = $stmt->fetchAll();
             </div>
         </div>
 
-        <!-- DEUXIÈME LIGNE -->
         <div class="row g-4 mb-5">
             <div class="col-md-6 animate-fade-in" style="animation-delay: 0.4s">
                 <a href="statistiques.php" class="menu-card">
