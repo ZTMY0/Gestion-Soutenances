@@ -10,3 +10,5 @@ __pycache__/
 *.pyc
 
  /config/database.php
+# dossiers de génération / scripts locaux
+_data_generators/
