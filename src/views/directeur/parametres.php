@@ -3,22 +3,51 @@ session_start();
 require_once '../../../config/database.php';
 
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'directeur') {
-    header("Location: ../auth/login.php");
-    exit();
+  header("Location: ../auth/login.php"); exit();
 }
-?>
-<h1>Paramètres système</h1>
 
-<ul>
-  <li>⏱ Durée standard soutenance : 60 min</li>
-  <li>📅 Date limite de dépôt</li>
-  <li>👤 Gestion des comptes coordinateurs</li>
-</ul>
-<?php
-session_start();
-require_once '../../../config/database.php';
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'directeur') {
-    header("Location: ../auth/login.php"); exit();
+$success = '';
+$error = '';
+
+// Charger paramètres existants en tableau clé=>valeur
+$stmt = $pdo->query("SELECT cle, valeur FROM parametres");
+$params = [];
+foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+  $params[$row['cle']] = $row['valeur'];
+}
+
+$date_limite_rapport = $params['date_limite_rapport'] ?? '';
+$duree_soutenance_min = $params['duree_soutenance_min'] ?? '';
+
+// Sauvegarde
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $newDate = trim($_POST['date_limite_rapport'] ?? '');
+  $newDuree = trim($_POST['duree_soutenance_min'] ?? '');
+
+  if ($newDate === '' || $newDuree === '') {
+    $error = "Tous les champs sont obligatoires.";
+  } elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $newDate)) {
+    $error = "Format de date invalide (YYYY-MM-DD).";
+  } elseif (!ctype_digit($newDuree) || (int)$newDuree <= 0) {
+    $error = "Durée invalide (nombre entier > 0).";
+  } else {
+    $pdo->beginTransaction();
+    try {
+      $up = $pdo->prepare("UPDATE parametres SET valeur=?, updated_at=NOW() WHERE cle=?");
+
+      $up->execute([$newDate, 'date_limite_rapport']);
+      $up->execute([(string)(int)$newDuree, 'duree_soutenance_min']);
+
+      $pdo->commit();
+      $success = "Paramètres enregistrés avec succès.";
+
+      $date_limite_rapport = $newDate;
+      $duree_soutenance_min = (string)(int)$newDuree;
+    } catch (Exception $e) {
+      $pdo->rollBack();
+      $error = "Erreur sauvegarde paramètres.";
+    }
+  }
 }
 ?>
 <!doctype html>
@@ -29,29 +58,25 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'directeur') {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h4 mb-0">Paramètres & Gestion des comptes</h1>
-    <a class="btn btn-outline-secondary btn-sm" href="index.php">Retour</a>
-  </div>
+  <h1 class="h4 mb-3">Paramètres (Directeur)</h1>
 
-  <div class="alert alert-info">
-    Configuration des règles métier : durée soutenance, dates limites, activation/désactivation coordinateurs.
-  </div>
+  <?php if($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+  <?php if($success): ?><div class="alert alert-success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
 
-  <form class="row g-3" method="post">
-    <div class="col-md-4">
-      <label class="form-label">Durée standard soutenance (min)</label>
-      <input class="form-control" type="number" value="60" disabled>
+  <form method="post" class="card p-3">
+    <div class="mb-3">
+      <label class="form-label fw-bold">Date limite dépôt rapport</label>
+      <input type="date" name="date_limite_rapport" class="form-control" value="<?= htmlspecialchars($date_limite_rapport) ?>" required>
     </div>
-    <div class="col-md-4">
-      <label class="form-label">Date limite dépôt rapport</label>
-      <input class="form-control" type="date" disabled>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Durée soutenance (minutes)</label>
+      <input type="number" name="duree_soutenance_min" class="form-control" min="1" value="<?= htmlspecialchars($duree_soutenance_min) ?>" required>
     </div>
-    <div class="col-12">
-      <button class="btn btn-primary" disabled>Enregistrer</button>
-    </div>
+
+    <button class="btn btn-primary">Enregistrer</button>
   </form>
 
-  <p class="text-muted mt-3 mb-0">(Simulation UI — à relier à une table settings.)</p>
+  <a class="btn btn-link mt-3" href="index.php">← Retour</a>
 </body>
 </html>

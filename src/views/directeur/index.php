@@ -17,7 +17,13 @@ $nbValides = $pdo->query("SELECT COUNT(*) FROM projets WHERE statut = 'valide'")
 $taux = ($nbProjets > 0) ? round(($nbValides / $nbProjets) * 100) : 0;
 
 // Alertes (Projets sans rapport déposé alors qu'ils sont encadrés)
-$nbAlertes = $pdo->query("SELECT COUNT(*) FROM projets WHERE statut = 'encadre' AND (rapport_chemin IS NULL OR rapport_chemin = '')")->fetchColumn();
+$nbAlertes = $pdo->query("
+    SELECT COUNT(*)
+    FROM projets p
+    LEFT JOIN rapports r ON r.projet_id = p.id
+    WHERE p.statut = 'encadre'
+      AND r.id IS NULL
+")->fetchColumn();
 ?>
 
 <!DOCTYPE html>

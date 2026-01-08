@@ -33,7 +33,7 @@ $dateDuJour = date('d M Y');
     
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2">
         <div class="container">
-            <span class="navbar-text text-white-50"><i class="fas fa-shield-alt me-2"></i>Portail Sécurisé UEMF</span>
+            <span class="navbar-text text-white-50">Espace Coordinateur UEMF</span>
             <div class="ms-auto">
                 <a href="../auth/logout.php" class="text-white-50 text-decoration-none hover-white"><i class="fas fa-sign-out-alt me-1"></i>Déconnexion</a>
             </div>
@@ -170,9 +170,28 @@ $dateDuJour = date('d M Y');
         </div>
 
         <div class="mt-5 text-center border-top pt-4">
-            <p class="text-muted small mb-3">Zone d'administration technique</p>
-            <a href="import_etudiants.php" class="btn btn-sm btn-outline-secondary me-2"><i class="fas fa-file-csv me-1"></i> Import Étudiants</a>
-            <a href="import_profs.php" class="btn btn-sm btn-outline-secondary"><i class="fas fa-file-csv me-1"></i> Import Professeurs</a>
+            <p class="text-muted small mb-3 text-uppercase fw-bold">Administration & Support</p>
+            
+            <a href="tickets.php" class="btn btn-sm btn-outline-danger me-2 mb-2">
+                <i class="fas fa-headset me-1"></i> Tickets Support
+                <span class="badge bg-danger rounded-pill">!</span>
+            </a>
+
+            <div class="d-inline-block border-start border-end px-3 mx-2 mb-2">
+                <a href="gestion_etudiants.php" class="btn btn-sm btn-outline-dark me-1">
+                    <i class="fas fa-user-lock me-1"></i> Reset Étudiants
+                </a>
+                <a href="gestion_profs.php" class="btn btn-sm btn-outline-dark">
+                    <i class="fas fa-chalkboard-teacher me-1"></i> Reset Profs
+                </a>
+            </div>
+
+            <a href="import_etudiants.php" class="btn btn-sm btn-outline-secondary me-1 mb-2">
+                <i class="fas fa-file-csv me-1"></i> Import Etu
+            </a>
+            <a href="import_profs.php" class="btn btn-sm btn-outline-secondary mb-2">
+                <i class="fas fa-file-csv me-1"></i> Import Prof
+            </a>
         </div>
 
     </div>

@@ -9,7 +9,7 @@
 
 | Membre | Module Responsable | Tâches Principales | État |
 | :--- | :--- | :--- | :--- |
-| **IHAB** | **Coord. & Étudiant** | Espace Coordinateur, Espace Étudiant. | ✅ TERMINÉ |
+| **IHAB** | **Coord. & Étudiant** | Espace Coordinateur, Espace Étudiant, Architecture Globale. | ✅ TERMINÉ |
 | **ABDELMOUGHIT** | **Prof & Algo** | Espace Professeur, Algorithmes (Affectation, Planning, Jury). | ✅ TERMINÉ |
 | **NIZAR** | **Directeur** | Validation planning, KPIs, Signature électronique. | ✅ TERMINÉ |
 | **NOURDDINE** | **Secrétaire Générale** | Logistique, PDF, Archivage. | ⏳ EN COURS |
@@ -18,12 +18,13 @@
 
 ##  DÉTAIL DES RÉALISATIONS
 
-### 1. IHAB (Lead Dev Front & Intégration) - ✅ TERMINÉ
+### 1. IHAB - ✅ TERMINÉ
 
 **A. REFONTE UI/UX GLOBALE (Charte UEMF)**
 * [x] **Design System :** Création d'une charte graphique "Pilotage" (Bleu UEMF `#004d99`, Hero Headers, Cartes flottantes).
 * [x] **Composants :** Développement du `style.css` unifié (Navbar responsive, Badges carrés, Tableaux aérés).
 * [x] **Navigation :** Mise en place du flux logique (Dashboard → Actions → Détails).
+* [x] **NOUVEAU : Sidebar "Enterprise" :** Passage d'une navbar haute à un menu latéral fixe (Style carré/pro) pour le Coordinateur.
 
 **B. ESPACE COORDINATEUR (`src/views/coordinateur/`)**
 * [x] **Dashboard :** Vue d'ensemble avec KPIs temps réel et graphiques Chart.js.
@@ -32,11 +33,18 @@
 * [x] **Planification :** Interface double colonne (Accordéon pour planifier vs Tableau du planning confirmé).
 * [x] **Gestion Jurys :** Système d'accordéon pour assigner Président et Examinateur.
 * [x] **Administration :** Imports CSV fonctionnels pour la base Étudiants et Professeurs.
+* [x] **NOUVEAU : Gestion Sécurité :** Pages `gestion_etudiants.php` et `gestion_profs.php` pour réinitialiser les mots de passe et la 2FA.
 
 **C. ESPACE ÉTUDIANT (`src/views/etudiant/`)**
 * [x] **Dashboard Immersif :** Timeline de progression visuelle (Inscription → Encadré → Rapport → Soutenance → Terminé).
 * [x] **Communication :** Système de Chat intégré en temps réel avec l'encadrant.
 * [x] **Gestion Dossier :** Upload de rapport, affichage conditionnel de la convocation et de la note finale.
+
+**D. INFRASTRUCTURE & DÉPANNAGE (AJOUTS RÉCENTS)**
+* [x] **Support Technique :** Création du système de tickets (`support.php`) pour gérer les comptes bloqués sans emails.
+* [x] **Fix Login Multi-rôles :** Réparation des redirections (page blanche) pour les rôles `Directeur` et `Assistante`.
+* [x] **Intégration Directeur :** Mise en place du Dashboard Directeur (KPIs connectés à la BDD).
+* [x] **Routage Assistante :** Configuration de l'accès sécurisé pour le module logistique.
 
 ### 2. ABDELMOUGHIT (Professeurs & Backend) - ✅ INTÉGRÉ
 
@@ -84,3 +92,4 @@
 - [x] **Git Workflow :** IHAB sur `main` (Core/Coord/Etu), autres membres sur branches isolées pour protection DB.
 - [x] **Session Management :** Vérification stricte des rôles (`$_SESSION['user_role']`) sur toutes les pages.
 - [x] **Base de données :** Tables `messages`, `jurys`, et `disponibilites_profs` opérationnelles.
+- [x] **2FA & Reset :** Authentification Google Auth + Procédure de réinitialisation Coordinateur.
