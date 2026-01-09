@@ -42,8 +42,8 @@
 * **Espace Étudiant :** Timeline interactive de suivi et messagerie instantanée avec l'encadrant.
 
 ### 2. ABDELMOUGHIT - MODULE PROFESSEUR ET ALGORITHMES
-* **Espace Professeur :** Gestion des disponibilités et validation des rapports académiques.
-* **Algorithmes :** Services automatisés d'affectation des sujets et détection de conflits de planning.
+* **Espace Professeur :** gestion des disponibilités, validation des rapports académiques, suivi des projets encadrés, consultation des jurys et plannings, accès aux statistiques.
+* **Algorithmes :** Services automatisés d’affectation des encadrants et des jurys, planification des soutenances et détection de conflits de planning.
 
 ### 3. NIZAR - MODULE DIRECTEUR
 * **Espace Direction :** Module de validation globale des plannings et interface de contrôle des résultats.
