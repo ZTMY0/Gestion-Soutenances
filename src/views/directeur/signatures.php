@@ -1,6 +1,13 @@
 <?php
+// ERROR REPORTING
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
-require_once '../../../config/database.php';
+
+// FIX: Use __DIR__ for absolute path
+require_once __DIR__ . '/../../../config/database.php';
 
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'directeur') {
     header("Location: ../auth/login.php"); exit();
@@ -8,17 +15,16 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'directeur') {
 
 $success = '';
 $error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    die("POST REÇU : " . htmlspecialchars(json_encode($_POST)));
-}
-
+// --- CORRECTED LOGIC BLOCK ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'sign') {
     $pv_id = (int)($_POST['pv_id'] ?? 0);
-   } if ($pv_id <= 0) {
+
+    // The check must be INSIDE the POST condition
+    if ($pv_id <= 0) {
         $error = "PV invalide.";
     } else {
-        // On signe "logiquement" : hash basé sur (pv_id + soutenance_id + date)
-       $stmt = $pdo->prepare("SELECT id, soutenance_id, statut FROM pv WHERE id = ?");
+        // Retrieve PV info
+        $stmt = $pdo->prepare("SELECT id, soutenance_id, statut FROM pv WHERE id = ?");
         $stmt->execute([$pv_id]);
         $pv = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -27,16 +33,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'sign'
         } elseif ($pv['statut'] === 'pv_signe') {
             $error = "PV déjà signé.";
         } else {
-           $payload = $pv['id'] . '|' . $pv['soutenance_id'] . '|' . date('c');
+            // Generate Hash
+            $payload = $pv['id'] . '|' . $pv['soutenance_id'] . '|' . date('c');
             $hash = hash('sha256', $payload);
 
+            // Update DB
             $up = $pdo->prepare("UPDATE pv SET statut='pv_signe', signature_hash=?, signed_at=NOW() WHERE id=?");
             $up->execute([$hash, $pv_id]);
-            if ($up->rowCount() === 0) {
-    $error = "DEBUG: UPDATE a touché 0 ligne. pv_id=" . $pv_id;
-} else {
 
-            $success = "PV signé avec succès. Hash: $hash";
+            if ($up->rowCount() === 0) {
+                $error = "Erreur: Impossible de signer le PV (peut-être déjà signé ?).";
+            } else {
+                $success = "PV signé avec succès. Hash: $hash";
+            }
         }
     }
 }
@@ -97,4 +106,3 @@ $pvs = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <a class="btn btn-link mt-3" href="index.php">← Retour</a>
 </body>
 </html>
-

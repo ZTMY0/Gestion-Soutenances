@@ -1,11 +1,18 @@
 <?php
+// ERROR REPORTING
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
-require_once '../../../config/database.php';
+
+// FIX: Use __DIR__ for absolute path
+require_once __DIR__ . '/../../../config/database.php';
 
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'directeur') {
   header("Location: ../auth/login.php"); exit();
 }
-
+// ... rest of your code ...
 $success = '';
 $error = '';
 

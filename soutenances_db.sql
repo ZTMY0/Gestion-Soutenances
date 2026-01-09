@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 06, 2026 at 04:36 PM
+-- Generation Time: Jan 09, 2026 at 03:04 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,43 @@ SET time_zone = "+00:00";
 --
 -- Database: `soutenances_db`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `audit_logs`
+--
+
+CREATE TABLE `audit_logs` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `action` varchar(50) NOT NULL,
+  `details` text DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `audit_logs`
+--
+
+INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `details`, `ip_address`, `created_at`) VALUES
+(1, 283, 'COORD_SUPPRESSION', 'Suppression projet ID 14', '105.76.137.190', '2026-01-08 22:32:14'),
+(2, 283, 'COORD_VALIDATION', 'Validation projet ID 15', '105.76.137.190', '2026-01-08 22:44:58');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `demandes_correction`
+--
+
+CREATE TABLE `demandes_correction` (
+  `id` int(11) NOT NULL,
+  `directeur_id` int(11) NOT NULL,
+  `projet_id` int(11) NOT NULL,
+  `message` text NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
 
@@ -5024,10 +5061,10 @@ CREATE TABLE `jurys` (
 --
 
 INSERT INTO `jurys` (`id`, `soutenance_id`, `prof_id`, `role_jury`, `present`) VALUES
-(16, 11, 781, 'president', 1),
-(17, 11, 786, 'examinateur', 1),
-(20, 10, 785, 'president', 1),
-(21, 10, 786, 'examinateur', 1);
+(24, 12, 771, 'president', 1),
+(25, 12, 785, 'examinateur', 1),
+(26, 10, 785, 'president', 1),
+(27, 10, 786, 'examinateur', 1);
 
 -- --------------------------------------------------------
 
@@ -5065,6 +5102,26 @@ CREATE TABLE `messages` (
 
 INSERT INTO `messages` (`id`, `projet_id`, `sender_id`, `message`, `created_at`) VALUES
 (7, 10, 1157, 'done', '2026-01-06 15:01:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `parametres`
+--
+
+CREATE TABLE `parametres` (
+  `cle` varchar(50) NOT NULL,
+  `valeur` text DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `parametres`
+--
+
+INSERT INTO `parametres` (`cle`, `valeur`, `updated_at`) VALUES
+('date_limite_rapport', '2024-06-30', '2026-01-08 21:43:20'),
+('duree_soutenance_min', '45', '2026-01-08 21:43:20');
 
 -- --------------------------------------------------------
 
@@ -5132,7 +5189,30 @@ CREATE TABLE `projets` (
 
 INSERT INTO `projets` (`id`, `titre`, `description`, `domaine`, `technologies`, `binome_email`, `etudiant_id`, `encadrant_id`, `filiere_id`, `encadrant_pref1_id`, `encadrant_pref2_id`, `encadrant_pref3_id`, `statut`, `annee_universitaire`, `created_at`, `rapport_chemin`) VALUES
 (10, 'Système de détection d\'intrusions', 'Système de détection d\'intrusions', 'Cyber', 'Docker,PHP', '', 1157, 780, 1, 780, NULL, NULL, 'valide', '2025-2026', '2026-01-06 14:58:53', 'rapport_10_1767708053.pdf'),
-(11, 'Analyse des tendances sur les réseaux sociaux', 'Analyse des tendances sur les réseaux sociaux', 'IA', 'IA : Python (Scikit-learn)  Backend : FastAPI  Front : React', '', 811, 771, 2, NULL, NULL, NULL, 'valide', '2025-2026', '2026-01-06 15:14:51', 'rapport_11_1767708969.pdf');
+(15, 'Analyse des tendances sur les réseaux sociaux', 'Analyse des tendances sur les réseaux sociaux', 'BigData', 'IA : Python (Scikit-learn)  Backend : FastAPI  Front : React', '', 1176, NULL, 1, 765, NULL, NULL, 'valide', '2025-2026', '2026-01-08 14:33:02', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pv`
+--
+
+CREATE TABLE `pv` (
+  `id` int(11) NOT NULL,
+  `soutenance_id` int(11) NOT NULL,
+  `statut` varchar(20) DEFAULT 'attente_signature',
+  `signature_hash` varchar(64) DEFAULT NULL,
+  `signed_at` datetime DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `pv`
+--
+
+INSERT INTO `pv` (`id`, `soutenance_id`, `statut`, `signature_hash`, `signed_at`, `created_at`) VALUES
+(1, 11, 'pv_signe', 'bab711b6acf11468c0bb995401b43919c69b29b1c7e76526b1a6f09e006a5a73', '2026-01-08 13:47:39', '2026-01-08 21:47:35'),
+(2, 12, 'pv_signe', '3728ef787e605d9a23fd7dc6e35da2e128cc1ffb0875ad9597d26ec0a2b59c89', '2026-01-08 14:57:51', '2026-01-08 22:57:40');
 
 -- --------------------------------------------------------
 
@@ -5158,8 +5238,7 @@ CREATE TABLE `rapports` (
 --
 
 INSERT INTO `rapports` (`id`, `projet_id`, `nom_fichier`, `chemin_fichier`, `taille_fichier`, `resume`, `mots_cles`, `remerciements`, `est_original`, `created_at`) VALUES
-(9, 10, 'mini-projets_2025.pdf', 'uploads/rapport_10_1767708053.pdf', 169547, 'Rapport final de pfe', NULL, NULL, 1, '2026-01-06 15:00:53'),
-(10, 11, 'Revision_question - Exercises.pdf', 'uploads/rapport_11_1767708969.pdf', 182147, 'Rapport pfe', NULL, NULL, 1, '2026-01-06 15:16:09');
+(9, 10, 'mini-projets_2025.pdf', 'uploads/rapport_10_1767708053.pdf', 169547, 'Rapport final de pfe', NULL, NULL, 1, '2026-01-06 15:00:53');
 
 -- --------------------------------------------------------
 
@@ -5197,16 +5276,20 @@ CREATE TABLE `soutenances` (
   `note_finale` decimal(4,2) DEFAULT NULL,
   `mention` varchar(50) DEFAULT NULL,
   `commentaire_jury` text DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `pv_signe` tinyint(1) DEFAULT 0,
+  `pv_hash` varchar(64) DEFAULT NULL,
+  `date_signature` datetime DEFAULT NULL,
+  `statut` varchar(20) DEFAULT 'prevue'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `soutenances`
 --
 
-INSERT INTO `soutenances` (`id`, `projet_id`, `date_soutenance`, `salle`, `jury_infos`, `note_finale`, `mention`, `commentaire_jury`, `created_at`) VALUES
-(10, 10, '2026-01-06 09:00:00', 'Salle Standard (Auto)', NULL, NULL, NULL, NULL, '2026-01-06 15:13:40'),
-(11, 11, '2026-01-16 09:00:00', 'Salle Standard (Auto)', NULL, NULL, NULL, NULL, '2026-01-06 15:17:24');
+INSERT INTO `soutenances` (`id`, `projet_id`, `date_soutenance`, `salle`, `jury_infos`, `note_finale`, `mention`, `commentaire_jury`, `created_at`, `pv_signe`, `pv_hash`, `date_signature`, `statut`) VALUES
+(10, 10, '2026-01-06 09:00:00', 'Salle Standard (Auto)', NULL, NULL, NULL, NULL, '2026-01-06 15:13:40', 0, NULL, NULL, 'prevue'),
+(12, 15, '2026-01-13 17:00:00', 'B1-2.12', NULL, NULL, NULL, NULL, '2026-01-08 14:54:25', 0, NULL, NULL, 'publie');
 
 -- --------------------------------------------------------
 
@@ -5542,6 +5625,19 @@ INSERT INTO `users` (`id`, `nom`, `prenom`, `email`, `username`, `login`, `passw
 --
 
 --
+-- Indexes for table `audit_logs`
+--
+ALTER TABLE `audit_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `demandes_correction`
+--
+ALTER TABLE `demandes_correction`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `disponibilites`
 --
 ALTER TABLE `disponibilites`
@@ -5590,6 +5686,12 @@ ALTER TABLE `messages`
   ADD KEY `projet_id` (`projet_id`);
 
 --
+-- Indexes for table `parametres`
+--
+ALTER TABLE `parametres`
+  ADD PRIMARY KEY (`cle`);
+
+--
 -- Indexes for table `password_resets`
 --
 ALTER TABLE `password_resets`
@@ -5608,6 +5710,13 @@ ALTER TABLE `periodes`
 ALTER TABLE `projets`
   ADD PRIMARY KEY (`id`),
   ADD KEY `etudiant_id` (`etudiant_id`);
+
+--
+-- Indexes for table `pv`
+--
+ALTER TABLE `pv`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `soutenance_id` (`soutenance_id`);
 
 --
 -- Indexes for table `rapports`
@@ -5649,6 +5758,18 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `audit_logs`
+--
+ALTER TABLE `audit_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `demandes_correction`
+--
+ALTER TABLE `demandes_correction`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `disponibilites`
 --
 ALTER TABLE `disponibilites`
@@ -5670,7 +5791,7 @@ ALTER TABLE `filieres`
 -- AUTO_INCREMENT for table `jurys`
 --
 ALTER TABLE `jurys`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `jury_soutenance`
@@ -5700,7 +5821,13 @@ ALTER TABLE `periodes`
 -- AUTO_INCREMENT for table `projets`
 --
 ALTER TABLE `projets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT for table `pv`
+--
+ALTER TABLE `pv`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `rapports`
@@ -5718,7 +5845,7 @@ ALTER TABLE `salles`
 -- AUTO_INCREMENT for table `soutenances`
 --
 ALTER TABLE `soutenances`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `support_tickets`
