@@ -1,0 +1,9 @@
+{
+    "name": "npp/gestion-soutenances",
+    "require": {
+        "fpdf/fpdf": "^1.86"
+    },
+    "autoload": {
+        "files": ["vendor/fpdf/fpdf/src/Fpdf/Fpdf.php"]
+    }
+}

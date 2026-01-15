@@ -1,64 +1,55 @@
 <?php
 session_start();
-require_once '../../../config/database.php';
+// SÉCURITÉ
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// 1. SÉCURITÉ D'ACCÈS
+require_once __DIR__ . '/../../../config/session_check.php';
+require_once __DIR__ . '/../../../config/database.php';
+require_once __DIR__ . '/../../services/SecurityService.php'; // Audit Trail
+$security = new SecurityService($pdo);
+
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'etudiant') {
-    header("Location: ../auth/login.php");
-    exit();
+    header("Location: ../auth/login.php"); exit();
 }
 
 $etudiant_id = $_SESSION['user_id'];
 $message = "";
 $error = "";
 
-// 2. RÉCUPÉRATION DU PROJET
+// PROJET & DOUBLONS
 $stmt = $pdo->prepare("SELECT * FROM projets WHERE etudiant_id = ?");
 $stmt->execute([$etudiant_id]);
 $projet = $stmt->fetch();
 
-if (!$projet || !$projet['encadrant_id']) {
-    header("Location: index.php");
-    exit();
+if (!$projet || empty($projet['encadrant_id'])) {
+    header("Location: index.php"); exit();
 }
 
-// 3. VÉRIFICATION DOUBLONS
-// On vérifie directement dans la table PROJETS maintenant (plus fiable)
 $dejaSoumis = !empty($projet['rapport_chemin']);
 
-// 4. TRAITEMENT DE L'UPLOAD
+// TRAITEMENT UPLOAD
 if (isset($_POST['upload_btn'])) {
-    
     if ($dejaSoumis) {
-        $error = "Un rapport est déjà présent.";
-    }
-    elseif (!isset($_POST['originalite'])) {
-        $error = "Vous devez cocher la case certifiant l'originalité de votre travail.";
-    }
-    elseif (isset($_FILES['rapport']) && $_FILES['rapport']['error'] == 0) {
+        $error = "Rapport déjà soumis. Contactez votre encadrant pour modification.";
+    } elseif (!isset($_POST['originalite'])) {
+        $error = "La case 'Originalité' est obligatoire.";
+    } elseif (isset($_FILES['rapport']) && $_FILES['rapport']['error'] === 0) {
         
         $file = $_FILES['rapport'];
-        $resume = trim($_POST['resume']);
-        // On récupère aussi les nouveaux champs (si tu veux les sauvegarder, il faudra adapter la BDD, mais je les laisse pour ne pas casser le code)
-        $mots_cles = $_POST['mots_cles_rapport'] ?? ''; 
-        $remerciements = $_POST['remerciements'] ?? '';
-        
         $maxSize = 50 * 1024 * 1024; // 50 Mo
         $allowedExt = ['pdf'];
         $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-
-        // SÉCURITÉ MIME
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->file($file['tmp_name']);
 
         if ($file['size'] > $maxSize) {
             $error = "Fichier trop lourd (Max 50 Mo).";
-        } elseif (!in_array($fileExt, $allowedExt)) {
-            $error = "Extension invalide. Seul le .pdf est autorisé.";
-        } elseif ($mime !== 'application/pdf') {
-            $error = "Fichier corrompu ou format invalide.";
+        } elseif (!in_array($fileExt, $allowedExt) || $mime !== 'application/pdf') {
+            $error = "Format invalide. PDF uniquement.";
         } else {
-            // UPLOAD
+            
             $uploadDir = __DIR__ . '/../../../public/uploads/';
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
@@ -66,28 +57,35 @@ if (isset($_POST['upload_btn'])) {
             $destPath = $uploadDir . $fileName;
 
             if (move_uploaded_file($file['tmp_name'], $destPath)) {
-                
-                // --- INSERTION DANS LA TABLE RAPPORTS (Pour l'historique) ---
-                $sql = "INSERT INTO rapports (projet_id, nom_fichier, chemin_fichier, taille_fichier, resume, est_original) 
-                        VALUES (?, ?, ?, ?, ?, 1)";
-                $stmtInsert = $pdo->prepare($sql);
-                // Note : On garde 'uploads/' pour la table rapports si tu veux
-                $stmtInsert->execute([$projet['id'], $file['name'], 'uploads/' . $fileName, $file['size'], $resume]);
+                try {
+                    $pdo->beginTransaction();
+                    
+                    // 1. Historique Rapports
+                    $stmtHist = $pdo->prepare("INSERT INTO rapports (projet_id, nom_fichier, chemin_fichier, taille_fichier, resume, est_original, created_at) VALUES (?, ?, ?, ?, ?, 1, NOW())");
+                    $stmtHist->execute([$projet['id'], $file['name'], 'uploads/' . $fileName, $file['size'], trim($_POST['resume'])]);
 
-                // --- 🚨 C'EST ICI LA CORRECTION IMPORTANTE 🚨 ---
-                // On met à jour la table PROJETS avec le nom du fichier pour l'affichage dashboard
-                // On sauvegarde juste le $fileName car index.php ajoute déjà le chemin
-                $sqlUpdate = "UPDATE projets SET statut = 'rapport_soumis', rapport_chemin = ? WHERE id = ?";
-                $pdo->prepare($sqlUpdate)->execute([$fileName, $projet['id']]);
+                    // 2. Mise à jour Projet (Lien actif)
+                    $sqlUpdate = "UPDATE projets SET statut = 'rapport_soumis', rapport_chemin = ? WHERE id = ?";
+                    $pdo->prepare($sqlUpdate)->execute([$fileName, $projet['id']]);
 
-                $message = "Votre rapport a été déposé avec succès !";
-                $dejaSoumis = true; 
+                    // 3. Audit Log
+                    $security->logAction($etudiant_id, 'DEPOT_RAPPORT', "Dépôt fichier : $fileName");
+
+                    $pdo->commit();
+                    $message = "Votre rapport a été déposé avec succès !";
+                    $dejaSoumis = true;
+
+                } catch (Exception $e) {
+                    $pdo->rollBack();
+                    $error = "Erreur BDD : " . $e->getMessage();
+                    if (file_exists($destPath)) unlink($destPath);
+                }
             } else {
-                $error = "Erreur serveur lors de l'enregistrement du fichier.";
+                $error = "Erreur technique lors de l'enregistrement.";
             }
         }
     } else {
-        $error = "Veuillez sélectionner un fichier PDF.";
+        $error = "Fichier manquant ou erreur de transfert.";
     }
 }
 ?>
@@ -96,121 +94,78 @@ if (isset($_POST['upload_btn'])) {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Dépôt Rapport PFE</title>
+    <title>Dépôt Rapport PFE | UEMF</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .upload-area {
-            border: 2px dashed #ced4da;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-        .upload-area:hover, .upload-area.dragover {
-            border-color: #0d6efd;
-            background-color: #e9ecef;
-            cursor: pointer;
-        }
-        .card { border: none; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); }
-        .card-header { background: linear-gradient(45deg, #0d6efd, #0a58ca); }
+        .upload-area { border: 2px dashed #ced4da; border-radius: 10px; transition: all 0.3s ease; background: #f8f9fa; cursor: pointer; }
+        .upload-area:hover, .upload-area.dragover { border-color: #0d6efd; background-color: #e9ecef; }
+        .card-header { background-color: #004d99; color: white; }
     </style>
 </head>
 <body class="bg-light py-5">
-    
     <div class="container">
-        <a href="index.php" class="btn btn-outline-secondary mb-4 rounded-pill px-4">
-            <i class="fas fa-arrow-left me-2"></i>Tableau de bord
-        </a>
-
+        <a href="index.php" class="btn btn-outline-secondary mb-4 rounded-pill px-4"><i class="fas fa-arrow-left me-2"></i>Retour</a>
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="card rounded-3 overflow-hidden">
-                    <div class="card-header text-white p-4">
-                        <h3 class="mb-0 fw-bold"><i class="fas fa-file-pdf me-2"></i>Dépôt du Mémoire Final</h3>
-                        <p class="mb-0 opacity-75 small">Projet : <?php echo htmlspecialchars($projet['titre']); ?></p>
+                <div class="card rounded-3 overflow-hidden shadow">
+                    <div class="card-header p-4">
+                        <h3 class="mb-0 fw-bold"><i class="fas fa-file-pdf me-2"></i>Dépôt du PFE</h3>
+                        <p class="mb-0 opacity-75 small">Projet : <?= htmlspecialchars($projet['titre']) ?></p>
                     </div>
                     
-                    <div class="card-body p-4 p-md-5">
-
+                    <div class="card-body p-5">
                         <?php if($message): ?>
-                            <div class="alert alert-success d-flex align-items-center mb-4">
+                            <div class="alert alert-success d-flex align-items-center">
                                 <i class="fas fa-check-circle fa-2x me-3"></i>
-                                <div>
-                                    <h5 class="alert-heading mb-1">Bravo !</h5>
-                                    <?= $message ?>
-                                </div>
+                                <div><h5 class="mb-1">Succès !</h5><?= $message ?></div>
                             </div>
-                            <div class="text-center">
-                                <a href="index.php" class="btn btn-primary px-5 rounded-pill">Retour à l'accueil</a>
-                            </div>
+                            <div class="text-center mt-4"><a href="index.php" class="btn btn-primary rounded-pill px-5">Accueil</a></div>
                         
                         <?php elseif($dejaSoumis): ?>
                             <div class="text-center py-5">
-                                <div class="mb-3 text-success">
-                                    <i class="fas fa-check-circle fa-5x"></i>
-                                </div>
-                                <h4 class="fw-bold text-dark">Rapport déjà soumis</h4>
-                                <p class="text-muted">Votre rapport est en cours d'examen par votre encadrant.</p>
+                                <i class="fas fa-check-circle fa-5x text-success mb-3"></i>
+                                <h4>Rapport déjà soumis</h4>
+                                <p class="text-muted">En attente de validation.</p>
                                 <a href="index.php" class="btn btn-outline-primary mt-3 px-4 rounded-pill">Retour</a>
                             </div>
 
                         <?php else: ?>
-
-                            <?php if($error): ?>
-                                <div class="alert alert-danger rounded-3">
-                                    <i class="fas fa-exclamation-circle me-2"></i><?= $error ?>
-                                </div>
-                            <?php endif; ?>
+                            <?php if($error): ?><div class="alert alert-danger"><?= $error ?></div><?php endif; ?>
 
                             <form method="POST" enctype="multipart/form-data">
-                                
                                 <div class="mb-4">
-                                    <label class="form-label fw-bold text-secondary">Résumé (Abstract)</label>
-                                    <textarea name="resume" class="form-control" rows="4" required placeholder="Copiez ici le résumé de votre travail..."></textarea>
+                                    <label class="form-label fw-bold">Résumé (Abstract)</label>
+                                    <textarea name="resume" class="form-control" rows="4" required placeholder="Résumé du projet..."></textarea>
                                 </div>
-
+                                <div class="mb-3">
+                                    <label class="fw-bold">Mots-clés</label>
+                                    <input type="text" name="mots_cles_rapport" class="form-control" placeholder="IA, Web, Sécurité...">
+                                </div>
                                 <div class="mb-4">
-                                    <label class="form-label fw-bold text-secondary">Fichier PDF</label>
+                                    <label class="form-label fw-bold">Fichier PDF</label>
                                     <div class="upload-area p-5 text-center position-relative" id="dropArea">
                                         <div id="uploadContent">
                                             <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
-                                            <h5 class="fw-bold text-dark">Glissez votre rapport ici</h5>
-                                            <p class="text-muted small mb-0">ou cliquez pour parcourir (Max 50 Mo)</p>
+                                            <h5>Glissez votre rapport ici</h5>
+                                            <p class="text-muted small">Max 50 Mo - PDF uniquement</p>
                                         </div>
                                         <div id="filePreview" class="d-none">
                                             <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
-                                            <h5 class="fw-bold text-dark" id="fileName">mon_rapport.pdf</h5>
-                                            <p class="text-success small mb-0"><i class="fas fa-check me-1"></i>Fichier prêt à l'envoi</p>
+                                            <h5 id="fileName">fichier.pdf</h5>
                                         </div>
-                                        <input type="file" name="rapport" class="form-control position-absolute top-0 start-0 w-100 h-100 opacity-0" 
-                                               accept=".pdf" required onchange="handleFile(this)">
+                                        <input type="file" name="rapport" class="form-control position-absolute top-0 start-0 w-100 h-100 opacity-0" accept=".pdf" required onchange="handleFile(this)">
                                     </div>
                                 </div>
-
-                                <div class="mb-3">
-                                    <label class="fw-bold">Mots-clés du rapport</label>
-                                    <input type="text" name="mots_cles_rapport" class="form-control" placeholder="Séparés par des virgules" required>
+                                <div class="form-check mb-4 bg-white p-3 border rounded shadow-sm">
+                                    <input class="form-check-input" type="checkbox" name="originalite" required style="transform: scale(1.2); margin-top: 0.3rem;">
+                                    <label class="form-check-label ps-2 text-danger fw-bold">Je certifie que ce travail est original.</label>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="fw-bold">Remerciements (pour le PV)</label>
-                                    <textarea name="remerciements" class="form-control" rows="3" placeholder="Texte court pour les remerciements..."></textarea>
-                                </div>
-
-                                <div class="form-check bg-light p-3 border rounded-3 mb-4">
-                                    <input class="form-check-input" type="checkbox" name="originalite" id="checkOrigine" required style="transform: scale(1.2); margin-top: 0.3rem;">
-                                    <label class="form-check-label ps-2 text-danger fw-bold" for="checkOrigine">
-                                        Je certifie sur l'honneur que ce travail est personnel et n'est pas issu de plagiat.
-                                    </label>
-                                </div>
-
                                 <div class="d-grid">
-                                    <button type="submit" name="upload_btn" class="btn btn-primary btn-lg rounded-pill shadow-sm">
-                                        <i class="fas fa-paper-plane me-2"></i>Soumettre définitivement
-                                    </button>
+                                    <button type="submit" name="upload_btn" class="btn btn-primary btn-lg rounded-pill shadow-sm">Soumettre définitivement</button>
                                 </div>
                             </form> 
-                            <?php endif; ?>
-
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -218,32 +173,11 @@ if (isset($_POST['upload_btn'])) {
     </div>
 
     <script>
-        const dropArea = document.getElementById('dropArea');
-        const uploadContent = document.getElementById('uploadContent');
-        const filePreview = document.getElementById('filePreview');
-        const fileName = document.getElementById('fileName');
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                dropArea.classList.add('dragover');
-            });
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, (e) => {
-                dropArea.classList.remove('dragover');
-            });
-        });
-
         function handleFile(input) {
             if (input.files && input.files[0]) {
-                const file = input.files[0];
-                fileName.textContent = file.name;
-                uploadContent.classList.add('d-none');
-                filePreview.classList.remove('d-none');
-                dropArea.style.borderColor = '#198754';
-                dropArea.style.backgroundColor = '#d1e7dd';
+                document.getElementById('fileName').textContent = input.files[0].name;
+                document.getElementById('uploadContent').classList.add('d-none');
+                document.getElementById('filePreview').classList.remove('d-none');
             }
         }
     </script>

@@ -37,6 +37,10 @@ if (isset($_POST['login_btn'])) {
                 $_SESSION['otp_pending_role'] = $user['role'];
                 $_SESSION['otp_pending_nom'] = $user['nom'];
                 $_SESSION['otp_pending_secret'] = $user['otp_secret'];
+                
+                // <--- AJOUT IMPORTANT 1 : Stocker la filière temporairement pour le 2FA
+                $_SESSION['otp_pending_filiere_id'] = $user['filiere_id']; 
+                
                 $step = 2;
             } else {
                 // Connexion directe
@@ -44,6 +48,9 @@ if (isset($_POST['login_btn'])) {
                 $_SESSION['user_role'] = $user['role'];
                 $_SESSION['user_nom'] = $user['nom']; 
                 
+                // <--- AJOUT IMPORTANT 2 : Stocker la filière pour la connexion directe
+                $_SESSION['filiere_id'] = $user['filiere_id'];
+
                 // --- REDIRECTIONS PAR RÔLE ---
                 if ($user['role'] == 'etudiant') {
                     header("Location: ../etudiant/index.php");
@@ -54,7 +61,6 @@ if (isset($_POST['login_btn'])) {
                 } elseif ($user['role'] == 'directeur' || $user['role'] == 'admin') {
                     header("Location: ../directeur/index.php");
                 } elseif ($user['role'] == 'assistante') { 
-                    // AJOUT DU CAS ASSISTANTE
                     header("Location: ../assistante/index.php");
                 } else {
                     die("Erreur : Rôle inconnu (" . $user['role'] . ")");
@@ -80,12 +86,16 @@ if (isset($_POST['otp_verify_btn']) && $otp_enabled) {
         $_SESSION['user_role'] = $_SESSION['otp_pending_role'];
         $_SESSION['user_nom'] = $_SESSION['otp_pending_nom'];
         
+        // <--- AJOUT IMPORTANT 3 : Récupérer la filière après validation 2FA
+        $_SESSION['filiere_id'] = $_SESSION['otp_pending_filiere_id'];
+        
         $role = $_SESSION['user_role'];
 
         unset($_SESSION['otp_pending_user_id']);
         unset($_SESSION['otp_pending_secret']);
         unset($_SESSION['otp_pending_role']);
         unset($_SESSION['otp_pending_nom']);
+        unset($_SESSION['otp_pending_filiere_id']); // Nettoyage
 
         // --- REDIRECTIONS PAR RÔLE (OTP) ---
         if ($role == 'etudiant') {
@@ -97,7 +107,6 @@ if (isset($_POST['otp_verify_btn']) && $otp_enabled) {
         } elseif ($role == 'directeur' || $role == 'admin') {
             header("Location: ../directeur/index.php");
         } elseif ($role == 'assistante') {
-            // AJOUT DU CAS ASSISTANTE
             header("Location: ../assistante/index.php");
         }
         exit();

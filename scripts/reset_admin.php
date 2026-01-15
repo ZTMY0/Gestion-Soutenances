@@ -19,7 +19,7 @@ try {
     $stmt->execute([$password]);
 
     echo "<div style='font-family:sans-serif; text-align:center; margin-top:50px;'>";
-    echo "<h1 style='color:green'>✅ Compte Admin (Coordinateur) recréé !</h1>";
+    echo "<h1 style='color:green'> Compte Admin (Coordinateur) recréé !</h1>";
     echo "<hr style='width:300px'>";
     echo "<p>Login : <strong>ihab.admin</strong></p>";
     echo "<p>Pass : <strong>123456</strong></p>";
