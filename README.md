@@ -12,7 +12,7 @@
 | **IHAB** | **Coord. & Étudiant** | Espace Coordinateur, Espace Étudiant, Architecture Globale. | ✅ TERMINÉ |
 | **ABDELMOUGHIT** | **Prof & Algo** | Espace Professeur, Algorithmes (Affectation, Planning, Jury). | ✅ TERMINÉ |
 | **NIZAR** | **Directeur** | Validation planning, KPIs, Signature électronique. | ✅ TERMINÉ |
-| **NOURDDINE** | **Secrétaire Générale** | Logistique, PDF, Archivage. | ⏳ EN COURS |
+| **NOURDDINE** | **Secrétaire Générale** | Logistique, PDF, Archivage. | ✅ TERMINÉ |
 
 ---
 
@@ -82,9 +82,9 @@
 
 ### 4. MODULE SECRÉTAIRE GÉNÉRALE - NOURDDINE
 *Fichier cible : `src/views/assistante/`*
-- [ ] **Gestion Salles :** CRUD des salles et équipements.
-- [ ] **Génération PDF :** Convocations et PV (Utilisation de FPDF/DomPDF).
-- [ ] **Archivage :** Stockage final des documents signés.
+- [x] **Gestion Salles :** CRUD des salles et équipements.
+- [x] **Génération PDF :** Convocations et PV (Utilisation de FPDF/DomPDF).
+- [x] **Archivage :** Stockage final des documents signés.
 
 ---
 
