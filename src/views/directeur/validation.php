@@ -1,107 +1,234 @@
 <?php
-// Vérification de session sécurisée
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// SÉCURITÉ & CONFIGURATION
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-require_once '../../../config/database.php';
+session_start();
+// Utilisation de __DIR__ pour garantir le chemin correct sur le serveur Linux
+require_once __DIR__ . '/../../../config/database.php';
 
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'directeur') {
-    // header("Location: ../auth/login.php"); exit(); // Décommenter en prod
+    header("Location: ../auth/login.php");
+    exit();
 }
 
-// --- 1. RÉCUPÉRATION DES VRAIES DONNÉES ---
+$success = '';
+$error = '';
+$directeur_id = (int)($_SESSION['user_id'] ?? 0);
 
-// A. Compter le total des soutenances programmées
-$totalSoutenances = $pdo->query("SELECT COUNT(*) FROM soutenances")->fetchColumn();
+// --- TRAITEMENT DES ACTIONS ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
 
-// B. Récupérer les stats par Filière (Réel)
-// On suppose que la table 'filieres' a une colonne 'nom' ou 'code'. Adapte si besoin.
-$sqlStats = "SELECT f.code, COUNT(s.id) as total, GROUP_CONCAT(DISTINCT s.salle SEPARATOR ', ') as salles
-             FROM soutenances s
-             JOIN projets p ON s.projet_id = p.id
-             JOIN filieres f ON p.filiere_id = f.id
-             GROUP BY f.id";
-$statsFiliere = $pdo->query($sqlStats)->fetchAll();
+    try {
+        if ($action === 'approve') {
+            $projet_id = (int)($_POST['projet_id'] ?? 0);
+            if ($projet_id <= 0) throw new Exception("Projet invalide.");
 
-// Si aucune soutenance n'est programmée, on initialise un tableau vide
-if (empty($statsFiliere) && $totalSoutenances == 0) {
-    $statsFiliere = []; 
+            $pdo->prepare("UPDATE projets SET statut='valide' WHERE id=?")->execute([$projet_id]);
+            $success = "Projet approuvé.";
+
+        } elseif ($action === 'correction') {
+            $projet_id = (int)($_POST['projet_id'] ?? 0);
+            $msg = trim($_POST['message'] ?? '');
+
+            if ($projet_id <= 0) throw new Exception("Projet invalide.");
+            if ($msg === '') throw new Exception("Message obligatoire.");
+
+            $pdo->beginTransaction();
+            $pdo->prepare("UPDATE projets SET statut='correction_demandee' WHERE id=?")->execute([$projet_id]);
+            $pdo->prepare("INSERT INTO demandes_correction (directeur_id, projet_id, message) VALUES (?, ?, ?)")
+                ->execute([$directeur_id, $projet_id, $msg]);
+            $pdo->commit();
+            $success = "Demande de correction envoyée.";
+
+        } elseif ($action === 'publish') {
+            $soutenance_id = (int)($_POST['soutenance_id'] ?? 0);
+            if ($soutenance_id <= 0) throw new Exception("Soutenance invalide.");
+
+            $pdo->beginTransaction();
+            // On met le statut 'publie' (assurez-vous que la colonne existe, voir correctif précédent)
+            $pdo->prepare("UPDATE soutenances SET statut='publie' WHERE id=?")->execute([$soutenance_id]);
+
+            // Générer PV si absent
+            $pdo->prepare("INSERT INTO pv (soutenance_id) SELECT ? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM pv WHERE soutenance_id=?)")
+                ->execute([$soutenance_id, $soutenance_id]);
+
+            $pdo->commit();
+            $success = "Soutenance publiée (PV généré).";
+        }
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        $error = $e->getMessage();
+    }
 }
+
+// --- RÉCUPÉRATION DES DONNÉES AVEC LES NOMS ---
+$sql = "
+SELECT
+    p.id AS projet_id,
+    p.titre,
+    p.statut AS statut_projet,
+    p.encadrant_id,
+    u.nom AS nom_enc,        -- Récupération du Nom
+    u.prenom AS prenom_enc,  -- Récupération du Prénom
+    s.id AS soutenance_id,
+    s.date_soutenance,
+    s.salle,
+    s.statut AS statut_soutenance,
+    pv.id AS pv_id,
+    pv.statut AS statut_pv
+FROM projets p
+LEFT JOIN users u ON p.encadrant_id = u.id  -- Jointure pour avoir le nom du prof
+LEFT JOIN soutenances s ON s.projet_id = p.id
+LEFT JOIN pv ON pv.soutenance_id = s.id
+ORDER BY p.created_at DESC, p.id DESC
+";
+$rows = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <title>Directeur - Validation planning</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="utf-8">
+    <title>Directeur - Validation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-light p-5">
-  <div class="container bg-white p-5 rounded shadow-sm">
-      <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-        <h1 class="h3 mb-0 text-primary"><i class="fas fa-calendar-check me-2"></i>Validation Stratégique du Planning</h1>
-        <a class="btn btn-secondary btn-sm" href="index.php"><i class="fas fa-arrow-left me-2"></i>Retour</a>
-      </div>
+<body class="bg-light py-4">
 
-      <div class="alert alert-primary">
-        <i class="fas fa-eye me-2"></i>Vue globale du planning des soutenances. Vous pouvez approuver la publication ou demander des corrections.
-      </div>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 fw-bold text-dark">Validation & Publication</h1>
+        <a href="index.php" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>Retour</a>
+    </div>
 
-      <div class="card bg-light border-0 p-4 text-center mb-4">
-          <h4 class="fw-bold">Planning Session Juin 2026</h4>
-          
-          <?php if ($totalSoutenances > 0): ?>
-              <p class="text-success fw-bold fs-5 mb-2">
-                  <i class="fas fa-check-circle me-2"></i><?= $totalSoutenances ?> Soutenance(s) programmée(s)
-              </p>
-          <?php else: ?>
-              <p class="text-danger fw-bold fs-5 mb-2">
-                  <i class="fas fa-exclamation-triangle me-2"></i>Aucune soutenance programmée
-              </p>
-          <?php endif; ?>
-          
-          <div class="d-flex justify-content-center gap-3 mt-3">
-            <button class="btn btn-success btn-lg px-4" <?= $totalSoutenances == 0 ? 'disabled' : '' ?>>
-                <i class="fas fa-check-double me-2"></i>Approuver & Publier
-            </button>
-            <button class="btn btn-outline-danger btn-lg px-4">
-                <i class="fas fa-envelope me-2"></i>Demander correction
-            </button>
-          </div>
-      </div>
-      
-      <h5 class="mt-4 border-bottom pb-2">Aperçu rapide par Filière</h5>
-      <table class="table table-hover mt-3">
-          <thead class="table-light">
-              <tr>
-                  <th>Filière</th>
-                  <th class="text-center">Nb Soutenances</th>
-                  <th>Salles Utilisées</th>
-                  <th class="text-end">État</th>
-              </tr>
-          </thead>
-          <tbody>
-              <?php if (count($statsFiliere) > 0): ?>
-                  <?php foreach ($statsFiliere as $row): ?>
-                      <tr>
-                          <td class="fw-bold"><?= htmlspecialchars($row['code']) ?></td>
-                          <td class="text-center">
-                              <span class="badge bg-primary rounded-pill"><?= $row['total'] ?></span>
-                          </td>
-                          <td><small class="text-muted"><?= htmlspecialchars($row['salles']) ?></small></td>
-                          <td class="text-end"><span class="badge bg-success">Prêt</span></td>
-                      </tr>
-                  <?php endforeach; ?>
-              <?php else: ?>
-                  <tr>
-                      <td colspan="4" class="text-center text-muted py-3">
-                          <em>Aucune donnée disponible pour le moment. Les coordinateurs doivent planifier les dates.</em>
-                      </td>
-                  </tr>
-              <?php endif; ?>
-          </tbody>
-      </table>
-  </div>
+    <?php if ($error): ?>
+        <div class="alert alert-danger shadow-sm"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
+
+    <?php if ($success): ?>
+        <div class="alert alert-success shadow-sm"><?= htmlspecialchars($success) ?></div>
+    <?php endif; ?>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                <tr>
+                    <th style="width: 30%;">Projet & Encadrement</th>
+                    <th>Statut Projet</th>
+                    <th>Soutenance</th>
+                    <th>PV</th>
+                    <th style="width: 25%;">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php if (empty($rows)): ?>
+                    <tr><td colspan="5" class="text-center text-muted py-5">Aucun projet à traiter.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($rows as $r): ?>
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark mb-1">
+                                    #<?= (int)$r['projet_id'] ?> — <?= htmlspecialchars($r['titre'] ?? 'Sans titre') ?>
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fas fa-user-tie me-1"></i>
+                                    <?php if($r['encadrant_id']): ?>
+                                        <span class="text-primary fw-bold">Pr. <?= htmlspecialchars(strtoupper($r['nom_enc']) . ' ' . $r['prenom_enc']) ?></span>
+                                    <?php else: ?>
+                                        <span class="text-warning">Non assigné</span>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+
+                            <td>
+                                <?php 
+                                    $badges = [
+                                        'valide' => 'bg-success',
+                                        'correction_demandee' => 'bg-warning text-dark',
+                                        'inscrit' => 'bg-secondary',
+                                        'pret_soutenance' => 'bg-info text-dark'
+                                    ];
+                                    $bg = $badges[$r['statut_projet']] ?? 'bg-secondary';
+                                ?>
+                                <span class="badge <?= $bg ?>"><?= htmlspecialchars($r['statut_projet'] ?? '-') ?></span>
+                            </td>
+
+                            <td>
+                                <?php if (!empty($r['soutenance_id'])): ?>
+                                    <div class="small fw-bold">
+                                        <?= date('d/m/Y H:i', strtotime($r['date_soutenance'])) ?>
+                                    </div>
+                                    <div class="text-muted small">Salle <?= htmlspecialchars($r['salle']) ?></div>
+                                    <?php if($r['statut_soutenance'] == 'publie'): ?>
+                                        <span class="badge bg-primary proper-badge mt-1" style="font-size: 0.7rem;">Publiée</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-warning text-dark mt-1" style="font-size: 0.7rem;">Prévue</span>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <span class="text-muted small">—</span>
+                                <?php endif; ?>
+                            </td>
+
+                            <td>
+                                <?php if (!empty($r['pv_id'])): ?>
+                                    <?php if($r['statut_pv'] === 'pv_signe'): ?>
+                                        <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Signé</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-light text-dark border">En attente</span>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <span class="text-muted small">—</span>
+                                <?php endif; ?>
+                            </td>
+
+                            <td>
+                                <div class="d-flex gap-2 flex-column">
+                                    <?php if($r['statut_projet'] !== 'valide'): ?>
+                                    <div class="btn-group btn-group-sm">
+                                        <form method="post">
+                                            <input type="hidden" name="action" value="approve">
+                                            <input type="hidden" name="projet_id" value="<?= $r['projet_id'] ?>">
+                                            <button class="btn btn-outline-success" title="Valider le projet"><i class="fas fa-check"></i></button>
+                                        </form>
+                                        <button class="btn btn-outline-warning" type="button" data-bs-toggle="collapse" data-bs-target="#corr<?= $r['projet_id'] ?>" title="Demander correction">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($r['soutenance_id']) && $r['statut_soutenance'] !== 'publie'): ?>
+                                        <form method="post">
+                                            <input type="hidden" name="action" value="publish">
+                                            <input type="hidden" name="soutenance_id" value="<?= $r['soutenance_id'] ?>">
+                                            <button class="btn btn-primary btn-sm w-100"><i class="fas fa-bullhorn me-2"></i>Publier</button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr class="collapse bg-light" id="corr<?= $r['projet_id'] ?>">
+                            <td colspan="5" class="p-3">
+                                <form method="post" class="d-flex gap-2">
+                                    <input type="hidden" name="action" value="correction">
+                                    <input type="hidden" name="projet_id" value="<?= $r['projet_id'] ?>">
+                                    <textarea name="message" class="form-control form-control-sm" rows="1" required placeholder="Motif de la correction..."></textarea>
+                                    <button class="btn btn-sm btn-warning text-nowrap">Envoyer</button>
+                                </form>
+                            </td>
+                        </tr>
+
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

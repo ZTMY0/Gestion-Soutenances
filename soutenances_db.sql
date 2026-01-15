@@ -1,13 +1,14 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 4.9.0.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Jan 06, 2026 at 04:36 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: sql108.infinityfree.com
+-- Generation Time: Jan 15, 2026 at 01:29 AM
+-- Server version: 11.4.9-MariaDB
+-- PHP Version: 7.2.22
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
@@ -18,8 +19,48 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `soutenances_db`
+-- Database: `if0_40832873_soutenances`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `audit_logs`
+--
+
+CREATE TABLE `audit_logs` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `action` varchar(50) NOT NULL,
+  `details` text DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `audit_logs`
+--
+
+INSERT INTO `audit_logs` (`id`, `user_id`, `action`, `details`, `ip_address`, `created_at`) VALUES
+(1, 283, 'COORD_SUPPRESSION', 'Suppression projet ID 14', '105.76.137.190', '2026-01-08 22:32:14'),
+(2, 283, 'COORD_VALIDATION', 'Validation projet ID 15', '105.76.137.190', '2026-01-08 22:44:58'),
+(3, 283, 'COORD_SUPPRESSION', 'Suppression projet ID 15', '105.75.17.32', '2026-01-12 13:04:37'),
+(4, 1252, 'DEPOT_RAPPORT', 'Dépôt fichier : rapport_17_1768306985.pdf', '105.75.10.76', '2026-01-13 12:23:05'),
+(5, 1176, 'DEPOT_RAPPORT', 'Dépôt fichier : rapport_16_1768307616.pdf', '105.75.10.76', '2026-01-13 12:33:36');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `demandes_correction`
+--
+
+CREATE TABLE `demandes_correction` (
+  `id` int(11) NOT NULL,
+  `directeur_id` int(11) NOT NULL,
+  `projet_id` int(11) NOT NULL,
+  `message` text NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
 
@@ -148,97 +189,6 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (919, 764, 'Samedi', '08:00:00', '18:00:00', 1, '2026-04-04'),
 (920, 764, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-04-05'),
 (921, 764, 'Lundi', '08:00:00', '18:00:00', 1, '2026-04-06'),
-(922, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-01-06'),
-(923, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-01-07'),
-(924, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-01-08'),
-(925, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-01-09'),
-(926, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-01-10'),
-(927, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-01-11'),
-(928, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-01-12'),
-(929, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-01-13'),
-(930, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-01-14'),
-(931, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-01-15'),
-(932, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-01-16'),
-(933, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-01-17'),
-(934, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-01-18'),
-(935, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-01-19'),
-(936, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-01-20'),
-(937, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-01-21'),
-(938, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-01-22'),
-(939, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-01-23'),
-(940, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-01-24'),
-(941, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-01-25'),
-(942, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-01-26'),
-(943, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-01-27'),
-(944, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-01-28'),
-(945, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-01-29'),
-(946, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-01-30'),
-(947, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-01-31'),
-(948, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-02-01'),
-(949, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-02-02'),
-(950, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-02-03'),
-(951, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-02-04'),
-(952, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-02-05'),
-(953, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-02-06'),
-(954, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-02-07'),
-(955, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-02-08'),
-(956, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-02-09'),
-(957, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-02-10'),
-(958, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-02-11'),
-(959, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-02-12'),
-(960, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-02-13'),
-(961, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-02-14'),
-(962, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-02-15'),
-(963, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-02-16'),
-(964, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-02-17'),
-(965, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-02-18'),
-(966, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-02-19'),
-(967, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-02-20'),
-(968, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-02-21'),
-(969, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-02-22'),
-(970, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-02-23'),
-(971, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-02-24'),
-(972, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-02-25'),
-(973, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-02-26'),
-(974, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-02-27'),
-(975, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-02-28'),
-(976, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-03-01'),
-(977, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-03-02'),
-(978, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-03-03'),
-(979, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-03-04'),
-(980, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-03-05'),
-(981, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-03-06'),
-(982, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-03-07'),
-(983, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-03-08'),
-(984, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-03-09'),
-(985, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-03-10'),
-(986, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-03-11'),
-(987, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-03-12'),
-(988, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-03-13'),
-(989, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-03-14'),
-(990, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-03-15'),
-(991, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-03-16'),
-(992, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-03-17'),
-(993, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-03-18'),
-(994, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-03-19'),
-(995, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-03-20'),
-(996, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-03-21'),
-(997, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-03-22'),
-(998, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-03-23'),
-(999, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-03-24'),
-(1000, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-03-25'),
-(1001, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-03-26'),
-(1002, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-03-27'),
-(1003, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-03-28'),
-(1004, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-03-29'),
-(1005, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-03-30'),
-(1006, 765, 'Mardi', '08:00:00', '18:00:00', 1, '2026-03-31'),
-(1007, 765, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-04-01'),
-(1008, 765, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-04-02'),
-(1009, 765, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-04-03'),
-(1010, 765, 'Samedi', '08:00:00', '18:00:00', 1, '2026-04-04'),
-(1011, 765, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-04-05'),
-(1012, 765, 'Lundi', '08:00:00', '18:00:00', 1, '2026-04-06'),
 (1013, 766, 'Mardi', '08:00:00', '18:00:00', 1, '2026-01-06'),
 (1014, 766, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-01-07'),
 (1015, 766, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-01-08'),
@@ -857,8 +807,7 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (1628, 772, 'Lundi', '08:00:00', '18:00:00', 1, '2026-03-16'),
 (1629, 772, 'Mardi', '08:00:00', '18:00:00', 1, '2026-03-17'),
 (1630, 772, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-03-18'),
-(1631, 772, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-03-19');
-INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`, `date`) VALUES
+(1631, 772, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-03-19'),
 (1632, 772, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-03-20'),
 (1633, 772, 'Samedi', '08:00:00', '18:00:00', 1, '2026-03-21'),
 (1634, 772, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-03-22'),
@@ -948,7 +897,8 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (1718, 773, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-03-15'),
 (1719, 773, 'Lundi', '08:00:00', '18:00:00', 1, '2026-03-16'),
 (1720, 773, 'Mardi', '08:00:00', '18:00:00', 1, '2026-03-17'),
-(1721, 773, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-03-18'),
+(1721, 773, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-03-18');
+INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`, `date`) VALUES
 (1722, 773, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-03-19'),
 (1723, 773, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-03-20'),
 (1724, 773, 'Samedi', '08:00:00', '18:00:00', 1, '2026-03-21'),
@@ -1656,8 +1606,7 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (2426, 781, 'Lundi', '08:00:00', '18:00:00', 1, '2026-02-23'),
 (2427, 781, 'Mardi', '08:00:00', '18:00:00', 1, '2026-02-24'),
 (2428, 781, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-02-25'),
-(2429, 781, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-02-26');
-INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`, `date`) VALUES
+(2429, 781, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-02-26'),
 (2430, 781, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-02-27'),
 (2431, 781, 'Samedi', '08:00:00', '18:00:00', 1, '2026-02-28'),
 (2432, 781, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-03-01'),
@@ -1747,7 +1696,8 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (2516, 782, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-02-22'),
 (2517, 782, 'Lundi', '08:00:00', '18:00:00', 1, '2026-02-23'),
 (2518, 782, 'Mardi', '08:00:00', '18:00:00', 1, '2026-02-24'),
-(2519, 782, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-02-25'),
+(2519, 782, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-02-25');
+INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`, `date`) VALUES
 (2520, 782, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-02-26'),
 (2521, 782, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-02-27'),
 (2522, 782, 'Samedi', '08:00:00', '18:00:00', 1, '2026-02-28'),
@@ -2453,8 +2403,7 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (3222, 1451, 'Samedi', '08:00:00', '18:00:00', 1, '2026-01-31'),
 (3223, 1451, 'Dimanche', '08:00:00', '18:00:00', 1, '2026-02-01'),
 (3224, 1451, 'Lundi', '08:00:00', '18:00:00', 1, '2026-02-02'),
-(3225, 1451, 'Mardi', '08:00:00', '18:00:00', 1, '2026-02-03');
-INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`, `date`) VALUES
+(3225, 1451, 'Mardi', '08:00:00', '18:00:00', 1, '2026-02-03'),
 (3226, 1451, 'Mercredi', '08:00:00', '18:00:00', 1, '2026-02-04'),
 (3227, 1451, 'Jeudi', '08:00:00', '18:00:00', 1, '2026-02-05'),
 (3228, 1451, 'Vendredi', '08:00:00', '18:00:00', 1, '2026-02-06'),
@@ -2543,7 +2492,8 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (4949, 764, 'Thursday', '08:00:00', '18:00:00', 1, '2026-01-29'),
 (4950, 764, 'Friday', '08:00:00', '18:00:00', 1, '2026-01-30'),
 (4951, 764, 'Saturday', '08:00:00', '18:00:00', 1, '2026-01-31'),
-(4952, 764, 'Sunday', '08:00:00', '18:00:00', 1, '2026-02-01'),
+(4952, 764, 'Sunday', '08:00:00', '18:00:00', 1, '2026-02-01');
+INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`, `date`) VALUES
 (4953, 764, 'Monday', '08:00:00', '18:00:00', 1, '2026-02-02'),
 (4954, 764, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-02-03'),
 (4955, 764, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-02-04'),
@@ -2608,97 +2558,6 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (5014, 764, 'Saturday', '08:00:00', '18:00:00', 1, '2026-04-04'),
 (5015, 764, 'Sunday', '08:00:00', '18:00:00', 1, '2026-04-05'),
 (5016, 764, 'Monday', '08:00:00', '18:00:00', 1, '2026-04-06'),
-(5017, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-01-06'),
-(5018, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-01-07'),
-(5019, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-01-08'),
-(5020, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-01-09'),
-(5021, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-01-10'),
-(5022, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-01-11'),
-(5023, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-01-12'),
-(5024, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-01-13'),
-(5025, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-01-14'),
-(5026, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-01-15'),
-(5027, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-01-16'),
-(5028, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-01-17'),
-(5029, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-01-18'),
-(5030, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-01-19'),
-(5031, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-01-20'),
-(5032, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-01-21'),
-(5033, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-01-22'),
-(5034, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-01-23'),
-(5035, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-01-24'),
-(5036, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-01-25'),
-(5037, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-01-26'),
-(5038, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-01-27'),
-(5039, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-01-28'),
-(5040, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-01-29'),
-(5041, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-01-30'),
-(5042, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-01-31'),
-(5043, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-02-01'),
-(5044, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-02-02'),
-(5045, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-02-03'),
-(5046, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-02-04'),
-(5047, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-02-05'),
-(5048, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-02-06'),
-(5049, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-02-07'),
-(5050, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-02-08'),
-(5051, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-02-09'),
-(5052, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-02-10'),
-(5053, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-02-11'),
-(5054, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-02-12'),
-(5055, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-02-13'),
-(5056, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-02-14'),
-(5057, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-02-15'),
-(5058, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-02-16'),
-(5059, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-02-17'),
-(5060, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-02-18'),
-(5061, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-02-19'),
-(5062, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-02-20'),
-(5063, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-02-21'),
-(5064, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-02-22'),
-(5065, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-02-23'),
-(5066, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-02-24'),
-(5067, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-02-25'),
-(5068, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-02-26'),
-(5069, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-02-27'),
-(5070, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-02-28'),
-(5071, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-03-01'),
-(5072, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-03-02'),
-(5073, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-03-03'),
-(5074, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-03-04'),
-(5075, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-03-05'),
-(5076, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-03-06'),
-(5077, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-03-07'),
-(5078, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-03-08'),
-(5079, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-03-09'),
-(5080, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-03-10'),
-(5081, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-03-11'),
-(5082, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-03-12'),
-(5083, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-03-13'),
-(5084, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-03-14'),
-(5085, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-03-15'),
-(5086, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-03-16'),
-(5087, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-03-17'),
-(5088, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-03-18'),
-(5089, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-03-19'),
-(5090, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-03-20'),
-(5091, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-03-21'),
-(5092, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-03-22'),
-(5093, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-03-23'),
-(5094, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-03-24'),
-(5095, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-03-25'),
-(5096, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-03-26'),
-(5097, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-03-27'),
-(5098, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-03-28'),
-(5099, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-03-29'),
-(5100, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-03-30'),
-(5101, 765, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-03-31'),
-(5102, 765, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-04-01'),
-(5103, 765, 'Thursday', '08:00:00', '18:00:00', 1, '2026-04-02'),
-(5104, 765, 'Friday', '08:00:00', '18:00:00', 1, '2026-04-03'),
-(5105, 765, 'Saturday', '08:00:00', '18:00:00', 1, '2026-04-04'),
-(5106, 765, 'Sunday', '08:00:00', '18:00:00', 1, '2026-04-05'),
-(5107, 765, 'Monday', '08:00:00', '18:00:00', 1, '2026-04-06'),
 (5108, 766, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-01-06'),
 (5109, 766, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-01-07'),
 (5110, 766, 'Thursday', '08:00:00', '18:00:00', 1, '2026-01-08'),
@@ -3243,8 +3102,7 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (5649, 771, 'Thursday', '08:00:00', '18:00:00', 1, '2026-04-02'),
 (5650, 771, 'Friday', '08:00:00', '18:00:00', 1, '2026-04-03'),
 (5651, 771, 'Saturday', '08:00:00', '18:00:00', 1, '2026-04-04'),
-(5652, 771, 'Sunday', '08:00:00', '18:00:00', 1, '2026-04-05');
-INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`, `date`) VALUES
+(5652, 771, 'Sunday', '08:00:00', '18:00:00', 1, '2026-04-05'),
 (5653, 771, 'Monday', '08:00:00', '18:00:00', 1, '2026-04-06'),
 (5654, 772, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-01-06'),
 (5655, 772, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-01-07'),
@@ -3424,7 +3282,8 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (5829, 773, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-03-31'),
 (5830, 773, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-04-01'),
 (5831, 773, 'Thursday', '08:00:00', '18:00:00', 1, '2026-04-02'),
-(5832, 773, 'Friday', '08:00:00', '18:00:00', 1, '2026-04-03'),
+(5832, 773, 'Friday', '08:00:00', '18:00:00', 1, '2026-04-03');
+INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`, `date`) VALUES
 (5833, 773, 'Saturday', '08:00:00', '18:00:00', 1, '2026-04-04'),
 (5834, 773, 'Sunday', '08:00:00', '18:00:00', 1, '2026-04-05'),
 (5835, 773, 'Monday', '08:00:00', '18:00:00', 1, '2026-04-06'),
@@ -4033,8 +3892,7 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (6438, 780, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-03-03'),
 (6439, 780, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-03-04'),
 (6440, 780, 'Thursday', '08:00:00', '18:00:00', 1, '2026-03-05'),
-(6441, 780, 'Friday', '08:00:00', '18:00:00', 1, '2026-03-06');
-INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`, `date`) VALUES
+(6441, 780, 'Friday', '08:00:00', '18:00:00', 1, '2026-03-06'),
 (6442, 780, 'Saturday', '08:00:00', '18:00:00', 1, '2026-03-07'),
 (6443, 780, 'Sunday', '08:00:00', '18:00:00', 1, '2026-03-08'),
 (6444, 780, 'Monday', '08:00:00', '18:00:00', 1, '2026-03-09'),
@@ -4214,7 +4072,8 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (6618, 782, 'Sunday', '08:00:00', '18:00:00', 1, '2026-03-01'),
 (6619, 782, 'Monday', '08:00:00', '18:00:00', 1, '2026-03-02'),
 (6620, 782, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-03-03'),
-(6621, 782, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-03-04'),
+(6621, 782, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-03-04');
+INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`, `date`) VALUES
 (6622, 782, 'Thursday', '08:00:00', '18:00:00', 1, '2026-03-05'),
 (6623, 782, 'Friday', '08:00:00', '18:00:00', 1, '2026-03-06'),
 (6624, 782, 'Saturday', '08:00:00', '18:00:00', 1, '2026-03-07'),
@@ -4823,8 +4682,7 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (7227, 1450, 'Sunday', '08:00:00', '18:00:00', 1, '2026-02-01'),
 (7228, 1450, 'Monday', '08:00:00', '18:00:00', 1, '2026-02-02'),
 (7229, 1450, 'Tuesday', '08:00:00', '18:00:00', 1, '2026-02-03'),
-(7230, 1450, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-02-04');
-INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`, `date`) VALUES
+(7230, 1450, 'Wednesday', '08:00:00', '18:00:00', 1, '2026-02-04'),
 (7231, 1450, 'Thursday', '08:00:00', '18:00:00', 1, '2026-02-05'),
 (7232, 1450, 'Friday', '08:00:00', '18:00:00', 1, '2026-02-06'),
 (7233, 1450, 'Saturday', '08:00:00', '18:00:00', 1, '2026-02-07'),
@@ -4976,7 +4834,128 @@ INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debu
 (7379, 1451, 'Friday', '08:00:00', '18:00:00', 1, '2026-04-03'),
 (7380, 1451, 'Saturday', '08:00:00', '18:00:00', 1, '2026-04-04'),
 (7381, 1451, 'Sunday', '08:00:00', '18:00:00', 1, '2026-04-05'),
-(7382, 1451, 'Monday', '08:00:00', '18:00:00', 1, '2026-04-06');
+(7382, 1451, 'Monday', '08:00:00', '18:00:00', 1, '2026-04-06'),
+(9021, 765, 'Lundi', '08:00:00', '08:30:00', 1, NULL),
+(9022, 765, 'Mardi', '08:00:00', '08:30:00', 1, NULL),
+(9023, 765, 'Mercredi', '08:00:00', '08:30:00', 1, NULL),
+(9024, 765, 'Jeudi', '08:00:00', '08:30:00', 1, NULL),
+(9025, 765, 'Vendredi', '08:00:00', '08:30:00', 1, NULL),
+(9026, 765, 'Samedi', '08:00:00', '08:30:00', 1, NULL),
+(9027, 765, 'Lundi', '08:30:00', '09:00:00', 1, NULL),
+(9028, 765, 'Mardi', '08:30:00', '09:00:00', 1, NULL),
+(9029, 765, 'Mercredi', '08:30:00', '09:00:00', 1, NULL),
+(9030, 765, 'Jeudi', '08:30:00', '09:00:00', 1, NULL),
+(9031, 765, 'Vendredi', '08:30:00', '09:00:00', 1, NULL),
+(9032, 765, 'Samedi', '08:30:00', '09:00:00', 1, NULL),
+(9033, 765, 'Lundi', '09:00:00', '09:30:00', 1, NULL),
+(9034, 765, 'Mardi', '09:00:00', '09:30:00', 1, NULL),
+(9035, 765, 'Mercredi', '09:00:00', '09:30:00', 1, NULL),
+(9036, 765, 'Jeudi', '09:00:00', '09:30:00', 1, NULL),
+(9037, 765, 'Vendredi', '09:00:00', '09:30:00', 1, NULL),
+(9038, 765, 'Samedi', '09:00:00', '09:30:00', 1, NULL),
+(9039, 765, 'Lundi', '09:30:00', '10:00:00', 1, NULL),
+(9040, 765, 'Mardi', '09:30:00', '10:00:00', 1, NULL),
+(9041, 765, 'Mercredi', '09:30:00', '10:00:00', 1, NULL),
+(9042, 765, 'Jeudi', '09:30:00', '10:00:00', 1, NULL),
+(9043, 765, 'Vendredi', '09:30:00', '10:00:00', 1, NULL),
+(9044, 765, 'Samedi', '09:30:00', '10:00:00', 1, NULL),
+(9045, 765, 'Lundi', '10:00:00', '10:30:00', 1, NULL),
+(9046, 765, 'Mardi', '10:00:00', '10:30:00', 1, NULL),
+(9047, 765, 'Mercredi', '10:00:00', '10:30:00', 1, NULL),
+(9048, 765, 'Jeudi', '10:00:00', '10:30:00', 1, NULL),
+(9049, 765, 'Vendredi', '10:00:00', '10:30:00', 1, NULL),
+(9050, 765, 'Samedi', '10:00:00', '10:30:00', 1, NULL);
+INSERT INTO `disponibilites_profs` (`id`, `prof_id`, `jour_semaine`, `heure_debut`, `heure_fin`, `est_disponible`, `date`) VALUES
+(9051, 765, 'Lundi', '10:30:00', '11:00:00', 1, NULL),
+(9052, 765, 'Mardi', '10:30:00', '11:00:00', 1, NULL),
+(9053, 765, 'Mercredi', '10:30:00', '11:00:00', 1, NULL),
+(9054, 765, 'Jeudi', '10:30:00', '11:00:00', 1, NULL),
+(9055, 765, 'Vendredi', '10:30:00', '11:00:00', 1, NULL),
+(9056, 765, 'Samedi', '10:30:00', '11:00:00', 1, NULL),
+(9057, 765, 'Lundi', '11:00:00', '11:30:00', 1, NULL),
+(9058, 765, 'Mardi', '11:00:00', '11:30:00', 1, NULL),
+(9059, 765, 'Mercredi', '11:00:00', '11:30:00', 1, NULL),
+(9060, 765, 'Jeudi', '11:00:00', '11:30:00', 1, NULL),
+(9061, 765, 'Vendredi', '11:00:00', '11:30:00', 1, NULL),
+(9062, 765, 'Samedi', '11:00:00', '11:30:00', 1, NULL),
+(9063, 765, 'Lundi', '11:30:00', '12:00:00', 1, NULL),
+(9064, 765, 'Mardi', '11:30:00', '12:00:00', 1, NULL),
+(9065, 765, 'Mercredi', '11:30:00', '12:00:00', 1, NULL),
+(9066, 765, 'Jeudi', '11:30:00', '12:00:00', 1, NULL),
+(9067, 765, 'Vendredi', '11:30:00', '12:00:00', 1, NULL),
+(9068, 765, 'Samedi', '11:30:00', '12:00:00', 1, NULL),
+(9069, 765, 'Lundi', '12:00:00', '12:30:00', 1, NULL),
+(9070, 765, 'Mardi', '12:00:00', '12:30:00', 1, NULL),
+(9071, 765, 'Mercredi', '12:00:00', '12:30:00', 1, NULL),
+(9072, 765, 'Jeudi', '12:00:00', '12:30:00', 1, NULL),
+(9073, 765, 'Vendredi', '12:00:00', '12:30:00', 1, NULL),
+(9074, 765, 'Samedi', '12:00:00', '12:30:00', 1, NULL),
+(9075, 765, 'Lundi', '12:30:00', '13:00:00', 1, NULL),
+(9076, 765, 'Mardi', '12:30:00', '13:00:00', 1, NULL),
+(9077, 765, 'Mercredi', '12:30:00', '13:00:00', 1, NULL),
+(9078, 765, 'Jeudi', '12:30:00', '13:00:00', 1, NULL),
+(9079, 765, 'Vendredi', '12:30:00', '13:00:00', 1, NULL),
+(9080, 765, 'Samedi', '12:30:00', '13:00:00', 1, NULL),
+(9081, 765, 'Lundi', '13:00:00', '13:30:00', 1, NULL),
+(9082, 765, 'Mardi', '13:00:00', '13:30:00', 1, NULL),
+(9083, 765, 'Mercredi', '13:00:00', '13:30:00', 1, NULL),
+(9084, 765, 'Jeudi', '13:00:00', '13:30:00', 1, NULL),
+(9085, 765, 'Vendredi', '13:00:00', '13:30:00', 1, NULL),
+(9086, 765, 'Samedi', '13:00:00', '13:30:00', 1, NULL),
+(9087, 765, 'Lundi', '13:30:00', '14:00:00', 1, NULL),
+(9088, 765, 'Mardi', '13:30:00', '14:00:00', 1, NULL),
+(9089, 765, 'Mercredi', '13:30:00', '14:00:00', 1, NULL),
+(9090, 765, 'Jeudi', '13:30:00', '14:00:00', 1, NULL),
+(9091, 765, 'Vendredi', '13:30:00', '14:00:00', 1, NULL),
+(9092, 765, 'Samedi', '13:30:00', '14:00:00', 1, NULL),
+(9093, 765, 'Lundi', '14:00:00', '14:30:00', 1, NULL),
+(9094, 765, 'Mardi', '14:00:00', '14:30:00', 1, NULL),
+(9095, 765, 'Mercredi', '14:00:00', '14:30:00', 1, NULL),
+(9096, 765, 'Jeudi', '14:00:00', '14:30:00', 1, NULL),
+(9097, 765, 'Vendredi', '14:00:00', '14:30:00', 1, NULL),
+(9098, 765, 'Samedi', '14:00:00', '14:30:00', 1, NULL),
+(9099, 765, 'Lundi', '14:30:00', '15:00:00', 1, NULL),
+(9100, 765, 'Mardi', '14:30:00', '15:00:00', 1, NULL),
+(9101, 765, 'Mercredi', '14:30:00', '15:00:00', 1, NULL),
+(9102, 765, 'Jeudi', '14:30:00', '15:00:00', 1, NULL),
+(9103, 765, 'Vendredi', '14:30:00', '15:00:00', 1, NULL),
+(9104, 765, 'Samedi', '14:30:00', '15:00:00', 1, NULL),
+(9105, 765, 'Lundi', '15:00:00', '15:30:00', 1, NULL),
+(9106, 765, 'Mardi', '15:00:00', '15:30:00', 1, NULL),
+(9107, 765, 'Mercredi', '15:00:00', '15:30:00', 1, NULL),
+(9108, 765, 'Jeudi', '15:00:00', '15:30:00', 1, NULL),
+(9109, 765, 'Vendredi', '15:00:00', '15:30:00', 1, NULL),
+(9110, 765, 'Samedi', '15:00:00', '15:30:00', 1, NULL),
+(9111, 765, 'Lundi', '15:30:00', '16:00:00', 1, NULL),
+(9112, 765, 'Mardi', '15:30:00', '16:00:00', 1, NULL),
+(9113, 765, 'Mercredi', '15:30:00', '16:00:00', 1, NULL),
+(9114, 765, 'Jeudi', '15:30:00', '16:00:00', 1, NULL),
+(9115, 765, 'Vendredi', '15:30:00', '16:00:00', 1, NULL),
+(9116, 765, 'Samedi', '15:30:00', '16:00:00', 1, NULL),
+(9117, 765, 'Lundi', '16:00:00', '16:30:00', 1, NULL),
+(9118, 765, 'Mardi', '16:00:00', '16:30:00', 1, NULL),
+(9119, 765, 'Mercredi', '16:00:00', '16:30:00', 1, NULL),
+(9120, 765, 'Jeudi', '16:00:00', '16:30:00', 1, NULL),
+(9121, 765, 'Vendredi', '16:00:00', '16:30:00', 1, NULL),
+(9122, 765, 'Samedi', '16:00:00', '16:30:00', 1, NULL),
+(9123, 765, 'Lundi', '16:30:00', '17:00:00', 1, NULL),
+(9124, 765, 'Mardi', '16:30:00', '17:00:00', 1, NULL),
+(9125, 765, 'Mercredi', '16:30:00', '17:00:00', 1, NULL),
+(9126, 765, 'Jeudi', '16:30:00', '17:00:00', 1, NULL),
+(9127, 765, 'Vendredi', '16:30:00', '17:00:00', 1, NULL),
+(9128, 765, 'Samedi', '16:30:00', '17:00:00', 1, NULL),
+(9129, 765, 'Lundi', '17:00:00', '17:30:00', 1, NULL),
+(9130, 765, 'Mardi', '17:00:00', '17:30:00', 1, NULL),
+(9131, 765, 'Mercredi', '17:00:00', '17:30:00', 1, NULL),
+(9132, 765, 'Jeudi', '17:00:00', '17:30:00', 1, NULL),
+(9133, 765, 'Vendredi', '17:00:00', '17:30:00', 1, NULL),
+(9134, 765, 'Samedi', '17:00:00', '17:30:00', 1, NULL),
+(9135, 765, 'Lundi', '17:30:00', '18:00:00', 1, NULL),
+(9136, 765, 'Mardi', '17:30:00', '18:00:00', 1, NULL),
+(9137, 765, 'Mercredi', '17:30:00', '18:00:00', 1, NULL),
+(9138, 765, 'Jeudi', '17:30:00', '18:00:00', 1, NULL),
+(9139, 765, 'Vendredi', '17:30:00', '18:00:00', 1, NULL),
+(9140, 765, 'Samedi', '17:30:00', '18:00:00', 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -5024,10 +5003,8 @@ CREATE TABLE `jurys` (
 --
 
 INSERT INTO `jurys` (`id`, `soutenance_id`, `prof_id`, `role_jury`, `present`) VALUES
-(16, 11, 781, 'president', 1),
-(17, 11, 786, 'examinateur', 1),
-(20, 10, 785, 'president', 1),
-(21, 10, 786, 'examinateur', 1);
+(26, 10, 785, 'president', 1),
+(27, 10, 786, 'examinateur', 1);
 
 -- --------------------------------------------------------
 
@@ -5065,6 +5042,26 @@ CREATE TABLE `messages` (
 
 INSERT INTO `messages` (`id`, `projet_id`, `sender_id`, `message`, `created_at`) VALUES
 (7, 10, 1157, 'done', '2026-01-06 15:01:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `parametres`
+--
+
+CREATE TABLE `parametres` (
+  `cle` varchar(50) NOT NULL,
+  `valeur` text DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `parametres`
+--
+
+INSERT INTO `parametres` (`cle`, `valeur`, `updated_at`) VALUES
+('date_limite_rapport', '2024-06-30', '2026-01-08 21:43:20'),
+('duree_soutenance_min', '45', '2026-01-08 21:43:20');
 
 -- --------------------------------------------------------
 
@@ -5132,7 +5129,30 @@ CREATE TABLE `projets` (
 
 INSERT INTO `projets` (`id`, `titre`, `description`, `domaine`, `technologies`, `binome_email`, `etudiant_id`, `encadrant_id`, `filiere_id`, `encadrant_pref1_id`, `encadrant_pref2_id`, `encadrant_pref3_id`, `statut`, `annee_universitaire`, `created_at`, `rapport_chemin`) VALUES
 (10, 'Système de détection d\'intrusions', 'Système de détection d\'intrusions', 'Cyber', 'Docker,PHP', '', 1157, 780, 1, 780, NULL, NULL, 'valide', '2025-2026', '2026-01-06 14:58:53', 'rapport_10_1767708053.pdf'),
-(11, 'Analyse des tendances sur les réseaux sociaux', 'Analyse des tendances sur les réseaux sociaux', 'IA', 'IA : Python (Scikit-learn)  Backend : FastAPI  Front : React', '', 811, 771, 2, NULL, NULL, NULL, 'valide', '2025-2026', '2026-01-06 15:14:51', 'rapport_11_1767708969.pdf');
+(16, 'Dashboard d’audit & hardening système', 'Dashboard d’audit & hardening système SOAR', 'Cyber', 'Docker,Shell,Apache Guacamole,TailScale', 'oussama.berrada@eidia.ueuromed.org', 1176, 765, 1, NULL, NULL, NULL, 'rapport_soumis', '2025-2026', '2026-01-13 02:46:09', 'rapport_16_1768307616.pdf');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pv`
+--
+
+CREATE TABLE `pv` (
+  `id` int(11) NOT NULL,
+  `soutenance_id` int(11) NOT NULL,
+  `statut` varchar(20) DEFAULT 'attente_signature',
+  `signature_hash` varchar(64) DEFAULT NULL,
+  `signed_at` datetime DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `pv`
+--
+
+INSERT INTO `pv` (`id`, `soutenance_id`, `statut`, `signature_hash`, `signed_at`, `created_at`) VALUES
+(1, 11, 'pv_signe', 'bab711b6acf11468c0bb995401b43919c69b29b1c7e76526b1a6f09e006a5a73', '2026-01-08 13:47:39', '2026-01-08 21:47:35'),
+(2, 12, 'pv_signe', '3728ef787e605d9a23fd7dc6e35da2e128cc1ffb0875ad9597d26ec0a2b59c89', '2026-01-08 14:57:51', '2026-01-08 22:57:40');
 
 -- --------------------------------------------------------
 
@@ -5159,7 +5179,7 @@ CREATE TABLE `rapports` (
 
 INSERT INTO `rapports` (`id`, `projet_id`, `nom_fichier`, `chemin_fichier`, `taille_fichier`, `resume`, `mots_cles`, `remerciements`, `est_original`, `created_at`) VALUES
 (9, 10, 'mini-projets_2025.pdf', 'uploads/rapport_10_1767708053.pdf', 169547, 'Rapport final de pfe', NULL, NULL, 1, '2026-01-06 15:00:53'),
-(10, 11, 'Revision_question - Exercises.pdf', 'uploads/rapport_11_1767708969.pdf', 182147, 'Rapport pfe', NULL, NULL, 1, '2026-01-06 15:16:09');
+(12, 16, 'pfe_upload_test.pdf', 'uploads/rapport_16_1768307616.pdf', 1775, 'test', NULL, NULL, 1, '2026-01-13 04:33:36');
 
 -- --------------------------------------------------------
 
@@ -5197,16 +5217,19 @@ CREATE TABLE `soutenances` (
   `note_finale` decimal(4,2) DEFAULT NULL,
   `mention` varchar(50) DEFAULT NULL,
   `commentaire_jury` text DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `pv_signe` tinyint(1) DEFAULT 0,
+  `pv_hash` varchar(64) DEFAULT NULL,
+  `date_signature` datetime DEFAULT NULL,
+  `statut` varchar(20) DEFAULT 'prevue'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `soutenances`
 --
 
-INSERT INTO `soutenances` (`id`, `projet_id`, `date_soutenance`, `salle`, `jury_infos`, `note_finale`, `mention`, `commentaire_jury`, `created_at`) VALUES
-(10, 10, '2026-01-06 09:00:00', 'Salle Standard (Auto)', NULL, NULL, NULL, NULL, '2026-01-06 15:13:40'),
-(11, 11, '2026-01-16 09:00:00', 'Salle Standard (Auto)', NULL, NULL, NULL, NULL, '2026-01-06 15:17:24');
+INSERT INTO `soutenances` (`id`, `projet_id`, `date_soutenance`, `salle`, `jury_infos`, `note_finale`, `mention`, `commentaire_jury`, `created_at`, `pv_signe`, `pv_hash`, `date_signature`, `statut`) VALUES
+(10, 10, '2026-01-06 09:00:00', 'Salle Standard (Auto)', NULL, NULL, NULL, NULL, '2026-01-06 15:13:40', 0, NULL, NULL, 'prevue');
 
 -- --------------------------------------------------------
 
@@ -5228,7 +5251,8 @@ CREATE TABLE `support_tickets` (
 --
 
 INSERT INTO `support_tickets` (`id`, `email_contact`, `motif`, `message`, `statut`, `created_at`) VALUES
-(1, 'abdelmoughit.mossaid@eidia.ueuromed.org', 'Mot de passe oublié', 'j&#039;ai oublié mon mot de passe', 'traite', '2026-01-06 15:49:55');
+(1, 'abdelmoughit.mossaid@eidia.ueuromed.org', 'Mot de passe oublié', 'j&#039;ai oublié mon mot de passe', 'traite', '2026-01-06 15:49:55'),
+(2, 'ihab.zaghdane@eidia.ueuromed.org', 'Etudiant - MDP oublié', 'mot de passe oublié', 'traite', '2026-01-09 07:41:09');
 
 -- --------------------------------------------------------
 
@@ -5542,6 +5566,19 @@ INSERT INTO `users` (`id`, `nom`, `prenom`, `email`, `username`, `login`, `passw
 --
 
 --
+-- Indexes for table `audit_logs`
+--
+ALTER TABLE `audit_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `demandes_correction`
+--
+ALTER TABLE `demandes_correction`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `disponibilites`
 --
 ALTER TABLE `disponibilites`
@@ -5590,6 +5627,12 @@ ALTER TABLE `messages`
   ADD KEY `projet_id` (`projet_id`);
 
 --
+-- Indexes for table `parametres`
+--
+ALTER TABLE `parametres`
+  ADD PRIMARY KEY (`cle`);
+
+--
 -- Indexes for table `password_resets`
 --
 ALTER TABLE `password_resets`
@@ -5608,6 +5651,13 @@ ALTER TABLE `periodes`
 ALTER TABLE `projets`
   ADD PRIMARY KEY (`id`),
   ADD KEY `etudiant_id` (`etudiant_id`);
+
+--
+-- Indexes for table `pv`
+--
+ALTER TABLE `pv`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `soutenance_id` (`soutenance_id`);
 
 --
 -- Indexes for table `rapports`
@@ -5649,6 +5699,18 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `audit_logs`
+--
+ALTER TABLE `audit_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `demandes_correction`
+--
+ALTER TABLE `demandes_correction`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `disponibilites`
 --
 ALTER TABLE `disponibilites`
@@ -5658,7 +5720,7 @@ ALTER TABLE `disponibilites`
 -- AUTO_INCREMENT for table `disponibilites_profs`
 --
 ALTER TABLE `disponibilites_profs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9021;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9141;
 
 --
 -- AUTO_INCREMENT for table `filieres`
@@ -5670,7 +5732,7 @@ ALTER TABLE `filieres`
 -- AUTO_INCREMENT for table `jurys`
 --
 ALTER TABLE `jurys`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `jury_soutenance`
@@ -5682,7 +5744,7 @@ ALTER TABLE `jury_soutenance`
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `password_resets`
@@ -5700,13 +5762,19 @@ ALTER TABLE `periodes`
 -- AUTO_INCREMENT for table `projets`
 --
 ALTER TABLE `projets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `pv`
+--
+ALTER TABLE `pv`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `rapports`
 --
 ALTER TABLE `rapports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `salles`
@@ -5718,13 +5786,13 @@ ALTER TABLE `salles`
 -- AUTO_INCREMENT for table `soutenances`
 --
 ALTER TABLE `soutenances`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `support_tickets`
 --
 ALTER TABLE `support_tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `users`

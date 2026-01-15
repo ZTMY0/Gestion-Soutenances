@@ -140,10 +140,19 @@ $incomplets = $total - $complets;
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion Jurys | UEMF</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../../public/assets/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" 
+          integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
+          integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="/Gestion-Soutenances/public/assets/css/style.css">
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com;">
 </head>
 <body>
 
@@ -167,7 +176,7 @@ $incomplets = $total - $complets;
                 </div>
                 <form method="POST">
                     <button type="submit" name="auto_jury" class="btn btn-light text-primary fw-bold shadow-sm">
-                        <i class="fas fa-magic me-2"></i>Constituer Jurys Auto
+                        <i></i>Constituer Jurys Auto
                     </button>
                 </form>
             </div>
@@ -183,7 +192,7 @@ $incomplets = $total - $complets;
                         <div class="stat-modern-label">Total Soutenances</div>
                         <div class="stat-modern-value"><?= $total ?></div>
                     </div>
-                    <i class="fas fa-calendar-alt fa-2x opacity-25 text-primary"></i>
+                   
                 </div>
             </div>
             <div class="col-md-4">
@@ -192,7 +201,7 @@ $incomplets = $total - $complets;
                         <div class="stat-modern-label text-success">Jurys Complets</div>
                         <div class="stat-modern-value"><?= $complets ?></div>
                     </div>
-                    <i class="fas fa-users fa-2x opacity-25 text-success"></i>
+                   
                 </div>
             </div>
             <div class="col-md-4">
@@ -201,7 +210,7 @@ $incomplets = $total - $complets;
                         <div class="stat-modern-label text-danger">À Assigner</div>
                         <div class="stat-modern-value"><?= $incomplets ?></div>
                     </div>
-                    <i class="fas fa-exclamation-circle fa-2x opacity-25 text-danger"></i>
+                   
                 </div>
             </div>
         </div>

@@ -1,13 +1,59 @@
 <?php
+// ERROR REPORTING
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
-require_once '../../../config/database.php';
+
+// FIX: Use __DIR__ for absolute path
+require_once __DIR__ . '/../../../config/database.php';
 
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'directeur') {
     header("Location: ../auth/login.php"); exit();
 }
 
-// Exemple de récupération de vrais PV (si la table existait)
-// $pvs = $pdo->query("SELECT * FROM pvs WHERE statut = 'attente_signature'")->fetchAll();
+$success = '';
+$error = '';
+// --- CORRECTED LOGIC BLOCK ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'sign') {
+    $pv_id = (int)($_POST['pv_id'] ?? 0);
+
+    // The check must be INSIDE the POST condition
+    if ($pv_id <= 0) {
+        $error = "PV invalide.";
+    } else {
+        // Retrieve PV info
+        $stmt = $pdo->prepare("SELECT id, soutenance_id, statut FROM pv WHERE id = ?");
+        $stmt->execute([$pv_id]);
+        $pv = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$pv) {
+            $error = "PV introuvable.";
+        } elseif ($pv['statut'] === 'pv_signe') {
+            $error = "PV déjà signé.";
+        } else {
+            // Generate Hash
+            $payload = $pv['id'] . '|' . $pv['soutenance_id'] . '|' . date('c');
+            $hash = hash('sha256', $payload);
+
+            // Update DB
+            $up = $pdo->prepare("UPDATE pv SET statut='pv_signe', signature_hash=?, signed_at=NOW() WHERE id=?");
+            $up->execute([$hash, $pv_id]);
+
+            if ($up->rowCount() === 0) {
+                $error = "Erreur: Impossible de signer le PV (peut-être déjà signé ?).";
+            } else {
+                $success = "PV signé avec succès. Hash: $hash";
+            }
+        }
+    }
+}
+
+$stmt = $pdo->query("SELECT id, soutenance_id, statut, signature_hash, signed_at
+                     FROM pv
+                     ORDER BY created_at DESC");
+$pvs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!doctype html>
 <html lang="fr">
@@ -15,42 +61,48 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'directeur') {
   <meta charset="utf-8">
   <title>Directeur - Signatures PV</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-light p-5">
-  <div class="container bg-white p-5 rounded shadow-sm">
-      <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-        <h1 class="h3 mb-0 text-success"><i class="fas fa-file-signature me-2"></i>Signature électronique des PV</h1>
-        <a class="btn btn-secondary btn-sm" href="index.php"><i class="fas fa-arrow-left me-2"></i>Retour</a>
-      </div>
+<body class="container py-4">
+  <h1 class="h4 mb-3">Signature électronique des PV</h1>
 
-      <div class="alert alert-warning">
-        <i class="fas fa-lock me-2"></i>Les documents signés seront verrouillés et archivés définitivement.
-      </div>
+  <?php if($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+  <?php if($success): ?><div class="alert alert-success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
 
-      <table class="table table-hover align-middle mt-4">
-        <thead class="table-light">
-            <tr>
-                <th>Projet / Étudiant</th>
-                <th>Date Soutenance</th>
-                <th>Note Finale</th>
-                <th>Statut PV</th>
-                <th>Action</th>
-            </tr>
-        </thead>
+  <div class="card">
+    <div class="card-header">PV disponibles</div>
+    <div class="table-responsive">
+      <table class="table table-striped mb-0">
+        <thead><tr>
+          <th>ID</th><th>Soutenance</th><th>Statut</th><th>Hash</th><th>Signé le</th><th>Action</th>
+        </tr></thead>
         <tbody>
+        <?php foreach($pvs as $pv): ?>
           <tr>
+            <td><?= (int)$pv['id'] ?></td>
+            <td><?= htmlspecialchars($pv['soutenance_id']) ?></td>
+            <td><span class="badge <?= $pv['statut']==='pv_signe'?'bg-success':'bg-secondary' ?>">
+              <?= htmlspecialchars($pv['statut']) ?>
+            </span></td>
+            <td class="small"><?= htmlspecialchars($pv['signature_hash'] ?? '-') ?></td>
+            <td><?= htmlspecialchars($pv['signed_at'] ?? '-') ?></td>
             <td>
-                <strong>Système de détection d'intrusions</strong><br>
-                <small class="text-muted">Zouhair Reda</small>
+              <?php if($pv['statut'] !== 'pv_signe'): ?>
+                <form method="post" class="d-inline">
+                  <input type="hidden" name="action" value="sign">
+                  <input type="hidden" name="pv_id" value="<?= (int)$pv['id'] ?>">
+                  <button class="btn btn-sm btn-primary">Signer</button>
+                </form>
+              <?php else: ?>
+                <span class="text-muted">—</span>
+              <?php endif; ?>
             </td>
-            <td>10/06/2026</td>
-            <td>18/20</td>
-            <td><span class="badge bg-warning text-dark">En attente signature</span></td>
-            <td><button class="btn btn-sm btn-success"><i class="fas fa-pen-nib me-2"></i>Signer</button></td>
           </tr>
-          </tbody>
+        <?php endforeach; ?>
+        </tbody>
       </table>
+    </div>
   </div>
+
+  <a class="btn btn-link mt-3" href="index.php">← Retour</a>
 </body>
 </html>

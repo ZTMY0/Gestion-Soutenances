@@ -81,7 +81,7 @@ $stats = $simulation['stats'];
                         <div class="stat-modern-label text-primary">Projets à traiter</div>
                         <div class="stat-modern-value"><?php echo $stats['total_projets']; ?></div>
                     </div>
-                    <i class="fas fa-layer-group stat-modern-icon text-primary"></i>
+                 
                 </div>
             </div>
             
@@ -102,7 +102,7 @@ $stats = $simulation['stats'];
                         <div class="stat-modern-label text-warning">Pertinence (IA)</div>
                         <div class="stat-modern-value text-warning"><?php echo $stats['score_moyen']; ?><small class="fs-6 text-muted">/100</small></div>
                     </div>
-                    <i class="fas fa-star stat-modern-icon text-warning"></i>
+                   
                 </div>
             </div>
 
