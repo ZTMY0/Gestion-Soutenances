@@ -1,79 +1,69 @@
 <?php
-session_start(); // Start the session to persist data
+session_start();
 
-// Initial data for salles (rooms)
-$initial_salles = [
-    ['id' => 1, 'nom' => 'Salle A101', 'capacite' => 30, 'equipements' => 'Projecteur, Tableau blanc'],
-    ['id' => 2, 'nom' => 'Salle B205', 'capacite' => 20, 'equipements' => 'TV, Micros'],
-    ['id' => 3, 'nom' => 'Amphi C', 'capacite' => 150, 'equipements' => 'Projecteur, Sonorisation'],
-];
-
-// Initialize $_SESSION['salles'] if it doesn't exist or if a reset is requested
-if (!isset($_SESSION['salles']) || (isset($_GET['action']) && $_GET['action'] === 'reset')) {
-    $_SESSION['salles'] = $initial_salles;
-    if (isset($_GET['action']) && $_GET['action'] === 'reset') {
-        header('Location: gestion_salles.php'); // Redirect to clean the URL
-        exit();
-    }
-}
-
-$salles = &$_SESSION['salles']; // Use a reference to directly modify the session array
+require_once '../../config/db.php';
 
 $message = '';
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+    unset($_SESSION['message']); // Clear the message after displaying it
+}
 $edit_salle = null;
-$next_id = empty($salles) ? 1 : max(array_column($salles, 'id')) + 1;
+
+try {
+    $stmt = $pdo->query("SELECT * FROM salles ORDER BY nom");
+    $salles = $stmt->fetchAll();
+} catch (PDOException $e) {
+    $message = "Erreur lors du chargement des salles: " . $e->getMessage();
+    $salles = []; // Ensure $salles is an empty array on error
+}
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
+    try {
         switch ($_POST['action']) {
             case 'add':
-                $new_salle = [
-                    'id' => $next_id,
-                    'nom' => htmlspecialchars($_POST['nom']),
-                    'capacite' => (int)$_POST['capacite'],
-                    'equipements' => htmlspecialchars($_POST['equipements']),
-                ];
-                $salles[] = $new_salle;
-                $message = 'Salle ajoutée avec succès.';
+                $nom = htmlspecialchars($_POST['nom']);
+                $capacite = (int)$_POST['capacite'];
+                $equipements = htmlspecialchars($_POST['equipements']);
+
+                $stmt = $pdo->prepare("INSERT INTO salles (nom, capacite, equipements) VALUES (?, ?, ?)");
+                $stmt->execute([$nom, $capacite, $equipements]);
+                $_SESSION['message'] = 'Salle ajoutée avec succès.';
                 break;
             case 'edit':
                 $edit_id = (int)$_POST['salle_id'];
-                foreach ($salles as &$salle_item) { // Use a different variable name to avoid conflict with outer $salles
-                    if ($salle_item['id'] === $edit_id) {
-                        $salle_item['nom'] = htmlspecialchars($_POST['nom']);
-                        $salle_item['capacite'] = (int)$_POST['capacite'];
-                        $salle_item['equipements'] = htmlspecialchars($_POST['equipements']);
-                        break;
-                    }
-                }
-                $message = 'Salle mise à jour avec succès.';
+                $nom = htmlspecialchars($_POST['nom']);
+                $capacite = (int)$_POST['capacite'];
+                $equipements = htmlspecialchars($_POST['equipements']);
+
+                $stmt = $pdo->prepare("UPDATE salles SET nom = ?, capacite = ?, equipements = ? WHERE id = ?");
+                $stmt->execute([$nom, $capacite, $equipements, $edit_id]);
+                $_SESSION['message'] = 'Salle mise à jour avec succès.';
                 break;
             case 'delete':
                 $delete_id = (int)$_POST['salle_id'];
-                $salles = array_filter($salles, fn($salle_item) => $salle_item['id'] !== $delete_id);
-                $salles = array_values($salles); // Re-index array after deletion
-                $message = 'Salle supprimée avec succès.';
+                $stmt = $pdo->prepare("DELETE FROM salles WHERE id = ?");
+                $stmt->execute([$delete_id]);
+                $_SESSION['message'] = 'Salle supprimée avec succès.';
                 break;
         }
+    } catch (PDOException $e) {
+        $_SESSION['message'] = "Erreur: " . $e->getMessage();
     }
-    // Redirect to prevent form re-submission on refresh
-    header('Location: gestion_salles.php?message=' . urlencode($message));
+    header('Location: gestion_salles.php');
     exit();
 }
 
 if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) {
     $edit_id = (int)$_GET['id'];
-    foreach ($salles as $salle_item) {
-        if ($salle_item['id'] === $edit_id) {
-            $edit_salle = $salle_item;
-            break;
-        }
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM salles WHERE id = ?");
+        $stmt->execute([$edit_id]);
+        $edit_salle = $stmt->fetch();
+    } catch (PDOException $e) {
+        $message = "Erreur lors du chargement de la salle pour édition: " . $e->getMessage();
     }
-}
-
-// Display message from redirect
-if (isset($_GET['message'])) {
-    $message = htmlspecialchars($_GET['message']);
 }
 
 ?>

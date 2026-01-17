@@ -36,7 +36,7 @@ if (!isset($pdo)) { die("Erreur critique : Connexion BDD échouée."); }
 // 4. TRAITEMENT DU CHAT (Envoi message)
 if (isset($_POST['send_msg']) && !empty($_POST['msg'])) {
     try {
-        $stmt = $pdo->prepare("INSERT INTO messages (projet_id, sender_id, message, created_at) VALUES (?, ?, ?, NOW())");
+        $stmt = $pdo->prepare("INSERT INTO messages (projet_id, expediteur_id, contenu, created_at) VALUES (?, ?, ?, NOW())");
         $stmt->execute([$_POST['pid'], $uid, trim($_POST['msg'])]);
         header("Location: index.php"); exit(); 
     } catch (PDOException $e) {
@@ -47,11 +47,11 @@ if (isset($_POST['send_msg']) && !empty($_POST['msg'])) {
 // 5. RÉCUPÉRATION DES DONNÉES
 try {
     // Infos Projet + Encadrant
-    $stmt = $pdo->prepare("SELECT p.*, u.nom as nom_enc, u.prenom as prenom_enc, u.email as email_enc 
-                           FROM projets p 
-                           LEFT JOIN users u ON p.encadrant_id = u.id 
-                           WHERE p.etudiant_id = ?");
-    $stmt->execute([$uid]);
+        $stmt = $pdo->prepare("SELECT p.*, u.nom as nom_enc, u.prenom as prenom_enc, u.email as email_enc, f.nom as filiere_nom
+                               FROM projets p
+                               LEFT JOIN users u ON p.encadrant_id = u.id
+                               LEFT JOIN filieres f ON p.filiere_id = f.id
+                               WHERE p.etudiant_id = ?");    $stmt->execute([$uid]);
     $projet = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($projet) {
@@ -62,7 +62,7 @@ try {
         
         // Infos Soutenance (si existe)
         try {
-            $stmtSout = $pdo->prepare("SELECT * FROM soutenances WHERE projet_id = ?");
+            $stmtSout = $pdo->prepare("SELECT s.*, sal.nom as salle_nom FROM soutenances s JOIN salles sal ON s.salle_id = sal.id WHERE s.projet_id = ?");
             $stmtSout->execute([$projet['id']]);
             $soutenance = $stmtSout->fetch();
         } catch (Exception $e) { /* Table n'existe peut-être pas encore */ }
@@ -158,7 +158,7 @@ if ($projet) {
                 <div>
                     <div class="mb-2">
                         <span class="badge bg-warning text-dark me-1">
-                            <i class="fas fa-code-branch me-1"></i><?= htmlspecialchars($projet['domaine']) ?>
+                            <i class="fas fa-code-branch me-1"></i><?= htmlspecialchars($projet['filiere_nom']) ?>
                         </span>
                         
                         <span class="badge bg-secondary me-1">
@@ -173,10 +173,10 @@ if ($projet) {
                     <h2 class="mb-0 fw-bold"><?= htmlspecialchars($projet['titre']) ?></h2>
                 </div>
 
-                <?php if($soutenance): ?>
+                <?php if($soutenance && is_array($soutenance)): ?>
                     <div class="text-end">
                         <div class="h4 mb-0 fw-bold text-success"><?= date('d M Y', strtotime($soutenance['date_soutenance'])) ?></div>
-                        <div class="badge bg-light text-primary border"><?= date('H:i', strtotime($soutenance['date_soutenance'])) ?> - <?= htmlspecialchars($soutenance['salle']) ?></div>
+                        <div class="badge bg-light text-primary border"><?= date('H:i', strtotime($soutenance['date_soutenance'])) ?> - <?= htmlspecialchars($soutenance['salle_nom']) ?></div>
                     </div>
                 <?php endif; ?>
             </div>
@@ -214,7 +214,7 @@ if ($projet) {
                             
                             <h6 class="fw-bold mb-2">Technologies</h6>
                             <div class="mb-4">
-                                <?php foreach(explode(',', $projet['technologies']) as $t): ?>
+                                <?php foreach(explode(',', $projet['mots_cles']) as $t): ?>
                                     <span class="badge bg-light text-dark border me-1"><?= trim($t) ?></span>
                                 <?php endforeach; ?>
                             </div>
@@ -223,10 +223,16 @@ if ($projet) {
 
                             <div class="bg-light p-4 rounded border text-center">
                                 <?php if($progress_level >= 4): ?>
-                                    <div class="text-success mb-3"><i class="fas fa-check-circle fa-2x"></i><br><strong>Dossier Validé</strong></div>
-                                    <a href="../../../public/uploads/<?= htmlspecialchars($projet['rapport_chemin']) ?>" target="_blank" class="btn btn-outline-success btn-sm">
-                                        <i class="fas fa-download me-2"></i>Télécharger mon rapport
-                                    </a>
+                                    <?php if(!empty($projet['rapport_chemin'])): ?>
+                                        <div class="text-success mb-3"><i class="fas fa-check-circle fa-2x"></i><br><strong>Dossier Validé</strong></div>
+                                        <a href="../../../public/uploads/<?= htmlspecialchars($projet['rapport_chemin']) ?>" target="_blank" class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-download me-2"></i>Télécharger mon rapport
+                                        </a>
+                                    <?php else: ?>
+                                        <div class="text-primary mb-3"><i class="fas fa-clock fa-2x"></i><br><strong>Dossier Validé</strong></div>
+                                        <p class="small text-muted">Votre dossier est validé. Déposez votre rapport final.</p>
+                                        <a href="depot.php" class="btn btn-primary fw-bold px-4 shadow-sm"><i class="fas fa-cloud-upload-alt me-2"></i>DÉPOSER</a>
+                                    <?php endif; ?>
                                 <?php elseif($progress_level == 3): ?>
                                     <div class="text-primary mb-3"><i class="fas fa-clock fa-2x"></i><br><strong>En attente de validation</strong></div>
                                     <p class="small text-muted">Votre rapport est chez l'encadrant.</p>
@@ -263,8 +269,8 @@ if ($projet) {
                                         <div class="text-center text-muted mt-5"><i class="far fa-comment-dots fa-2x mb-2"></i><br>Aucun message</div>
                                     <?php else: ?>
                                         <?php foreach($messages as $m): ?>
-                                            <div class="msg-bubble <?= ($m['sender_id'] == $uid) ? 'msg-me' : 'msg-other' ?>">
-                                                <?= nl2br(htmlspecialchars($m['message'])) ?>
+                                            <div class="msg-bubble <?= ($m['expediteur_id'] == $uid) ? 'msg-me' : 'msg-other' ?>">
+                                                <?= nl2br(htmlspecialchars($m['contenu'])) ?>
                                             </div>
                                         <?php endforeach; ?>
                                     <?php endif; ?>

@@ -16,7 +16,7 @@ if (isset($_POST['send_msg']) && !empty($_POST['msg_text'])) {
     $check = $pdo->prepare("SELECT id FROM projets WHERE id = ? AND encadrant_id = ?");
     $check->execute([$pid, $prof_id]);
     if($check->fetch()) {
-        $pdo->prepare("INSERT INTO messages (projet_id, sender_id, message) VALUES (?, ?, ?)")->execute([$pid, $prof_id, $msg]);
+        $pdo->prepare("INSERT INTO messages (projet_id, expediteur_id, contenu) VALUES (?, ?, ?)")->execute([$pid, $prof_id, $msg]);
         $message = "Message envoyé avec succès !";
         $messageType = "success";
     }
@@ -38,7 +38,7 @@ $sql = "SELECT p.*, u.nom AS etudiant_nom, u.email AS etudiant_email,
                r.chemin_fichier AS rapport_path 
         FROM projets p
         JOIN users u ON p.etudiant_id = u.id
-        LEFT JOIN users b ON p.binome_email = b.email
+        LEFT JOIN users b ON p.binome_id = b.id
         LEFT JOIN filieres f ON p.filiere_id = f.id
         LEFT JOIN rapports r ON r.projet_id = p.id
         WHERE p.encadrant_id = ? ORDER BY p.created_at DESC";
@@ -170,7 +170,7 @@ foreach($projets as $p) {
             <div class="row g-4">
                 <?php foreach($projets as $p): 
                     // Chat Count
-                    $stmtMsg = $pdo->prepare("SELECT m.*, u.nom FROM messages m JOIN users u ON m.sender_id = u.id WHERE m.projet_id = ? ORDER BY m.created_at ASC");
+                    $stmtMsg = $pdo->prepare("SELECT m.*, u.nom FROM messages m JOIN users u ON m.expediteur_id = u.id WHERE m.projet_id = ? ORDER BY m.created_at ASC");
                     $stmtMsg->execute([$p['id']]);
                     $msgs = $stmtMsg->fetchAll();
                     
@@ -286,13 +286,13 @@ foreach($projets as $p) {
                                                 <p class="mb-0 small">Aucun message pour le moment</p>
                                             </div>
                                         <?php else: ?>
-                                            <?php foreach($msgs as $m): $isMe = ($m['sender_id'] == $prof_id); ?>
+                                            <?php foreach($msgs as $m): $isMe = ($m['expediteur_id'] == $prof_id); ?>
                                                 <div class="msg <?= $isMe ? 'msg-me' : 'msg-other' ?>">
                                                     <strong class="d-block mb-1 small">
                                                         <i class="fas fa-<?= $isMe ? 'chalkboard-teacher' : 'user-graduate' ?> me-1"></i>
                                                         <?= $isMe ? 'Moi' : htmlspecialchars($m['nom']) ?>
                                                     </strong>
-                                                    <?= nl2br(htmlspecialchars($m['message'])) ?>
+                                                    <?= nl2br(htmlspecialchars($m['contenu'])) ?>
                                                     <small class="d-block mt-1 opacity-75" style="font-size: 0.75rem;">
                                                         <?= date('d/m/Y H:i', strtotime($m['created_at'])) ?>
                                                     </small>

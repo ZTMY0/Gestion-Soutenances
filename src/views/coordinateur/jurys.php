@@ -113,13 +113,14 @@ if (isset($_POST['affecter_jury'])) {
 // ---------------------------------------------------------
 // 3. RÉCUPÉRATION DES DONNÉES
 // ---------------------------------------------------------
-$sql = "SELECT s.id as sid, s.date_soutenance, s.salle,
+$sql = "SELECT s.id as sid, s.date_soutenance, sal.nom as salle_nom,
                p.titre, u.nom as etu_nom, u.prenom as etu_prenom,
                j1.prof_id as pres_id, u1.nom as pres_nom, u1.prenom as pres_prenom,
                j2.prof_id as exam_id, u2.nom as exam_nom, u2.prenom as exam_prenom
         FROM soutenances s
         JOIN projets p ON s.projet_id = p.id
         JOIN users u ON p.etudiant_id = u.id
+        JOIN salles sal ON s.salle_id = sal.id -- Added JOIN for salles
         LEFT JOIN jurys j1 ON s.id = j1.soutenance_id AND j1.role_jury = 'president'
         LEFT JOIN users u1 ON j1.prof_id = u1.id
         LEFT JOIN jurys j2 ON s.id = j2.soutenance_id AND j2.role_jury = 'examinateur'
@@ -250,7 +251,7 @@ $incomplets = $total - $complets;
                                         <div class="row w-100 align-items-center">
                                             <div class="col-md-3">
                                                 <span class="fw-bold text-primary"><?= date('d/m/Y H:i', strtotime($s['date_soutenance'])) ?></span>
-                                                <div class="small text-muted"><i class="fas fa-map-marker-alt me-1"></i><?= htmlspecialchars($s['salle']) ?></div>
+                                                <div class="small text-muted"><i class="fas fa-map-marker-alt me-1"></i><?= htmlspecialchars($s['salle_nom']) ?></div>
                                             </div>
                                             <div class="col-md-4">
                                                 <strong><?= htmlspecialchars($s['etu_nom'].' '.$s['etu_prenom']) ?></strong>

@@ -61,8 +61,8 @@ if (isset($_POST['upload_btn'])) {
                     $pdo->beginTransaction();
                     
                     // 1. Historique Rapports
-                    $stmtHist = $pdo->prepare("INSERT INTO rapports (projet_id, nom_fichier, chemin_fichier, taille_fichier, resume, est_original, created_at) VALUES (?, ?, ?, ?, ?, 1, NOW())");
-                    $stmtHist->execute([$projet['id'], $file['name'], 'uploads/' . $fileName, $file['size'], trim($_POST['resume'])]);
+                    $stmtHist = $pdo->prepare("INSERT INTO rapports (projet_id, chemin_fichier, commentaire) VALUES (?, ?, ?)");
+                    $stmtHist->execute([$projet['id'], 'uploads/' . $fileName, trim($_POST['resume'])]);
 
                     // 2. Mise à jour Projet (Lien actif)
                     $sqlUpdate = "UPDATE projets SET statut = 'rapport_soumis', rapport_chemin = ? WHERE id = ?";

@@ -54,23 +54,35 @@ try {
 
 // --- 3. TRAITEMENT DU FORMULAIRE ---
 if (isset($_POST['submit_projet'])) {
+    $binome_id = null;
+    if (!empty($_POST['binome'])) {
+        $stmt_binome = $pdo->prepare("SELECT id FROM users WHERE email = ? AND role = 'etudiant'");
+        $stmt_binome->execute([$_POST['binome']]);
+        $binome_user = $stmt_binome->fetch(PDO::FETCH_ASSOC);
+        if ($binome_user) {
+            $binome_id = $binome_user['id'];
+        } else {
+            $error = "Erreur : L'email du binôme n'appartient pas à un étudiant enregistré.";
+            goto end_submit_logic; // Jump to the end to prevent further processing
+        }
+    }
+
     try {
-        // Insertion sécurisée avec le domaine forcé
-        $sql = "INSERT INTO projets (titre, description, domaine, technologies, binome_email, etudiant_id, filiere_id, encadrant_pref1_id, encadrant_pref2_id, encadrant_pref3_id, statut, created_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'inscrit', NOW())";
+        // Corrected SQL
+        $sql = "INSERT INTO projets (titre, description, mots_cles, etudiant_id, binome_id, filiere_id, encadrant_pref1_id, encadrant_pref2_id, encadrant_pref3_id, statut, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'inscrit', NOW())";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
-            $_POST['titre'], 
-            $_POST['description'], 
-            $domaine_code,      // <--- Valeur automatique (ex: 'Cyber', 'AI'...)
-            $_POST['technos'], 
-            $_POST['binome'],
-            $_SESSION['user_id'], 
-            $filiere_id, 
-            $_POST['p1'] ?: null, 
-            $_POST['p2'] ?: null, 
-            $_POST['p3'] ?: null
+            $_POST['titre'],
+            $_POST['description'],
+            $_POST['technos'], // Mapped from technologies
+            $_SESSION['user_id'],
+            $binome_id, // Determined above
+            $filiere_id,
+            $_POST['p1'] ?: null, // encadrant_pref1_id
+            $_POST['p2'] ?: null, // encadrant_pref2_id
+            $_POST['p3'] ?: null  // encadrant_pref3_id
         ]);
         
         header("Location: index.php"); exit();
@@ -78,6 +90,7 @@ if (isset($_POST['submit_projet'])) {
         $error = "Erreur lors de l'enregistrement : " . $e->getMessage();
     }
 }
+end_submit_logic:
 ?>
 
 <!DOCTYPE html>

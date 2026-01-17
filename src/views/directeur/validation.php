@@ -71,17 +71,18 @@ SELECT
     p.titre,
     p.statut AS statut_projet,
     p.encadrant_id,
-    u.nom AS nom_enc,        -- Récupération du Nom
-    u.prenom AS prenom_enc,  -- Récupération du Prénom
+    CONCAT(u.prenom, ' ', u.nom) AS nom_enc,
     s.id AS soutenance_id,
     s.date_soutenance,
-    s.salle,
+    s.salle_id,
+    sal.nom AS nom_salle,
     s.statut AS statut_soutenance,
     pv.id AS pv_id,
     pv.statut AS statut_pv
 FROM projets p
 LEFT JOIN users u ON p.encadrant_id = u.id  -- Jointure pour avoir le nom du prof
 LEFT JOIN soutenances s ON s.projet_id = p.id
+LEFT JOIN salles sal ON s.salle_id = sal.id -- Add this join
 LEFT JOIN pv ON pv.soutenance_id = s.id
 ORDER BY p.created_at DESC, p.id DESC
 ";
@@ -136,7 +137,7 @@ $rows = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
                                 <div class="text-muted small">
                                     <i class="fas fa-user-tie me-1"></i>
                                     <?php if($r['encadrant_id']): ?>
-                                        <span class="text-primary fw-bold">Pr. <?= htmlspecialchars(strtoupper($r['nom_enc']) . ' ' . $r['prenom_enc']) ?></span>
+                                        <span class="text-primary fw-bold">Pr. <?= htmlspecialchars($r['nom_enc']) ?></span>
                                     <?php else: ?>
                                         <span class="text-warning">Non assigné</span>
                                     <?php endif; ?>
@@ -161,7 +162,7 @@ $rows = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
                                     <div class="small fw-bold">
                                         <?= date('d/m/Y H:i', strtotime($r['date_soutenance'])) ?>
                                     </div>
-                                    <div class="text-muted small">Salle <?= htmlspecialchars($r['salle']) ?></div>
+                                    <div class="text-muted small">Salle <?= htmlspecialchars($r['nom_salle']) ?></div>
                                     <?php if($r['statut_soutenance'] == 'publie'): ?>
                                         <span class="badge bg-primary proper-badge mt-1" style="font-size: 0.7rem;">Publiée</span>
                                     <?php else: ?>

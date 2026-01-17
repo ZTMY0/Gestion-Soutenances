@@ -35,7 +35,7 @@
                             <i class="fas fa-door-open fa-3x text-primary mb-3"></i>
                             <h3>Gestion des Salles</h3>
                             <p class="text-muted">Ajouter, modifier ou vérifier la disponibilité des salles.</p>
-                            <a href="salles.php" class="btn btn-primary w-100">Gérer les Salles</a>
+                            <a href="gestion_salles.php" class="btn btn-primary w-100">Gérer les Salles</a>
                         </div>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
                             <i class="fas fa-print fa-3x text-secondary mb-3"></i>
                             <h3>Impressions & Documents</h3>
                             <p class="text-muted">Imprimer les convocations et feuilles d'émargement.</p>
-                            <button class="btn btn-outline-secondary w-100">Voir les documents</button>
+                            <a href="liste_convocations.php" class="btn btn-outline-secondary w-100">Voir les documents</a>
                         </div>
                     </div>
                 </div>
@@ -67,9 +67,9 @@
                             <p class="text-muted mb-0">Scanner les PV signés et générer les attestations de réussite.</p>
                         </div>
                     </div>
-                    <button class="btn btn-outline-warning btn-lg">
+                    <a href="archiver_soutenance.php" class="btn btn-outline-warning btn-lg">
                         <i class="fas fa-upload me-2"></i>Archiver une soutenance
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>

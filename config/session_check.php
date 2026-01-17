@@ -1,26 +1,21 @@
 <?php
-// config/session_check.php
-
-// Configuration de la session (Sécurité Cookies)
-if (session_status() === PHP_SESSION_NONE) {
-    ini_set('session.cookie_httponly', 1); 
-    ini_set('session.use_strict_mode', 1);
+// Gestion-Soutenances/config/session_check.php
+if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-
-$timeout_duration = 900;
-if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout_duration) {
-    session_unset();
-    session_destroy();
-    header("Location: ../auth/login.php?timeout=1");
+// Check if user is logged in and has a role
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role'])) {
+    // Redirect to login page if not authenticated
+    header("Location: ../auth/login.php");
     exit();
 }
-$_SESSION['last_activity'] = time();
 
-// Token CSRF 
-if (empty($_SESSION['csrf_token'])) {
-    // On génère une chaîne aléatoire cryptographique de 64 caractères
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
+// Optionally, you can add more specific role-based checks here
+// For example, if generer_pdf.php is only for 'assistante' role:
+// if ($_SESSION['user_role'] !== 'assistante') {
+//     header("Location: ../../index.php"); // Redirect to a more general page or error page
+//     exit();
+// }
+
 ?>

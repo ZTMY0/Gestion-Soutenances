@@ -64,7 +64,7 @@ $profs = $pdo->query("SELECT id, nom, prenom FROM users WHERE role = 'prof' ORDE
                         <hr class="my-4 opacity-25">
                         
                         <h6 class="fw-bold mb-3">Stack Technique</h6>
-                        <?php foreach(explode(',', $projet['technologies']) as $t): ?>
+                        <?php foreach(explode(',', $projet['mots_cles']) as $t): ?>
                             <span class="badge bg-light text-dark border me-1 px-3 py-2"><?= trim($t) ?></span>
                         <?php endforeach; ?>
                     </div>

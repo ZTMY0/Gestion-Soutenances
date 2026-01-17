@@ -20,45 +20,16 @@ $message = "";
 $msg_type = "";
 
 // ---------------------------------------------------------
-// LISTE GLOBALE DES 25 SALLES (Architecture Respectée)
+// RÉCUPÉRATION DES SALLES DE LA BDD
 // ---------------------------------------------------------
-$toutes_les_salles = [
-    // --- BÂTIMENT B4 (RDC + 3 Étages + Amphis) ---
-    'B4-Amphithéâtre-0.5',
-    'B4-Amphithéâtre-0.6',
-    'B4-0.15', // RDC
-    'B4-1.05', // 1er étage
-    'B4-1.12',
-    'B4-2.08', // 2ème étage
-    'B4-3.01', // 3ème étage (Exclusif B4)
-    'B4-3.10', // 3ème étage
-
-    // --- BÂTIMENT B3 (RDC + 2 Étages + Amphi) ---
-    'B3-Amphithéâtre-0.2',
-    'B3-0.04', // RDC
-    'B3-1.02', // 1er étage
-    'B3-1.20',
-    'B3-2.15', // 2ème étage
-    'B3-2.18',
-
-    // --- BÂTIMENT B2 (RDC + 2 Étages - Pas d'amphi) ---
-    'B2-0.08', // RDC
-    'B2-0.10',
-    'B2-1.05', // 1er étage
-    'B2-1.14',
-    'B2-2.03', // 2ème étage
-    'B2-2.09',
-
-    // --- BÂTIMENT B1 (RDC + 2 Étages - Pas d'amphi) ---
-    'B1-0.02', // RDC
-    'B1-1.06', // 1er étage
-    'B1-1.18', 
-    'B1-2.05', // 2ème étage
-    'B1-2.12',
-
-    // --- AUTRES ESPACES ---
-    'Salle-Conférence',
-];
+$salles_disponibles = [];
+try {
+    $stmt_salles = $pdo->query("SELECT id, nom FROM salles ORDER BY nom");
+    $salles_disponibles = $stmt_salles->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // Gérer l'erreur, par exemple, logguer et utiliser une liste vide
+    error_log("Erreur de récupération des salles: " . $e->getMessage());
+}
 
 // ---------------------------------------------------------
 // TRAITEMENT 1 : AUTO-PLANIFICATION (Algorithme)
@@ -71,7 +42,7 @@ if (isset($_POST['run_auto_planning'])) {
             
             // Créneaux horaires standards
             $creneauxHoraires = ['08:30:00', '10:15:00', '13:30:00', '15:15:00', '17:00:00'];
-            $sallesDispo = $toutes_les_salles; // Utilisation de la liste mise à jour
+            // $sallesDispo will be fetched from the service directly if used, or dynamically from DB for manual fallback
 
             $planningData = [];
             
@@ -103,7 +74,14 @@ if (isset($_POST['run_auto_planning'])) {
                 } catch (Exception $e) { $projetsManuels = []; }
 
                 if (!empty($projetsManuels)) {
-                    $slotsOccupes = []; 
+                    $slotsOccupes = [];
+                    // Fetch salles from DB for fallback also
+                    $fallback_salles_data = $salles_disponibles; // Use the full array for IDs and names
+                    if (empty($fallback_salles_data)) {
+                        error_log("Aucune salle trouvée dans la BDD pour le fallback de planification.");
+                        // Handle case with no salles, maybe skip auto-planning entirely or use a default
+                    }
+
                     foreach ($projetsManuels as $pid) {
                         $creneauTrouve = false; $tentatives = 0;
                         while (!$creneauTrouve && $tentatives < 100) {
@@ -115,12 +93,16 @@ if (isset($_POST['run_auto_planning'])) {
                             if (date('N', strtotime($testDate)) >= 6) continue; 
 
                             $testHeure = $creneauxHoraires[array_rand($creneauxHoraires)];
-                            $testSalle = $sallesDispo[array_rand($sallesDispo)]; 
-                            $cleUnique = $testDate . '_' . $testHeure . '_' . $testSalle;
+                            // Use a random salle ID from DB fetched list
+                            $selected_fallback_salle = !empty($fallback_salles_data) ? $fallback_salles_data[array_rand($fallback_salles_data)] : ['id' => null, 'nom' => 'Salle par défaut'];
+                            $testSalleId = $selected_fallback_salle['id'];
+                            $testSalleNom = $selected_fallback_salle['nom'];
+                            $cleUnique = $testDate . '_' . $testHeure . '_' . $testSalleNom;
 
-                            if (!isset($slotsOccupes[$cleUnique])) {
+
+                            if ($testSalleId !== null && !isset($slotsOccupes[$cleUnique])) {
                                 $slotsOccupes[$cleUnique] = true;
-                                $planningData[] = ['projet_id' => $pid, 'date_soutenance' => $testDate . ' ' . $testHeure, 'salle' => $testSalle];
+                                $planningData[] = ['projet_id' => $pid, 'date_soutenance' => $testDate . ' ' . $testHeure, 'salle_id' => $testSalleId]; // Changed 'salle' to 'salle_id'
                                 $creneauTrouve = true;
                             }
                         }
@@ -131,14 +113,14 @@ if (isset($_POST['run_auto_planning'])) {
             // Insertion en base de données
             $count = 0;
             if (!empty($planningData)) {
-                $stmtInsert = $pdo->prepare("INSERT INTO soutenances (projet_id, date_soutenance, salle) VALUES (?, ?, ?)");
+                $stmtInsert = $pdo->prepare("INSERT INTO soutenances (projet_id, date_soutenance, salle_id) VALUES (?, ?, ?)"); // Changed 'salle' to 'salle_id'
                 $stmtUpdate = $pdo->prepare("UPDATE projets SET statut = 'valide' WHERE id = ?");
                 $checkStmt = $pdo->prepare("SELECT id FROM soutenances WHERE projet_id = ?");
 
                 foreach ($planningData as $creneau) {
                     $checkStmt->execute([$creneau['projet_id']]);
                     if ($checkStmt->rowCount() == 0) {
-                        $stmtInsert->execute([$creneau['projet_id'], $creneau['date_soutenance'], $creneau['salle']]);
+                        $stmtInsert->execute([$creneau['projet_id'], $creneau['date_soutenance'], $creneau['salle_id']]); // Changed 'salle' to 'salle_id'
                         $stmtUpdate->execute([$creneau['projet_id']]);
                         $count++;
                     }
@@ -161,14 +143,14 @@ if (isset($_POST['planifier_btn'])) {
     try {
         $projet_id = $_POST['projet_id'];
         $date = $_POST['date_soutenance'];
-        $salle = $_POST['salle'];
+        $salle_id = (int)$_POST['salle']; // Changed variable name and cast to int
         
         $check = $pdo->prepare("SELECT id FROM soutenances WHERE projet_id = ?");
         $check->execute([$projet_id]);
         
         if ($check->rowCount() > 0) { $message = "Ce projet est déjà planifié."; $msg_type = "warning"; }
         else {
-            $pdo->prepare("INSERT INTO soutenances (projet_id, date_soutenance, salle) VALUES (?, ?, ?)")->execute([$projet_id, $date, $salle]);
+            $pdo->prepare("INSERT INTO soutenances (projet_id, date_soutenance, salle_id) VALUES (?, ?, ?)")->execute([$projet_id, $date, $salle_id]); // Changed 'salle' to 'salle_id' and used $salle_id
             $pdo->prepare("UPDATE projets SET statut = 'valide' WHERE id = ?")->execute([$projet_id]);
             $message = "Soutenance enregistrée avec succès."; $msg_type = "success";
         }
@@ -189,7 +171,7 @@ try {
             AND p.id NOT IN (SELECT projet_id FROM soutenances)";
     $projets_a_planifier = $pdo->query($sql)->fetchAll();
 
-    $liste_soutenances = $pdo->query("SELECT s.*, p.titre, u.nom, u.prenom FROM soutenances s JOIN projets p ON s.projet_id = p.id JOIN users u ON p.etudiant_id = u.id ORDER BY s.date_soutenance ASC")->fetchAll();
+    $liste_soutenances = $pdo->query("SELECT s.id, s.date_soutenance, p.titre, u.nom, u.prenom, sal.nom as salle_nom FROM soutenances s JOIN projets p ON s.projet_id = p.id JOIN users u ON p.etudiant_id = u.id JOIN salles sal ON s.salle_id = sal.id ORDER BY s.date_soutenance ASC")->fetchAll();
 
 } catch (PDOException $e) {
     $message = "Erreur Chargement Données : " . $e->getMessage(); $msg_type = "danger";
@@ -277,11 +259,11 @@ try {
                                                         <input type="datetime-local" name="date_soutenance" class="form-control form-control-sm" required>
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label class="small text-muted fw-bold">Salle (25 Disponibles)</label>
+                                                        <label class="small text-muted fw-bold">Salle (<?= count($salles_disponibles) ?> Disponibles)</label>
                                                         <select name="salle" class="form-select form-select-sm" required>
                                                             <option value="">Sélectionner une salle...</option>
-                                                            <?php foreach ($toutes_les_salles as $s): ?>
-                                                                <option value="<?= $s ?>"><?= $s ?></option>
+                                                            <?php foreach ($salles_disponibles as $salle_item): ?>
+                                                                <option value="<?= htmlspecialchars($salle_item['id']) ?>"><?= htmlspecialchars($salle_item['nom']) ?></option>
                                                             <?php endforeach; ?>
                                                         </select>
                                                     </div>
@@ -330,7 +312,7 @@ try {
                                                 </td>
                                                 <td>
                                                     <span class="badge bg-light text-dark border">
-                                                        <?= htmlspecialchars($s['salle']) ?>
+                                                        <?= htmlspecialchars($s['salle_nom']) ?>
                                                     </span>
                                                 </td>
                                                 <td class="text-end pe-4">

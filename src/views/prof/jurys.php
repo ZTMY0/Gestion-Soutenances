@@ -57,16 +57,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['saisir_note'])) {
 }
 
 // Récupérer les jurys du prof
-$sql = "SELECT s.id, s.date_soutenance, s.note_finale, s.salle,
+$sql = "SELECT s.id, s.date_soutenance, s.note_finale,
+             sal.nom AS nom_salle,
              p.titre AS projet_titre,
              u.nom AS etudiant_nom,
-             p.binome_email AS binome_email,
+             b.nom AS binome_nom,
+             b.email AS binome_email,
              f.nom AS filiere_nom,
              j.role_jury AS mon_role
          FROM soutenances s
          JOIN jurys j ON j.soutenance_id = s.id
          JOIN projets p ON s.projet_id = p.id
          JOIN users u ON p.etudiant_id = u.id
+         LEFT JOIN salles sal ON s.salle_id = sal.id
+         LEFT JOIN users b ON p.binome_id = b.id
          LEFT JOIN filieres f ON p.filiere_id = f.id
          WHERE j.prof_id = ?
          ORDER BY s.date_soutenance ASC";
@@ -224,10 +228,10 @@ foreach ($jurysPasses as $j) {
                                 <p class="text-muted mb-2 small">
                                     <i class="fas fa-user-graduate me-2"></i>
                                     <strong><?= htmlspecialchars($jury['etudiant_nom']) ?></strong>
-                                    <?php if (!empty($jury['binome_email'])): ?>
+                                    <?php if (!empty($jury['binome_nom'])): ?>
                                         <span class="ms-2">
                                             <i class="fas fa-users me-1"></i>
-                                            & <?= htmlspecialchars($jury['binome_email']) ?>
+                                            & <?= htmlspecialchars($jury['binome_nom']) ?>
                                         </span>
                                     <?php endif; ?>
                                 </p>
@@ -238,7 +242,7 @@ foreach ($jurysPasses as $j) {
                                     </span>
                                     <span class="badge-modern primary">
                                         <i class="fas fa-door-open me-1"></i>
-                                        <?= htmlspecialchars($jury['salle'] ?? 'Salle à définir') ?>
+                                        <?= htmlspecialchars($jury['nom_salle'] ?? 'Salle à définir') ?>
                                     </span>
                                 </div>
                             </div>

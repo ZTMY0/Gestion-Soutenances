@@ -29,7 +29,7 @@ if (!isset($pdo)) { die("Erreur critique : La connexion base de données a écho
 // 4. RÉCUPÉRATION DES DONNÉES
 try {
     // A. Compter les disponibilités
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM disponibilites_profs WHERE prof_id = ?");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM disponibilites WHERE prof_id = ?");
     $stmt->execute([$prof_id]);
     $nbDispos = $stmt->fetchColumn();
 

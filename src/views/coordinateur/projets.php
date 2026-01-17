@@ -245,19 +245,19 @@ foreach($projets as $p) {
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="btn-group">
-                                            <a href="details_projet.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-secondary" title="Détails"><i class="fas fa-eye"></i></a>
+                                            <a href="details_projet.php?id=<?= htmlspecialchars($p['id']) ?>" class="btn btn-sm btn-outline-secondary" title="Détails"><i class="fas fa-eye"></i></a>
 
                                             <?php if($p['statut'] == 'inscrit'): ?>
                                                 <form method="POST" class="d-inline" onsubmit="return confirm('Valider ce projet ?');">
-                                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                                    <input type="hidden" name="valider_projet_id" value="<?= $p['id'] ?>">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+                                                    <input type="hidden" name="valider_projet_id" value="<?= htmlspecialchars((int)$p['id']) ?>">
                                                     <button class="btn btn-sm btn-outline-success" title="Valider"><i class="fas fa-check"></i></button>
                                                 </form>
                                             <?php endif; ?>
                                             
                                             <form method="POST" class="d-inline" onsubmit="return confirm('Attention : Suppression définitive ! Continuer ?');">
-                                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                                <input type="hidden" name="supprimer_projet_id" value="<?= $p['id'] ?>">
+                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+                                                <input type="hidden" name="supprimer_projet_id" value="<?= htmlspecialchars((int)$p['id']) ?>">
                                                 <button class="btn btn-sm btn-outline-danger ms-1" title="Supprimer"><i class="fas fa-trash"></i></button>
                                             </form>
                                         </div>
