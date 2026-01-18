@@ -24,10 +24,10 @@ Ce projet consiste en la conception et le développement d'une solution web cent
 
 | Membre | Module Responsable |
 | :--- | :--- |
-| **IHAB** | **Architecture Globale, Sécurité, Infra, Modules Étudiant & Coordinateur.** |
-| **ABDELMOUGHIT** | Espace Professeur & Algorithmes de notation. |
-| **NIZAR** | Espace Directeur & Tableaux de bord (KPI). |
-| **NOURDDINE** | Espace Logistique & Génération de documents. |
+| **IHAB ZAGHDANE** | **Architecture Globale, Sécurité, Infra, Modules Étudiant & Coordinateur.** |
+| **ABDELMOUGHIT MOUSSAID** | Espace Professeur & Algorithmes de notation. |
+| **MOHAMED NIZAR ZOUIZRA** | Espace Directeur & Tableaux de bord (KPI). |
+| **NOURDDINE EL KISSIRI** | Espace Logistique & Génération de documents. |
 
 ---
 
