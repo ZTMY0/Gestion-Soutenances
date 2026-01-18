@@ -1,65 +1,115 @@
-# GESTION DES SOUTENANCES - RAPPORT D'ÉTAT D'AVANCEMENT Final
+# PLATEFORME DE GESTION DES SOUTENANCES (PFE)
 
-**PROJET :** Plateforme de Gestion des Soutenances de Fin d'Études (PFE)  
-**URL OFFICIELLE :** [https://web-dev.live/Gestion-Soutenances/](https://web-dev.live/Gestion-Soutenances/)  
-**HÉBERGEMENT :** Serveur distant avec nom de domaine personnalisé et certification SSL active.  
-**STATUT :** **CLÔTURÉ (LOCK)** - Aucune modification de l'arborescence ou ajout de fichier n'est désormais autorisé pour garantir la stabilité avant livraison.
+![Statut](https://img.shields.io/badge/STATUT-FINALIS%C3%89-success)
+![Sécurité](https://img.shields.io/badge/S%C3%89CURIT%C3%89-SSL%20%2F%20RBAC-blue)
+![Version](https://img.shields.io/badge/VERSION-1.0.0-orange)
 
----
-
-## RÉPARTITION DES RÔLES ET MISSIONS
-
-| Membre | Module Responsable | Tâches Principales | État |
-| :--- | :--- | :--- | :--- |
-| **IHAB** | **Coord. & Étudiant** | Espace Coordinateur, Espace Étudiant, Architecture Globale. | TERMINÉ |
-| **ABDELMOUGHIT** | **Prof & Algo** | Espace Professeur, Algorithmes (Affectation, Planning, Jury). | TERMINÉ |
-| **NIZAR** | **Directeur** | Validation planning, KPIs, Signature électronique. | TERMINÉ |
-| **NOURDDINE** | **Secrétaire GÉNÉRALE** | Logistique, PDF, Archivage. | TERMINÉ |
+> **Lien de production :** [https://web-dev.live/Gestion-Soutenances/](https://web-dev.live/Gestion-Soutenances/)
 
 ---
 
-## MISES À JOUR SÉCURITÉ ET INFRASTRUCTURE (15 JANVIER 2026) - RESPONSABLE : IHAB
+## 1. PRÉSENTATION DU PROJET
 
-### **A. Déploiement et Certification**
-* **Hébergement Web :** Migration réussie vers l'environnement de production sous le domaine `web-dev.live`.
-* **Certification SSL :** Implémentation d'un certificat SSL/TLS garantissant le chiffrement des données (HTTPS) et la protection contre les interceptions de flux.
-* **Compatibilité Multi-Environnement :** Refactorisation du code source pour assurer un fonctionnement transparent entre le serveur de production (SSL) et les environnements locaux (XAMPP/MAMPP).
+Ce projet consiste en la conception et le développement d'une solution web centralisée pour la digitalisation du processus de gestion des Projets de Fin d'Études (PFE) au sein de l'UEMF. La plateforme gère l'intégralité du cycle de vie académique, depuis la soumission des sujets par les étudiants jusqu'à la délibération finale des jurys.
 
-### **B. Hardening**
-* **Contrôle d'Accès Strict (RBAC) :** Vérification systématique des permissions par rôle lors de chaque accès aux fichiers pour prévenir les escalades de privilèges.
-* **Gestion des Sessions :** Sécurisation des cookies de session (HttpOnly/Secure) et timeout d'inactivité de 15 minutes.
-* **Sécurité Documentaire :** Isolation des rapports et application d'un renommage aléatoire des fichiers pour prévenir l'exposition via l'URL.
-* **Intégrité des Données :** Implémentation du hashage SHA-256 pour garantir l'intégrité des notes et préparer la signature électronique.
-* **Audit Trail :** Mise en place d'une traçabilité complète des actions critiques sur la plateforme.
+### Stack Technique
+* **Langage :** PHP 7.4+
+* **Base de données :** MySQL
+* **Frontend :** HTML5, CSS3, Bootstrap 5, JavaScript
+* **Hébergement :** Serveur Apache (InfinityFree) avec **Nom de Domaine Personnalisé** et **Certificat SSL**.
 
 ---
 
-## DÉTAIL DES RÉALISATIONS PAR MODULE
+## 2. ÉQUIPE DE DÉVELOPPEMENT & RÔLES
 
-### 1. IHAB - MODULES COORDINATEUR ET ÉTUDIANT
-* **Interface Utilisateur :** Design institutionnel basé sur la charte graphique de l'UEMF.
-* **Espace Coordinateur :** Dashboard stratégique, pilotage de l'affectation IA et gestion des imports de données.
-* **Espace Étudiant :** Timeline interactive de suivi et messagerie instantanée avec l'encadrant.
-
-### 2. ABDELMOUGHIT - MODULE PROFESSEUR ET ALGORITHMES
-* **Espace Professeur :** gestion des disponibilités, validation des rapports académiques, suivi des projets encadrés, consultation des jurys et plannings, accès aux statistiques.
-* **Algorithmes :** Services automatisés d’affectation des encadrants et des jurys, planification des soutenances et détection de conflits de planning.
-
-### 3. NIZAR - MODULE DIRECTEUR
-* **Espace Direction :** Module de validation globale des plannings et interface de contrôle des résultats.
-
-### 4. NOURDDINE - MODULE SECRÉTAIRE GÉNÉRALE
-* **Gestion Salles :** CRUD des salles et équipements.
-* **Génération PDF :** Convocations et PV (Utilisation de FPDF/DomPDF).
-* **Archivage :** Stockage final des documents signés.
+| Membre | Module Responsable |
+| :--- | :--- |
+| **IHAB** | **Architecture Globale, Sécurité, Infra, Modules Étudiant & Coordinateur.** |
+| **ABDELMOUGHIT** | Espace Professeur & Algorithmes de notation. |
+| **NIZAR** | Espace Directeur & Tableaux de bord (KPI). |
+| **NOURDDINE** | Espace Logistique & Génération de documents. |
 
 ---
 
-## ÉLÉMENTS EN COURS DE FINALISATION (OPTI D'INFRASTRUCTURE)
-* **Obfuscation d'URL (Alias) :** Configuration des redirections serveurs pour masquer l'arborescence physique.
-* **Masquage des Métadonnées :** Suppression de l'affichage des extensions de fichiers (.php) dans l'URL.
+## 3. DÉTAIL DES CONTRIBUTIONS
+
+### 3.1. ESPACES ÉTUDIANT, COORDINATEUR & INFRASTRUCTURE (IHAB)
+
+Cette section détaille l'architecture socle, la sécurité et les fonctionnalités administratives implémentées dans ce dépôt.
+
+#### A. Architecture Applicative & Modules
+* **Espace Étudiant :** Développement du workflow complet (Soumission du sujet -> Validation -> Dépôt du rapport). Intégration d'une **Timeline interactive** et d'un système d'upload sécurisé (renommage aléatoire, vérification MIME).
+* **Espace Coordinateur :** Création du Dashboard de pilotage et de l'interface de gestion de l'affectation (Validation des propositions). Gestion CRUD centralisée des utilisateurs.
+
+#### B. Hardening
+Conformité avec les bonnes pratiques de sécurité Web :
+* **RBAC (Role-Based Access Control) :** Implémentation d'un mécanisme de contrôle strict strict vérifiant les droits d'accès avant chaque chargement de vue.
+* **Sécurité des Données :** Utilisation exclusive de `PDO Prepared Statements` (Anti-Injection SQL) et hashage des mots de passe (`Bcrypt`).
+* **Protection de Session :** Lutte contre le Session Hijacking et failles CSRF.
+
+#### C. Infrastructure Web & Déploiement
+* **Production :** Mise en ligne sur serveur Apache (InfinityFree) avec sécurisation `.htaccess`.
+* **Chiffrement :** Configuration d'un certificat **SSL/TLS** pour une connexion HTTPS sécurisée sur le domaine `web-dev.live`.
+
+#### D. Modélisation des Données (MLD)
+>  **[Voir le Diagramme MLD complet (PDF)](UML/diagramme_mld.pdf)**
 
 ---
+>  **PROJET Reseau**
+>
+>  **[Accéder au Repo GitHub Réseau](https://github.com/ZTMY0/Projet-Reseau-GNS3)**
+---
 
-## NOTE DE CLÔTURE DU PROJET
-> **Dépôt Figé :** Pour assurer l'intégrité du système, le repository est officiellement clos. Le travail résiduel porte exclusivement sur la stabilisation réseau et l'optimisation de la sécurité.
+### 3.2. ESPACE PROFESSEUR (ABDELMOUGHIT)
+*[Intégration du module Prof]*
+
+> **[PLACEHOLDER : Gestion des Profs & Algorithmes]**
+> 
+> 
+
+---
+>  **PROJET Reseau**
+>
+>  **[Accéder au Repo GitHub Réseau](INSÉRER_LE_LIEN_DU_REPO_RESEAU_ICI)**
+---
+
+### 3.3. MODULE PILOTAGE (NIZAR)
+*[Intégration du module de directeur]*
+
+> **[PLACEHOLDER : Dashboard & KPI]**
+> 
+>
+
+---
+>  **PROJET Reseau**
+>
+>  **[Accéder au Repo GitHub Réseau](INSÉRER_LE_LIEN_DU_REPO_RESEAU_ICI)**
+---
+
+### 3.4. MODULE LOGISTIQUE (NOURDDINE)
+*[Intégration du module de secrétariat]*
+
+> **[PLACEHOLDER : Gestion Salles & PDF]**
+> 
+>
+
+---
+> **PROJET Reseau**
+>
+>  **[Accéder au Repo GitHub Réseau](INSÉRER_LE_LIEN_DU_REPO_RESEAU_ICI)**
+---
+
+## 4. INSTALLATION LOCALE
+
+1.  **Cloner le dépôt :**
+    ```bash
+    git clone [https://github.com/ZTMY0/Gestion-Soutenances.git](https://github.com/ZTMY0/Gestion-Soutenances.git)
+    ```
+2.  **Base de Données :**
+    Importer le fichier `soutenances_db.sql` dans votre SGBD (phpMyAdmin).
+3.  **Configuration :**
+    Modifier `config/database.php` avec vos paramètres locaux.
+4.  **Lancement :**
+    Démarrer via un serveur local (XAMPP / Laragon).
+
+---
