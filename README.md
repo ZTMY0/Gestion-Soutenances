@@ -103,7 +103,7 @@ Conformité avec les bonnes pratiques de sécurité Web :
 
 1.  **Cloner le dépôt :**
     ```bash
-    git clone [https://github.com/ZTMY0/Gestion-Soutenances.git](https://github.com/ZTMY0/Gestion-Soutenances.git)
+    git clone https://github.com/ZTMY0/Gestion-Soutenances.git
     ```
 2.  **Base de Données :**
     Importer le fichier `soutenances_db.sql` dans votre SGBD (phpMyAdmin).
