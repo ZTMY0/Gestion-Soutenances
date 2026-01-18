@@ -76,11 +76,40 @@ Conformité avec les bonnes pratiques de sécurité Web :
 ### 3.3. MODULE PILOTAGE (NIZAR)
 *[Intégration du module de directeur]*
 
-> **[PLACEHOLDER : Dashboard & KPI]**
+### 1. Gestion des paramètres académiques
+Un module de paramétrage a été développé afin de permettre au directeur de définir dynamiquement les règles académiques, notamment :
+- la date limite de dépôt des rapports ;
+- la durée officielle des soutenances.
+
+Ces paramètres sont stockés dans une table dédiée (`parametres`) et peuvent être modifiés sans intervention sur le code source, garantissant ainsi flexibilité et évolutivité du système.
+
+### 2. Validation et suivi des projets
+L’espace directeur permet de gérer le cycle de validation des projets PFE à travers les actions suivantes :
+- approbation des projets ;
+- demande de correction avec message explicatif ;
+- publication officielle des soutenances.
+
+Chaque action entraîne une mise à jour du statut du projet ou de la soutenance, assurant une traçabilité complète des décisions académiques.
+
+### 3. Signature électronique des procès-verbaux (PV)
+Un mécanisme de signature électronique des procès-verbaux a été implémenté :
+- affichage des PV liés aux soutenances ;
+- signature par le directeur à l’aide d’un hash cryptographique (SHA-256) ;
+- enregistrement de la signature et de la date de validation en base de données.
+
+Ce mécanisme garantit l’intégrité, l’authenticité et la traçabilité des documents officiels.
+
+## 4. Tableaux de Bord et Indicateurs (KPI)
+Un tableau de bord décisionnel a été mis en place afin de fournir au directeur une vue synthétique de l’état global du système à travers des indicateurs clés :
+- nombre total de projets ;
+- nombre de projets validés ;
+- taux global de validation ;
+- nombre de soutenances planifiées ;
+- alertes sur les projets encadrés sans rapport déposé.
+
+Ces indicateurs facilitent la prise de décision et le suivi de l’avancement du processus de soutenance
 > 
 >
-
----
 >  **PROJET Reseau**
 >
 >  **[Accéder au Repo GitHub Réseau](INSÉRER_LE_LIEN_DU_REPO_RESEAU_ICI)**
