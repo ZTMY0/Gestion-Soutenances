@@ -25,7 +25,7 @@ Ce projet consiste en la conception et le développement d'une solution web cent
 | Membre | Module Responsable |
 | :--- | :--- |
 | **IHAB ZAGHDANE** | **Architecture Globale, Sécurité, Infra, Modules Étudiant & Coordinateur.** |
-| **ABDELMOUGHIT MOUSSAID** | Espace Professeur & Algorithmes de notation. |
+| **ABDELMOUGHIT MOSSAID** | Espace Professeur & Algorithmes de notation. |
 | **MOHAMED NIZAR ZOUIZRA** | Espace Directeur & Tableaux de bord (KPI). |
 | **NOURDDINE EL KISSIRI** | Espace Logistique & Génération de documents. |
 
@@ -63,14 +63,53 @@ Conformité avec les bonnes pratiques de sécurité Web :
 ### 3.2. ESPACE PROFESSEUR (ABDELMOUGHIT)
 *[Intégration du module Prof]*
 
-> **[PLACEHOLDER : Gestion des Profs & Algorithmes]**
+> ***A. ESPACE PROFESSEUR (src/views/prof/)*
+* [x] *Dashboard :*
+    - Affichage personnalisé des étudiants encadrés avec notifications en temps réel (nouveaux rapports, messages, convocations).
+    - Intégration d'une messagerie interne pour faciliter la communication entre professeurs et étudiants.
+    - Accès direct aux convocations de jurys et aux prochaines soutenances.
+* [x] *Gestion des disponibilités :*
+    - Interface interactive basée sur le Drag & Drop pour sélectionner et modifier les créneaux horaires disponibles.
+    - Synchronisation automatique avec le module de planification pour éviter les conflits de planning.
+    - Visualisation des disponibilités sous forme de grille hebdomadaire, avec alertes en cas de chevauchement.
+* [x] *Validation des rapports :*
+    - Module dédié permettant de consulter, annoter et valider les rapports académiques soumis par les étudiants.
+    - Historique des validations et possibilité de demander des corrections via la messagerie intégrée.
+    - Génération automatique de notifications pour les étudiants après validation ou demande de correction.
+* [x] *Suivi des projets :*
+    - Visualisation détaillée de l’avancement des projets encadrés (étapes franchies, documents déposés, soutenance planifiée).
+    - Système d’alertes pour les dossiers incomplets ou en retard.
+    - Accès à l’historique des interactions et des modifications apportées au projet.
+* [x] *Consultation des jurys et plannings :*
+    - Liste dynamique des jurys auxquels le professeur participe (président, examinateur, encadrant).
+    - Planning des soutenances avec filtres par date, filière et rôle.
+    - Historique des participations et accès aux procès-verbaux signés.
+* [x] *Statistiques :*
+    - Tableaux de bord interactifs affichant le nombre de soutenances, le taux de validation, la répartition des rôles dans les jurys.
+    - Graphiques sur la charge d’encadrement, la performance des étudiants encadrés et les tendances par filière.
+    - Export des statistiques au format PDF ou CSV pour analyse externe.
+
+
+*B. SERVICES CORE (ALGORITHMES)*
+* [x] *Affectation intelligente :*
+    - Développement d’un algorithme prenant en compte les préférences des professeurs, leur charge d’encadrement, et les contraintes institutionnelles pour proposer une affectation optimale.
+    - Utilisation de scores de compatibilité basés sur les mots-clés des sujets, la disponibilité et l’historique d’encadrement.
+    - Interface de validation permettant au coordinateur de visualiser et ajuster les propositions générées.
+* [x] *Planification des soutenances :*
+    - Algorithme de détection automatique des conflits de planning (chevauchement de créneaux, indisponibilité des membres du jury).
+    - Suggestion de créneaux optimisés en fonction des disponibilités collectées et des contraintes de salle.
+    - Simulation du planning pour anticiper les problèmes et ajuster avant validation finale.
+* [x] *Constitution des jurys :*
+    - Génération automatisée de jurys respectant les règles (président ≠ encadrant, diversité des membres, équilibre des charges).
+    - Prise en compte des préférences et des exclusions pour garantir l’impartialité.
+    - Export des propositions de jurys et planning au format PDF pour diffusion officielle.**
 > 
 > 
 
 ---
 >  **PROJET Reseau**
 >
->  **[Accéder au Repo GitHub Réseau](INSÉRER_LE_LIEN_DU_REPO_RESEAU_ICI)**
+>  **[Accéder au Repo GitHub Réseau](https://github.com/AbdelmoughitMossaid/topologie_Projet_final_euromed)**
 ---
 
 ### 3.3. MODULE PILOTAGE (NIZAR)
