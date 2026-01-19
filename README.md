@@ -63,7 +63,7 @@ Conformité avec les bonnes pratiques de sécurité Web :
 ### 3.2. ESPACE PROFESSEUR (ABDELMOUGHIT)
 *[Intégration du module Prof]*
 
-> ***A. ESPACE PROFESSEUR (src/views/prof/)*
+> *A. ESPACE PROFESSEUR *
 * [x] *Dashboard :*
     - Affichage personnalisé des étudiants encadrés avec notifications en temps réel (nouveaux rapports, messages, convocations).
     - Intégration d'une messagerie interne pour faciliter la communication entre professeurs et étudiants.
@@ -102,7 +102,7 @@ Conformité avec les bonnes pratiques de sécurité Web :
 * [x] *Constitution des jurys :*
     - Génération automatisée de jurys respectant les règles (président ≠ encadrant, diversité des membres, équilibre des charges).
     - Prise en compte des préférences et des exclusions pour garantir l’impartialité.
-    - Export des propositions de jurys et planning au format PDF pour diffusion officielle.**
+    - Export des propositions de jurys et planning au format PDF pour diffusion officielle.
 > 
 > 
 
