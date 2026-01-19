@@ -1,0 +1,42 @@
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(#cb6613, #ece7c5);
+  color:#151318;
+  margin: 250px;
+  padding:1px;
+  display:flex;
+  justify-content:center;
+}
+.rounded-gif{
+  border-radius:150%;
+  width:100px;
+  height:150px;
+  object-fit:cover;
+  margin-bottom:5rem;
+  overflow:hidden;
+}
+
+.container{
+    background: #ffffff;
+    padding:20px;
+    border-radius:50px;
+}
+
+
+label{display:flex; margin:5px 10px 15px; font-weight:300}
+input, textarea{
+  width: 200px;
+  padding:5px;
+  border:1px solid #e5e7eb;
+  border-radius:5px;
+  margin-bottom:.75rem;
+}
+
+input[type="submit"]{
+  background:#ffffff;
+  color:#030303;
+  border:0;
+  padding:.6rem 1rem;
+  border-radius:6px;
+  cursor:pointer;
+}

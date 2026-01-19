@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ateliers Informatique</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <br>
+        <h1>Workshops</h1>
+        <br>
+        <nav>
+            <ul>
+                <li><a href="#accueil">Accueil</a></li>
+                <li><a href="#ateliers">Ateliers</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="accueil">
+            <h2>Accueil</h2>
+            <p>Bienvenue sur notre plateforme d'ateliers informatique. Découvrez nos formations en programmation, systèmes et cloud computing.</p>
+        </section>
+
+        <section id="ateliers">
+            <h2>Ateliers</h2>
+            
+            
+            <div class="ateliers-grid">
+                <div class="atelier-card">
+                    <h3>Introduction au HTML/CSS</h3>
+                    <div class="atelier-info">
+                        <p><strong>Durée:</strong> 3 mois</p>
+                        <p><strong>Prix:</strong> 150 mad</p>
+                        <p><strong>Lieu:</strong> B2-2.15</p>
+                        <p><strong>Places:</strong> 30</p>
+                    </div>
+                </div>
+
+                <div class="atelier-card">
+                    <h3>JavaScript pour débutants</h3>
+                    <div class="atelier-info">
+                        <p><strong>Durée:</strong> 1 mois</p>
+                        <p><strong>Prix:</strong> 50 mad</p>
+                        <p><strong>Lieu:</strong> Amphi B3</p>
+                        <p><strong>Places:</strong> 60</p>
+                    </div>
+                </div>
+
+                <div class="atelier-card">
+                    <h3>Intro à Git</h3>
+                    <div class="atelier-info">
+                        <p><strong>Durée:</strong> 2 semaines</p>
+                        <p><strong>Prix:</strong> 50 mad</p>
+                        <p><strong>Lieu:</strong> B4-1.03</p>
+                        <p><strong>Places:</strong> 25</p>
+                    </div>
+                </div>
+
+                <div class="atelier-card">
+                    <h3>Intro à Linux</h3>
+                    <div class="atelier-info">
+                        <p><strong>Durée:</strong> 2 mois</p>
+                        <p><strong>Prix:</strong> 100 mad</p>
+                        <p><strong>Lieu:</strong> B1-0.12</p>
+                        <p><strong>Places:</strong> 30</p>
+                    </div>
+                </div>
+
+                <div class="atelier-card">
+                    <h3>Intro Google Cloud</h3>
+                    <div class="atelier-info">
+                        <p><strong>Durée:</strong> 4 mois</p>
+                        <p><strong>Prix:</strong> 150 mad</p>
+                        <p><strong>Lieu:</strong> B2-0.06</p>
+                        <p><strong>Places:</strong> 15</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="inscription">
+            <h2>Inscription</h2>
+            
+            <form action="#" method="post">
+                <fieldset>
+                    <legend>Informations personnelles</legend>
+                    <label for="nom">Nom :</label>
+                    <input type="text" id="nom" name="nom" required>
+
+                    <label for="prenom">Prénom :</label>
+                    <input type="text" id="prenom" name="prenom" required>
+
+                    <label for="email">Email :</label>
+                    <input type="email" id="email" name="email" required>
+
+                    <label for="numero-telephone">Numéro téléphone :</label>
+                    <input type="text" id="numero-telephone" name="numero-telephone" required>
+                </fieldset>
+                
+                <br>
+
+                <fieldset>
+                    <legend>Choix de l'atelier</legend>
+                    <p>Sélectionnez un atelier :</p>
+                    
+                    <label>
+                        <input type="radio" name="atelier" value="html-css" required>
+                        Introduction au HTML/CSS
+                    </label><br>
+
+                    <label>
+                        <input type="radio" name="atelier" value="javascript" required>
+                        JavaScript pour débutants
+                    </label><br>
+
+                    <label>
+                        <input type="radio" name="atelier" value="Git" required>
+                        Introduction à Git
+                    </label><br>
+
+                    <label>
+                        <input type="radio" name="atelier" value="Linux" required>
+                        Introduction à Linux
+                    </label><br>
+
+                    <label>
+                        <input type="radio" name="atelier" value="Cloud" required>
+                        Introduction à Google Cloud
+                    </label>
+                </fieldset>
+
+                <br>
+
+                <fieldset>
+                    <legend>Votre niveau d'expérience</legend>
+                    
+                    <label>
+                        <input type="radio" name="experience" value="beginner" required>
+                        Débutant
+                    </label><br>
+
+                    <label>
+                        <input type="radio" name="experience" value="intermediate">
+                        Intermédiaire
+                    </label><br>
+
+                    <label>
+                        <input type="radio" name="experience" value="advanced">
+                        Avancé
+                    </label>
+                </fieldset>
+
+                <br>
+
+              
+                <br>
+                <button type="submit">S'inscrire</button>
+                <button type="reset">Réinitialiser</button>
+                <br>
+                <br>
+                <textarea name="commentaires" rows="4" cols="50" placeholder="Commentaires (optional)"></textarea>
+            </form>
+        </section>
+    </main>
+
+    <footer id="contact">
+        <address>
+            <p>Contactez-nous : <a href="mailto:info@nomdusite.com">info@Workshops.go</a></p>
+            <p>Téléphone : +212 XXX-XXXXXXX</p>
+            <p>Adresse : Avenida de Concha Espina, 1, 28036 Madrid, Spain</p>
+        </address>
+    </footer>
+</body>
+</html>

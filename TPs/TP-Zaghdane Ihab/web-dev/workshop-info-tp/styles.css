@@ -1,0 +1,269 @@
+/* Basic page setup: Sets font, removes default margins/padding, adds a light background, and smooth scrolling for links */
+body {
+    font-family: Arial, sans-serif;  /* Simple font stack */
+    margin: 0;
+    padding: 0;
+    background-color: #b8d1f5;  /* Light gray background */
+    color: #333;  /* Dark text for readability */
+    scroll-behavior: smooth;  /* Smooth jump to sections when clicking nav links */
+}
+
+/* Header styling: Blue background, white text, centered, with some padding */
+header {
+    background-color: #2c5f8d;  /* Blue header */
+    color: white;
+    padding: 15px 0;  /* Top/bottom padding */
+    text-align: center;
+}
+
+/* Header title: Removes default margin, sets size */
+header h1 {
+    margin: 0;
+    font-size: 2em;  /* Slightly smaller than original for simplicity */
+    font-weight: normal;
+}
+
+/* Navigation: Removes bullet points, centers list */
+nav ul {
+    list-style-type: none;  /* No bullets */
+    padding: 0;
+    margin: 15px 0 0 0;  /* Top margin to space from title */
+}
+
+/* Nav items: Displays inline with spacing */
+nav ul li {
+    display: inline;
+    margin: 0 20px;  /* Space between links */
+}
+
+/* Nav links: White-ish color, no underline by default */
+nav ul li a {
+    color: #e6f2ff;  /* Light blue-white */
+    text-decoration: none;
+    font-size: 16px;
+}
+
+/* Nav links on hover: Adds underline for feedback */
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+/* Main content: Centers the page, limits width, adds padding */
+main {
+    max-width: 1000px;  /* Keeps content from stretching too wide */
+    margin: 30px auto;  /* Centers horizontally, adds top/bottom space */
+    padding: 0 20px;  /* Left/right padding */
+}
+
+/* Sections: White background, padding, border, and bottom margin for separation */
+section {
+    background: white;
+    padding: 25px;
+    margin-bottom: 30px;
+    border: 1px solid #ddd;  /* Light border */
+}
+
+/* Section headings: Blue color, underline, padding */
+h2 {
+    color: #2c5f8d;  /* Matches header blue */
+    border-bottom: 3px solid #2c5f8d;  /* Blue underline */
+    padding-bottom: 10px;
+    margin-top: 0;
+    font-size: 1.6em;
+}
+
+/* Grid for ateliers: Simple responsive grid */
+.ateliers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));  /* Fits cards, stacks on small screens */
+    gap: 20px;  /* Space between cards */
+    margin-top: 25px;
+}
+
+/* Atelier cards: Light background, border, padding */
+.atelier-card {
+    background: #fafafa;  /* Very light gray */
+    border: 1px solid #ccc;  /* Light border */
+    padding: 20px;
+    transition: transform 0.3s ease;  /* Simple hover lift (kept basic) */
+}
+
+/* Card hover: Lifts slightly for interaction */
+.atelier-card:hover {
+    transform: translateY(-5px);  /* Moves up a bit */
+}
+
+/* Card titles: Blue, margin adjustments */
+.atelier-card h3 {
+    color: #2c5f8d;
+    margin-top: 0;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+}
+
+/* Atelier info: Smaller font, line spacing */
+.atelier-info {
+    font-size: 14px;
+    line-height: 1.8;  /* Readable spacing */
+}
+
+/* Bold text in info: Darker for emphasis */
+.atelier-info strong {
+    color: #555;
+}
+
+/* Form section: Adds shadow for depth (simplified from original) */
+#inscription {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);  /* Subtle shadow */
+    border: none;
+    border-radius: 4px;  /* Rounded corners */
+}
+
+/* Form spacing */
+form {
+    margin-top: 15px;
+}
+
+/* Fieldsets: Border, padding, background */
+fieldset {
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #fafafa;  /* Light background */
+    border-radius: 3px;
+}
+
+/* Fieldset legends: Bold, blue */
+legend {
+    font-weight: bold;
+    color: #2c5f8d;
+    padding: 0 10px;
+    font-size: 1.1em;
+}
+
+/* Labels: Block display, margin */
+label {
+    display: block;  /* Stacks labels vertically */
+    margin-top: 12px;
+    font-size: 15px;
+}
+
+/* Text inputs: Full width, padding, border */
+input[type="text"],
+input[type="email"] {
+    width: 100%;  /* Fills container */
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #aaa;
+    box-sizing: border-box;  /* Includes padding in width */
+    font-size: 14px;
+}
+
+/* Input focus: Blue border for feedback */
+input[type="text"]:focus,
+input[type="email"]:focus {
+    border-color: #2c5f8d;
+    outline: none;  /* Removes default outline */
+}
+
+/* Radio buttons: Basic styling (removed custom CSS-only hacks for simplicity) */
+input[type="radio"] {
+    margin-right: 8px;  /* Space from label */
+}
+
+/* Radio labels in fieldsets: Block, margin, cursor */
+fieldset label {
+    display: block;
+    margin: 8px 0;
+    cursor: pointer;  /* Hand cursor on hover */
+}
+
+/* Paragraphs in fieldsets: Bold, margins */
+fieldset p {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-weight: bold;
+}
+
+/* Textarea: Full width, padding, border */
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #aaa;
+    font-family: Arial, sans-serif;  /* Matches body font */
+    font-size: 14px;
+    resize: vertical;  /* Only vertical resize */
+    box-sizing: border-box;
+}
+
+/* Textarea focus: Blue border */
+textarea:focus {
+    border-color: #2c5f8d;
+    outline: none;
+}
+
+/* Submit button: Green, padding, no border */
+button[type="submit"] {
+    background-color: #28a745;  /* Green */
+    color: white;
+    padding: 11px 28px;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+/* Submit hover: Darker green */
+button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+/* Reset button: Gray, padding, no border */
+button[type="reset"] {
+    background-color: #6c757d;  /* Gray */
+    color: white;
+    padding: 11px 28px;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Reset hover: Darker gray */
+button[type="reset"]:hover {
+    background-color: #5a6268;
+}
+
+/* Footer: Dark background, light text, centered */
+footer {
+    background-color: #2b2b2b;  /* Dark gray */
+    color: #ccc;  /* Light gray text */
+    padding: 25px;
+    text-align: center;
+    margin-top: 40px;
+}
+
+/* Footer address: Normal style, line spacing */
+footer address {
+    font-style: normal;
+    line-height: 1.7;
+}
+
+/* Footer links: Blue-ish, no underline */
+footer a {
+    color: #5eb3ff;
+    text-decoration: none;
+}
+
+/* Footer links hover: Underline */
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* Mobile responsiveness: Stacks grid on small screens */
+@media (max-width: 768px) {
+    .ateliers-grid {
+        grid-template-columns: 1fr;  /* Single column */
+    }
+}

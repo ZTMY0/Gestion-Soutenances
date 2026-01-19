@@ -1,0 +1,86 @@
+body {
+    font-family: Arial, Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    background: #fff;
+}
+
+.id-card {
+    width: 400px;
+    border: 1px solid #000;
+    border-radius: 2px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2 2px rgba(0,0,0,0.1);
+}
+
+.header {
+    background: #0066fff5;
+    color: white;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header .logo {
+    height: 40px;
+    width: auto;
+    fill: white;
+    margin-top: 10px;
+    
+}
+
+.content {
+    display: flex;
+    flex-direction: row;
+}
+
+.photo {
+    text-align: left;
+    padding: 10px;
+    flex: 0 0 auto;
+}
+
+.photo img {
+    width: 100px;
+    height: 100px;
+    border-radius: 2px;
+    border: 1px solid black;
+    
+}
+
+.header div {
+    flex-grow: 2;
+    text-align: center;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 1.3em;
+    font-weight: 500;
+}
+
+.header h2 {
+    margin: 0;
+    font-size: 1em;
+    font-weight: 400;
+}
+
+.details {
+    padding: 10px 20px;
+    font-size: 0.8em;
+    color: #0e67da;
+    flex: 1;
+}
+
+.details p {
+    margin: 5px 0;
+}
+
+.details strong {
+    color: #000;
+}
