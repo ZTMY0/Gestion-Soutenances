@@ -118,9 +118,42 @@ Ces indicateurs facilitent la prise de décision et le suivi de l’avancement d
 ### 3.4. MODULE LOGISTIQUE (NOURDDINE)
 *[Intégration du module de secrétariat]*
 
-> **[PLACEHOLDER : Gestion Salles & PDF]**
-> 
->
+# Rapport Technique : Implémentation du Module Secrétaire Générale
+
+## I. Gestion des Salles (CRUD)
+
+* **Fichier cible :** `src/views/assistante/gestion_salles.php`
+* **Persistance des données :** Remplacement des tableaux statiques par l'utilisation de **`$_SESSION`** pour garantir la conservation des données entre les sessions.
+* **Fonctionnalités :** Implémentation complète du CRUD (Créer, Lire, Mettre à jour, Supprimer) avec une option de réinitialisation pour les tests.
+
+
+## II. Génération de PDF (FPDF)
+
+L'intégration du moteur de génération PDF a nécessité la résolution de plusieurs défis techniques liés à l'environnement :
+
+### 1. Environnement PHP & Composer
+
+* **Problème :** Le CLI de MAMP ne supportait pas le HTTPS, bloquant l'installation de Composer.
+* **Solution :** Configuration d'un fichier `php.ini` personnalisé pour activer l'extension **OpenSSL**.
+
+### 2. Gestion des Dépendances
+
+* **Autoloading :** Résolution de l'erreur "Class FPDF not found". FPDF étant une bibliothèque ancienne, elle a été mappée manuellement dans le fichier `composer.json` via la section `files` :
+`vendor/fpdf/fpdf/src/Fpdf/Fpdf.php`
+* **Installation propre :** Suppression des répertoires `vendor` et du fichier `composer.lock` pour une réinstallation complète afin d'éliminer tout conflit de cache.
+
+### 3. Correction des Images
+
+* **Bug :** Erreur "Not a JPEG file" lors de l'insertion du logo.
+* **Diagnostic :** L'analyse de l'en-tête binaire a révélé que le fichier était un **PNG** avec une extension `.jpeg`. Le fichier a été renommé et le code mis à jour.
+
+
+## III. Archivage des Documents
+
+* **Infrastructure :** Création du répertoire `public/archives/`.
+* **Automatisation :** Modification de `generer_pdf.php` pour sauvegarder automatiquement les fichiers avec un horodatage (ex: `convocation_1705623681.pdf`).
+* **Accessibilité :** Affichage d'un lien direct vers le fichier archivé immédiatement après sa génération.
+
 
 ---
 > **PROJET Reseau**
